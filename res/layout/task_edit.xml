@@ -15,17 +15,20 @@
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             />
-    <EditText
+    <TextView
+            android:id="@+id/focused_task_title"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:text="Focused task"
+            />
+    <TextView
             android:id="@+id/task_title"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            />
-    <Button
-            android:id="@+id/task_save"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/save_task"
-            android:onClick="onSave"
+            android:onClick="onTitleClick"
+            android:clickable="true"
+            android:textColor="@color/yellow"
+            android:textSize="20dp"
             />
     <TextView
             android:id="@+id/sub_task_title"

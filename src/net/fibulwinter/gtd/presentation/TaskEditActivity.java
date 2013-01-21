@@ -1,10 +1,11 @@
 package net.fibulwinter.gtd.presentation;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.ContentUris;
+import android.content.DialogInterface;
 import android.os.Bundle;
 import android.view.View;
-import android.view.WindowManager;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -21,7 +22,7 @@ public class TaskEditActivity extends Activity {
     private TextView masterActionsTitle;
     private ListView masterTaskList;
     private ListView subTaskList;
-    private EditText title;
+    private TextView title;
     private Task task;
     private TaskUpdateListener taskUpdateListener = new TaskUpdateListener() {
         @Override
@@ -45,7 +46,7 @@ public class TaskEditActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.task_edit);
         long id = ContentUris.parseId(getIntent().getData());
-        title = (EditText) findViewById(R.id.task_title);
+        title = (TextView) findViewById(R.id.task_title);
         masterActionsTitle = (TextView) findViewById(R.id.master_task_title);
         masterTaskList = (ListView) findViewById(R.id.master_task_ist);
         subTaskList = (ListView) findViewById(R.id.subTaskList);
@@ -55,8 +56,7 @@ public class TaskEditActivity extends Activity {
         task = isNew ? new Task("") : taskRepository.getById(id).get();
         updateToTask();
         if (isNew) {
-            title.requestFocus();
-            getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE);
+            onTitleClick(title);
         }
 
     }
@@ -69,17 +69,34 @@ public class TaskEditActivity extends Activity {
         subTaskList.setAdapter(new TaskItemAdapter(this, taskUpdateListener, task.getSubTasks(), false));
     }
 
-    public void onSave(View view) {
-        task.setText(title.getText().toString());
-        taskRepository.save(task);
-        finish();
+    public void onTitleClick(View view) {
+        // Set an EditText view to get user input
+        final EditText input = new EditText(this);
+        input.setText(task.getText());
+        new AlertDialog.Builder(this)
+                .setTitle("Edit task text")
+                .setView(input)
+                .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int whichButton) {
+                        task.setText(input.getText().toString());
+                        taskRepository.save(task);
+                        updateToTask();
+                    }
+                })
+                .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int whichButton) {
+                        // Do nothing.
+                    }
+                }).show();
     }
+
 
     public void onNewSubTask(View view) {
         Task master = task;
         task = new Task("");
         task.setMaster(master);
         updateToTask();
+        onTitleClick(title);
     }
 
 }
