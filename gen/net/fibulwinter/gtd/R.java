@@ -14,6 +14,8 @@ public final class R {
     public static final class id {
         public static final int taskList = 0x7f040000;
         public static final int task_list_item = 0x7f040001;
+        public static final int task_list_item_status = 0x7f040002;
+        public static final int task_list_item_text = 0x7f040003;
     }
 
     public static final class layout {
