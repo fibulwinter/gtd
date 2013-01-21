@@ -8,6 +8,12 @@
             android:id="@+id/master_task_title"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
+            android:text="Master tasks"
+            />
+    <ListView
+            android:id="@+id/master_task_ist"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
             />
     <EditText
             android:id="@+id/task_title"
@@ -21,12 +27,23 @@
             android:text="@string/save_task"
             android:onClick="onSave"
             />
+    <TextView
+            android:id="@+id/sub_task_title"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:text="Sub tasks"
+            />
     <Button
             android:id="@+id/task_create_sub_task"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/new_sub_task"
             android:onClick="onNewSubTask"
+            />
+    <ListView
+            android:id="@+id/subTaskList"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
             />
 </LinearLayout>
 

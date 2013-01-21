@@ -6,9 +6,9 @@ import android.database.Cursor;
 import com.google.common.base.Optional;
 import net.fibulwinter.gtd.infrastructure.TaskTableColumns;
 
-import java.util.List;
+import java.util.Map;
 
-import static com.google.common.collect.Lists.newArrayList;
+import static com.google.common.collect.Maps.newHashMap;
 
 public class TaskDAO {
     private ContentResolver contentResolver;
@@ -17,8 +17,8 @@ public class TaskDAO {
         this.contentResolver = contentResolver;
     }
 
-    public List<Task> getAll() {
-        List<Task> levels = newArrayList();
+    public Map<Task, Long> getAll() {
+        Map<Task, Long> tasks = newHashMap();
         Cursor cursor = contentResolver.query(
                 TaskTableColumns.CONTENT_URI,
                 new String[]{TaskTableColumns.TASK_ID, TaskTableColumns.TITLE, TaskTableColumns.STATUS, TaskTableColumns.MASTER},
@@ -26,11 +26,11 @@ public class TaskDAO {
                 new String[]{},
                 TaskTableColumns.TASK_ID);
         while (cursor.moveToNext()) {
-            Task levelRecord = cursor2LevelRecord(cursor);
-            levels.add(levelRecord);
+            Task task = cursor2LevelRecord(cursor);
+            tasks.put(task, cursor2MasterId(cursor));
         }
         cursor.close();
-        return levels;
+        return tasks;
     }
 
     public Optional<Task> getById(long levelId) {
@@ -69,8 +69,11 @@ public class TaskDAO {
         long id = cursor.getLong(0);
         String text = cursor.getString(1);
         TaskStatus status = TaskStatus.valueOf(cursor.getString(2));
-        long masterId = cursor.getLong(3);
-        return new Task(id, text, status, getById(masterId));
+        return new Task(id, text, status);
+    }
+
+    private long cursor2MasterId(Cursor cursor) {
+        return cursor.getLong(3);
     }
 
 }

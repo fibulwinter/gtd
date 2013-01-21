@@ -16,14 +16,16 @@ import java.util.List;
 
 public class TaskItemAdapter extends ArrayAdapter<Task> {
     private List<Task> items;
+    private final boolean showProject;
     private LayoutInflater inflater;
     private final TaskUpdateListener taskUpdateListener;
 
 
-    public TaskItemAdapter(Context context, TaskUpdateListener taskUpdateListener, List<Task> objects) {
+    public TaskItemAdapter(Context context, TaskUpdateListener taskUpdateListener, List<Task> objects, boolean showProject) {
         super(context, R.layout.task_list_item, objects);
         this.taskUpdateListener = taskUpdateListener;
         this.items = objects;
+        this.showProject = showProject;
         inflater = LayoutInflater.from(context);
     }
 
@@ -32,7 +34,7 @@ public class TaskItemAdapter extends ArrayAdapter<Task> {
         ViewHolder holder;
         if (convertView == null) {
             convertView = inflater.inflate(R.layout.task_list_item, null);
-            holder = new ViewHolder(items.get(position), convertView, taskUpdateListener);
+            holder = new ViewHolder(items.get(position), convertView);
             convertView.setTag(holder);
         } else {
             holder = (ViewHolder) convertView.getTag();
@@ -41,17 +43,15 @@ public class TaskItemAdapter extends ArrayAdapter<Task> {
         return convertView;
     }
 
-    private static class ViewHolder {
+    private class ViewHolder {
         private Task task;
-        private final TaskUpdateListener taskUpdateListener;
 
         private CheckBox doneStatus;
         private TextView text;
         private TextView details;
 
-        ViewHolder(Task aTask, View convertView, TaskUpdateListener taskUpdateListener) {
+        ViewHolder(Task aTask, View convertView) {
             this.task = aTask;
-            this.taskUpdateListener = taskUpdateListener;
             doneStatus = (CheckBox) convertView.findViewById(R.id.task_list_item_status);
             text = (TextView) convertView.findViewById(R.id.task_list_item_text);
             details = (TextView) convertView.findViewById(R.id.task_list_item_details);
@@ -85,8 +85,12 @@ public class TaskItemAdapter extends ArrayAdapter<Task> {
 
         void update() {
             text.setText(task.getText());
-            Optional<Task> masterTask = task.getMasterTask();
-            details.setText(masterTask.isPresent() ? "for " + masterTask.get().getText() : "<no project>");
+            if (showProject) {
+                Optional<Task> masterTask = task.getMasterTask();
+                details.setText(masterTask.isPresent() ? "for " + masterTask.get().getText() : "<no project>");
+            } else {
+                details.setText("");
+            }
             doneStatus.setChecked(task.getStatus().isDone());
         }
     }

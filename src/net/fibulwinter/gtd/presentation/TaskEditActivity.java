@@ -6,19 +6,36 @@ import android.os.Bundle;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.EditText;
+import android.widget.ListView;
 import android.widget.TextView;
-import com.google.common.base.Optional;
 import net.fibulwinter.gtd.R;
 import net.fibulwinter.gtd.domain.Task;
 import net.fibulwinter.gtd.domain.TaskDAO;
 import net.fibulwinter.gtd.domain.TaskRepository;
 
+import java.util.List;
+
 public class TaskEditActivity extends Activity {
 
     private TaskRepository taskRepository;
-    private TextView masterTitle;
+    private TextView masterActionsTitle;
+    private ListView masterTaskList;
+    private ListView subTaskList;
     private EditText title;
     private Task task;
+    private TaskUpdateListener taskUpdateListener = new TaskUpdateListener() {
+        @Override
+        public void onTaskSelected(Task selectedTask) {
+            task = selectedTask;
+            updateToTask();
+        }
+
+        @Override
+        public void onTaskUpdated(Task updatedTask) {
+            taskRepository.save(updatedTask);
+        }
+    };
+
 
     /**
      * Called when the activity is first created.
@@ -29,7 +46,9 @@ public class TaskEditActivity extends Activity {
         setContentView(R.layout.task_edit);
         long id = ContentUris.parseId(getIntent().getData());
         title = (EditText) findViewById(R.id.task_title);
-        masterTitle = (TextView) findViewById(R.id.master_task_title);
+        masterActionsTitle = (TextView) findViewById(R.id.master_task_title);
+        masterTaskList = (ListView) findViewById(R.id.master_task_ist);
+        subTaskList = (ListView) findViewById(R.id.subTaskList);
 
         taskRepository = new TaskRepository(new TaskDAO(getContentResolver()));
         boolean isNew = id == -1;
@@ -39,16 +58,15 @@ public class TaskEditActivity extends Activity {
             title.requestFocus();
             getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE);
         }
+
     }
 
     private void updateToTask() {
         title.setText(task.getText());
-        Optional<Task> masterAction = task.getMasterTask();
-        if (masterAction.isPresent()) {
-            masterTitle.setText(masterAction.get().getText());
-        } else {
-            masterTitle.setText("<Not in project>");
-        }
+        List<Task> masterTasks = task.getMasterTasks();
+        masterActionsTitle.setVisibility(masterTasks.isEmpty() ? View.INVISIBLE : View.VISIBLE);
+        masterTaskList.setAdapter(new TaskItemAdapter(this, taskUpdateListener, masterTasks, false));
+        subTaskList.setAdapter(new TaskItemAdapter(this, taskUpdateListener, task.getSubTasks(), false));
     }
 
     public void onSave(View view) {
@@ -58,7 +76,9 @@ public class TaskEditActivity extends Activity {
     }
 
     public void onNewSubTask(View view) {
-        task = new Task("", Optional.of(task));
+        Task master = task;
+        task = new Task("");
+        task.setMaster(master);
         updateToTask();
     }
 

@@ -16,24 +16,18 @@ public class Task {
     private Optional<Task> masterTask = Optional.absent();
 
     public Task(String text) {
-        this(text, Optional.<Task>absent());
-    }
-
-    public Task(String text, Optional<Task> masterTask) {
         this.id = UUID.randomUUID().getLeastSignificantBits();
         this.text = text;
-        this.masterTask = masterTask;
         this.status = TaskStatus.NextAction;
         if (masterTask.isPresent()) {
             masterTask.get().addSubAction(this);
         }
     }
 
-    public Task(long id, String text, TaskStatus status, Optional<Task> masterTask) {
+    public Task(long id, String text, TaskStatus status) {
         this.id = id;
         this.text = text;
         this.status = status;
-        this.masterTask = masterTask;
     }
 
     public long getId() {
@@ -85,5 +79,20 @@ public class Task {
 
     public void setText(String text) {
         this.text = text;
+    }
+
+    public void setMaster(Task masterTask) {
+        this.masterTask = Optional.of(masterTask);
+        masterTask.subTasks.add(this);
+    }
+
+    public List<Task> getMasterTasks() {
+        if (masterTask.isPresent()) {
+            List<Task> masterTasks = masterTask.get().getMasterTasks();
+            masterTasks.add(masterTask.get());
+            return masterTasks;
+        } else {
+            return newArrayList();
+        }
     }
 }

@@ -51,7 +51,7 @@ public class ListActivity extends Activity {
             public void onTaskUpdated(Task updatedTask) {
                 taskRepository.save(updatedTask);
             }
-        }, newArrayList(tasks)));
+        }, newArrayList(tasks), true));
     }
 
     private void editTask(Task task) {

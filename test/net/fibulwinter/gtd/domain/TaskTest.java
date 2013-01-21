@@ -1,6 +1,5 @@
 package net.fibulwinter.gtd.domain;
 
-import com.google.common.base.Optional;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -47,13 +46,17 @@ public class TaskTest {
     }
 
     public void itShouldHaveSubActions() {
-        Task sub1 = new Task(SUB_ACTION_TEXT, Optional.of(task));
+        Task sub1 = new Task(SUB_ACTION_TEXT);
+        sub1.setMaster(task);
 
         assertThat(task.getSubTasks(), contains(sub1));
     }
 
     public void itShouldHaveMasterAction() {
-        assertThat(new Task(SUB_ACTION_TEXT, Optional.of(task)).getMasterTask().get(), is(task));
+        Task sub1 = new Task(SUB_ACTION_TEXT);
+        sub1.setMaster(task);
+
+        assertThat(sub1.getMasterTask().get(), is(task));
     }
 
     public void itShouldNotHaveMasterActionByDefault() {
@@ -65,27 +68,31 @@ public class TaskTest {
     }
 
     public void itShouldBeProjectAfterSubActionWasAdded() {
-        new Task(SUB_ACTION_TEXT, Optional.of(task));
+        Task sub1 = new Task(SUB_ACTION_TEXT);
+        sub1.setMaster(task);
 
         assertThat(task.isProject(), is(true));
     }
 
     public void subActionShouldBeCancelledWhenMasterIsCancelled() {
-        Task subTask = new Task(SUB_ACTION_TEXT, Optional.of(task));
+        Task subTask = new Task(SUB_ACTION_TEXT);
+        subTask.setMaster(task);
         task.cancel();
 
         assertThat(subTask.getStatus(), is(TaskStatus.Cancelled));
     }
 
     public void subActionShouldBeCancelledWhenMasterIsComplete() {
-        Task subTask = new Task(SUB_ACTION_TEXT, Optional.of(task));
+        Task subTask = new Task(SUB_ACTION_TEXT);
+        subTask.setMaster(task);
         task.complete();
 
         assertThat(subTask.getStatus(), is(TaskStatus.Cancelled));
     }
 
     public void completeSubActionShouldBeCompletedWhenMasterIsCancelled() {
-        Task subTask = new Task(SUB_ACTION_TEXT, Optional.of(task));
+        Task subTask = new Task(SUB_ACTION_TEXT);
+        subTask.setMaster(task);
         subTask.complete();
         task.cancel();
 
@@ -93,7 +100,8 @@ public class TaskTest {
     }
 
     public void subActionShouldHaveOriginalStatusWhenMasterIsActiveAgain() {
-        Task subTask = new Task(SUB_ACTION_TEXT, Optional.of(task));
+        Task subTask = new Task(SUB_ACTION_TEXT);
+        subTask.setMaster(task);
         task.cancel();
         task.setStatus(TaskStatus.NextAction);
 
