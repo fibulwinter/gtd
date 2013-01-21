@@ -1,6 +1,6 @@
 package net.fibulwinter.gtd.domain;
 
-public enum ActionStatus {
+public enum TaskStatus {
     NextAction(false),
     Completed(true),
     Cancelled(true),;
@@ -8,7 +8,7 @@ public enum ActionStatus {
 
     private boolean done;
 
-    private ActionStatus(boolean done) {
+    private TaskStatus(boolean done) {
         this.done = done;
     }
 

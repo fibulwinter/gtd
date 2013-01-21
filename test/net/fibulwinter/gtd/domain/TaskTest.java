@@ -25,25 +25,25 @@ public class TaskTest {
     }
 
     public void itShouldBeNextActionByDefault() {
-        assertThat(task.getStatus(), is(ActionStatus.NextAction));
+        assertThat(task.getStatus(), is(TaskStatus.NextAction));
     }
 
     public void itShouldHaveAssignableStatus() {
-        task.setStatus(ActionStatus.Completed);
+        task.setStatus(TaskStatus.Completed);
 
-        assertThat(task.getStatus(), is(ActionStatus.Completed));
+        assertThat(task.getStatus(), is(TaskStatus.Completed));
     }
 
     public void itShouldBeCompletedAfterComplete() {
         task.complete();
 
-        assertThat(task.getStatus(), is(ActionStatus.Completed));
+        assertThat(task.getStatus(), is(TaskStatus.Completed));
     }
 
     public void itShouldBeCancelledAfterCancel() {
         task.cancel();
 
-        assertThat(task.getStatus(), is(ActionStatus.Cancelled));
+        assertThat(task.getStatus(), is(TaskStatus.Cancelled));
     }
 
     public void itShouldHaveSubActions() {
@@ -74,14 +74,14 @@ public class TaskTest {
         Task subTask = new Task(SUB_ACTION_TEXT, Optional.of(task));
         task.cancel();
 
-        assertThat(subTask.getStatus(), is(ActionStatus.Cancelled));
+        assertThat(subTask.getStatus(), is(TaskStatus.Cancelled));
     }
 
     public void subActionShouldBeCancelledWhenMasterIsComplete() {
         Task subTask = new Task(SUB_ACTION_TEXT, Optional.of(task));
         task.complete();
 
-        assertThat(subTask.getStatus(), is(ActionStatus.Cancelled));
+        assertThat(subTask.getStatus(), is(TaskStatus.Cancelled));
     }
 
     public void completeSubActionShouldBeCompletedWhenMasterIsCancelled() {
@@ -89,15 +89,15 @@ public class TaskTest {
         subTask.complete();
         task.cancel();
 
-        assertThat(subTask.getStatus(), is(ActionStatus.Completed));
+        assertThat(subTask.getStatus(), is(TaskStatus.Completed));
     }
 
     public void subActionShouldHaveOriginalStatusWhenMasterIsActiveAgain() {
         Task subTask = new Task(SUB_ACTION_TEXT, Optional.of(task));
         task.cancel();
-        task.setStatus(ActionStatus.NextAction);
+        task.setStatus(TaskStatus.NextAction);
 
-        assertThat(subTask.getStatus(), is(ActionStatus.NextAction));
+        assertThat(subTask.getStatus(), is(TaskStatus.NextAction));
     }
 
 

@@ -11,7 +11,7 @@ import static com.google.common.collect.Lists.newArrayList;
 public class Task {
     private long id;
     private String text;
-    private ActionStatus status;
+    private TaskStatus status;
     private List<Task> subTasks = newArrayList();
     private Optional<Task> masterAction;
 
@@ -23,7 +23,7 @@ public class Task {
         this.id = UUID.randomUUID().getLeastSignificantBits();
         this.text = text;
         this.masterAction = masterAction;
-        this.status = ActionStatus.NextAction;
+        this.status = TaskStatus.NextAction;
         if (masterAction.isPresent()) {
             masterAction.get().addSubAction(this);
         }
@@ -37,18 +37,18 @@ public class Task {
         return text;
     }
 
-    public ActionStatus getStatus() {
+    public TaskStatus getStatus() {
         return (status.isDone() || !masterAction.isPresent() || !masterAction.get().getStatus().isDone())
                 ? status
-                : ActionStatus.Cancelled;
+                : TaskStatus.Cancelled;
     }
 
     public void complete() {
-        this.status = ActionStatus.Completed;
+        this.status = TaskStatus.Completed;
     }
 
     public void cancel() {
-        this.status = ActionStatus.Cancelled;
+        this.status = TaskStatus.Cancelled;
     }
 
     private void addSubAction(Task subTask) {
@@ -63,7 +63,7 @@ public class Task {
         return !subTasks.isEmpty();
     }
 
-    public void setStatus(ActionStatus status) {
+    public void setStatus(TaskStatus status) {
         this.status = status;
     }
 

@@ -7,19 +7,19 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
 
 @Test
-public class ActionRepositoryTest {
-    private ActionRepository actionRepository;
+public class TaskRepositoryTest {
+    private TaskRepository taskRepository;
 
     @BeforeMethod
     public void givenActionList() {
-        actionRepository = new ActionRepository();
+        taskRepository = new TaskRepository();
     }
 
     public void itShouldHaveActionWhenActionWasSaved() {
         Task task = new Task("Text");
-        actionRepository.save(task);
+        taskRepository.save(task);
 
-        assertThat(actionRepository.getAll(), contains(task));
+        assertThat(taskRepository.getAll(), contains(task));
     }
 
 
