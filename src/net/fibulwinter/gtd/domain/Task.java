@@ -13,20 +13,21 @@ public class Task {
     private String text;
     private TaskStatus status;
     private List<Task> subTasks = newArrayList();
-    private Optional<Task> masterAction;
+    private Optional<Task> masterTask = Optional.absent();
 
     public Task(String text) {
-        this(text, Optional.<Task>absent());
-    }
-
-    public Task(String text, Optional<Task> masterAction) {
         this.id = UUID.randomUUID().getLeastSignificantBits();
         this.text = text;
-        this.masterAction = masterAction;
         this.status = TaskStatus.NextAction;
-        if (masterAction.isPresent()) {
-            masterAction.get().addSubAction(this);
+        if (masterTask.isPresent()) {
+            masterTask.get().addSubAction(this);
         }
+    }
+
+    public Task(long id, String text, TaskStatus status) {
+        this.id = id;
+        this.text = text;
+        this.status = status;
     }
 
     public long getId() {
@@ -38,7 +39,7 @@ public class Task {
     }
 
     public TaskStatus getStatus() {
-        return (status.isDone() || !masterAction.isPresent() || !masterAction.get().getStatus().isDone())
+        return (status.isDone() || !masterTask.isPresent() || !masterTask.get().getStatus().isDone())
                 ? status
                 : TaskStatus.Cancelled;
     }
@@ -67,12 +68,31 @@ public class Task {
         this.status = status;
     }
 
-    public Optional<Task> getMasterAction() {
-        return masterAction;
+    public Optional<Task> getMasterTask() {
+        return masterTask;
     }
 
     @Override
     public String toString() {
         return getText() + " " + getStatus().name();
+    }
+
+    public void setText(String text) {
+        this.text = text;
+    }
+
+    public void setMaster(Task masterTask) {
+        this.masterTask = Optional.of(masterTask);
+        masterTask.subTasks.add(this);
+    }
+
+    public List<Task> getMasterTasks() {
+        if (masterTask.isPresent()) {
+            List<Task> masterTasks = masterTask.get().getMasterTasks();
+            masterTasks.add(masterTask.get());
+            return masterTasks;
+        } else {
+            return newArrayList();
+        }
     }
 }

@@ -12,7 +12,7 @@ public class TaskRepositoryTest {
 
     @BeforeMethod
     public void givenActionList() {
-        taskRepository = new TaskRepository();
+        taskRepository = new TaskRepository(null);
     }
 
     public void itShouldHaveActionWhenActionWasSaved() {

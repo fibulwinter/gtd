@@ -7,6 +7,7 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.CheckBox;
 import android.widget.TextView;
+import com.google.common.base.Optional;
 import net.fibulwinter.gtd.R;
 import net.fibulwinter.gtd.domain.Task;
 import net.fibulwinter.gtd.domain.TaskStatus;
@@ -15,12 +16,16 @@ import java.util.List;
 
 public class TaskItemAdapter extends ArrayAdapter<Task> {
     private List<Task> items;
+    private final boolean showProject;
     private LayoutInflater inflater;
+    private final TaskUpdateListener taskUpdateListener;
 
 
-    public TaskItemAdapter(Context context, List<Task> objects) {
+    public TaskItemAdapter(Context context, TaskUpdateListener taskUpdateListener, List<Task> objects, boolean showProject) {
         super(context, R.layout.task_list_item, objects);
+        this.taskUpdateListener = taskUpdateListener;
         this.items = objects;
+        this.showProject = showProject;
         inflater = LayoutInflater.from(context);
     }
 
@@ -38,7 +43,7 @@ public class TaskItemAdapter extends ArrayAdapter<Task> {
         return convertView;
     }
 
-    private static class ViewHolder {
+    private class ViewHolder {
         private Task task;
 
         private CheckBox doneStatus;
@@ -56,6 +61,16 @@ public class TaskItemAdapter extends ArrayAdapter<Task> {
                     onDoneStatusUpdated();
                 }
             });
+            convertView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    onSelected();
+                }
+            });
+        }
+
+        private void onSelected() {
+            taskUpdateListener.onTaskSelected(task);
         }
 
         private void onDoneStatusUpdated() {
@@ -64,12 +79,19 @@ public class TaskItemAdapter extends ArrayAdapter<Task> {
             } else {
                 task.setStatus(TaskStatus.NextAction);
             }
+            taskUpdateListener.onTaskUpdated(task);
             update();
         }
 
         void update() {
             text.setText(task.getText());
-            details.setText(task.getStatus().name());
+            if (showProject) {
+                Optional<Task> masterTask = task.getMasterTask();
+                details.setText(masterTask.isPresent() ? "for " + masterTask.get().getText() : "<no project>");
+            } else {
+                int subTasksCount = task.getSubTasks().size();
+                details.setText(subTasksCount == 0 ? "" : subTasksCount + " subtasks");
+            }
             doneStatus.setChecked(task.getStatus().isDone());
         }
     }
