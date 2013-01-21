@@ -89,7 +89,8 @@ public class TaskItemAdapter extends ArrayAdapter<Task> {
                 Optional<Task> masterTask = task.getMasterTask();
                 details.setText(masterTask.isPresent() ? "for " + masterTask.get().getText() : "<no project>");
             } else {
-                details.setText("");
+                int subTasksCount = task.getSubTasks().size();
+                details.setText(subTasksCount == 0 ? "" : subTasksCount + " subtasks");
             }
             doneStatus.setChecked(task.getStatus().isDone());
         }
