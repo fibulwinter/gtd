@@ -1,8 +1,37 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<TextView xmlns:android="http://schemas.android.com/apk/res/android"
-          android:id="@+id/task_list_item"
-          android:layout_width="fill_parent"
-          android:layout_height="wrap_content"
-          android:text="Text"
-        />
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                android:id="@+id/task_list_item"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content">
+
+    <CheckBox
+            android:id="@+id/task_list_item_status"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentBottom="true"
+            android:gravity="center"
+            />
+    <TextView
+            android:id="@+id/task_list_item_text"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentTop="true"
+            android:layout_toLeftOf="@id/task_list_item_status"
+            android:textColor="@color/white"
+            android:gravity="center_vertical"
+            />
+    <TextView
+            android:id="@+id/task_list_item_details"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_below="@id/task_list_item_text"
+            android:layout_toLeftOf="@id/task_list_item_status"
+            android:gravity="center_vertical"
+            android:textColor="@color/silver"
+            />
+</RelativeLayout>

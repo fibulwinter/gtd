@@ -70,4 +70,9 @@ public class Task {
     public Optional<Task> getMasterAction() {
         return masterAction;
     }
+
+    @Override
+    public String toString() {
+        return getText() + " " + getStatus().name();
+    }
 }

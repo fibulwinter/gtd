@@ -10,7 +10,9 @@ public class TaskRepository {
     private Map<Long, Task> tasks = newHashMap();
 
     public TaskRepository() {
-        save(new Task("Create a doom day device"));
+        Task task = new Task("Create a doom day device");
+        task.complete();
+        save(task);
         save(new Task("Start WW3"));
     }
 
