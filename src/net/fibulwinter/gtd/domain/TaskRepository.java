@@ -7,7 +7,7 @@ public class TaskRepository {
 
     public TaskRepository(TaskDAO taskDAO) {
         this.taskDAO = taskDAO;
-        save(new Task("Create a doom day device: attempt " + (int) (Math.random() * 1000)));
+//        save(new Task("Create a doom day device: attempt " + (int) (Math.random() * 1000)));
     }
 
     public void save(Task task) {

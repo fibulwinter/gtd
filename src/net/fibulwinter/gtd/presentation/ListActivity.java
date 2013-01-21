@@ -5,6 +5,7 @@ import android.content.ContentUris;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.view.View;
 import android.widget.ListView;
 import net.fibulwinter.gtd.R;
 import net.fibulwinter.gtd.domain.Task;
@@ -55,6 +56,12 @@ public class ListActivity extends Activity {
 
     private void editTask(Task task) {
         Uri uri = ContentUris.withAppendedId(TaskTableColumns.CONTENT_URI, task.getId());
+        Intent intent = new Intent("edit", uri, this, TaskEditActivity.class);
+        startActivityForResult(intent, EDIT_REQUEST);
+    }
+
+    public void onNewTask(View view) {
+        Uri uri = ContentUris.withAppendedId(TaskTableColumns.CONTENT_URI, -1);
         Intent intent = new Intent("edit", uri, this, TaskEditActivity.class);
         startActivityForResult(intent, EDIT_REQUEST);
     }

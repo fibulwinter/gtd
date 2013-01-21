@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">GTD</string>
+    <string name="new_task">New task</string>
     <string name="edit_task">Edit task</string>
     <string name="save_task">Save</string>
 </resources>

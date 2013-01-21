@@ -60,7 +60,7 @@ public class TaskItemAdapter extends ArrayAdapter<Task> {
                     onDoneStatusUpdated();
                 }
             });
-            text.setOnClickListener(new View.OnClickListener() {
+            convertView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     onSelected();
