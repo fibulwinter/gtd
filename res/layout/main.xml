@@ -4,6 +4,10 @@
               android:layout_width="fill_parent"
               android:layout_height="fill_parent"
         >
+    <Spinner
+            android:id="@+id/mode_spinner"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"/>
     <Button android:id="@+id/new_task"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"

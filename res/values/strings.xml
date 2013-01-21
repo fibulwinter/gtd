@@ -5,4 +5,9 @@
     <string name="edit_task">Edit task</string>
     <string name="save_task">Save</string>
     <string name="new_sub_task">New sub task</string>
+    <string-array name="modes_array">
+        <item>All</item>
+        <item>Next Actions</item>
+        <item>Projects without actions</item>
+    </string-array>
 </resources>
