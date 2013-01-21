@@ -81,4 +81,8 @@ public class Task {
     public String toString() {
         return getText() + " " + getStatus().name();
     }
+
+    public void setText(String text) {
+        this.text = text;
+    }
 }

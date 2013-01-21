@@ -33,7 +33,7 @@ public class TaskDAO {
         return levels;
     }
 
-    public Optional<Task> getById(int levelId) {
+    public Optional<Task> getById(long levelId) {
         Cursor cursor = contentResolver.query(
                 TaskTableColumns.CONTENT_URI,
                 new String[]{TaskTableColumns.TASK_ID, TaskTableColumns.TITLE, TaskTableColumns.STATUS},

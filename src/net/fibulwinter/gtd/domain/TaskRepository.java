@@ -1,5 +1,7 @@
 package net.fibulwinter.gtd.domain;
 
+import com.google.common.base.Optional;
+
 public class TaskRepository {
     private final TaskDAO taskDAO;
 
@@ -14,5 +16,9 @@ public class TaskRepository {
 
     public Iterable<Task> getAll() {
         return taskDAO.getAll();
+    }
+
+    public Optional<Task> getById(long id) {
+        return taskDAO.getById(id);
     }
 }
