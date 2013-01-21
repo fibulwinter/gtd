@@ -16,10 +16,12 @@ import java.util.List;
 public class TaskItemAdapter extends ArrayAdapter<Task> {
     private List<Task> items;
     private LayoutInflater inflater;
+    private final TaskUpdateListener taskUpdateListener;
 
 
-    public TaskItemAdapter(Context context, List<Task> objects) {
+    public TaskItemAdapter(Context context, TaskUpdateListener taskUpdateListener, List<Task> objects) {
         super(context, R.layout.task_list_item, objects);
+        this.taskUpdateListener = taskUpdateListener;
         this.items = objects;
         inflater = LayoutInflater.from(context);
     }
@@ -29,7 +31,7 @@ public class TaskItemAdapter extends ArrayAdapter<Task> {
         ViewHolder holder;
         if (convertView == null) {
             convertView = inflater.inflate(R.layout.task_list_item, null);
-            holder = new ViewHolder(items.get(position), convertView);
+            holder = new ViewHolder(items.get(position), convertView, taskUpdateListener);
             convertView.setTag(holder);
         } else {
             holder = (ViewHolder) convertView.getTag();
@@ -40,13 +42,15 @@ public class TaskItemAdapter extends ArrayAdapter<Task> {
 
     private static class ViewHolder {
         private Task task;
+        private final TaskUpdateListener taskUpdateListener;
 
         private CheckBox doneStatus;
         private TextView text;
         private TextView details;
 
-        ViewHolder(Task aTask, View convertView) {
+        ViewHolder(Task aTask, View convertView, TaskUpdateListener taskUpdateListener) {
             this.task = aTask;
+            this.taskUpdateListener = taskUpdateListener;
             doneStatus = (CheckBox) convertView.findViewById(R.id.task_list_item_status);
             text = (TextView) convertView.findViewById(R.id.task_list_item_text);
             details = (TextView) convertView.findViewById(R.id.task_list_item_details);
@@ -64,6 +68,7 @@ public class TaskItemAdapter extends ArrayAdapter<Task> {
             } else {
                 task.setStatus(TaskStatus.NextAction);
             }
+            taskUpdateListener.onTaskUpdated(task);
             update();
         }
 

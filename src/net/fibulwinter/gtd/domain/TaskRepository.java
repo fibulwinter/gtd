@@ -1,26 +1,18 @@
 package net.fibulwinter.gtd.domain;
 
-import com.google.common.collect.Iterables;
-
-import java.util.Map;
-
-import static com.google.common.collect.Maps.newHashMap;
-
 public class TaskRepository {
-    private Map<Long, Task> tasks = newHashMap();
+    private final TaskDAO taskDAO;
 
-    public TaskRepository() {
-        Task task = new Task("Create a doom day device");
-        task.complete();
-        save(task);
-        save(new Task("Start WW3"));
+    public TaskRepository(TaskDAO taskDAO) {
+        this.taskDAO = taskDAO;
+        save(new Task("Create a doom day device: attempt " + (int) (Math.random() * 1000)));
     }
 
     public void save(Task task) {
-        tasks.put(task.getId(), task);
+        taskDAO.save(task);
     }
 
     public Iterable<Task> getAll() {
-        return Iterables.unmodifiableIterable(tasks.values());
+        return taskDAO.getAll();
     }
 }

@@ -13,7 +13,7 @@ public class Task {
     private String text;
     private TaskStatus status;
     private List<Task> subTasks = newArrayList();
-    private Optional<Task> masterAction;
+    private Optional<Task> masterAction = Optional.absent();
 
     public Task(String text) {
         this(text, Optional.<Task>absent());
@@ -27,6 +27,12 @@ public class Task {
         if (masterAction.isPresent()) {
             masterAction.get().addSubAction(this);
         }
+    }
+
+    public Task(long id, String text, TaskStatus status) {
+        this.id = id;
+        this.text = text;
+        this.status = status;
     }
 
     public long getId() {
