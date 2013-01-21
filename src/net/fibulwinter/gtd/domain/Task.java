@@ -13,26 +13,27 @@ public class Task {
     private String text;
     private TaskStatus status;
     private List<Task> subTasks = newArrayList();
-    private Optional<Task> masterAction = Optional.absent();
+    private Optional<Task> masterTask = Optional.absent();
 
     public Task(String text) {
         this(text, Optional.<Task>absent());
     }
 
-    public Task(String text, Optional<Task> masterAction) {
+    public Task(String text, Optional<Task> masterTask) {
         this.id = UUID.randomUUID().getLeastSignificantBits();
         this.text = text;
-        this.masterAction = masterAction;
+        this.masterTask = masterTask;
         this.status = TaskStatus.NextAction;
-        if (masterAction.isPresent()) {
-            masterAction.get().addSubAction(this);
+        if (masterTask.isPresent()) {
+            masterTask.get().addSubAction(this);
         }
     }
 
-    public Task(long id, String text, TaskStatus status) {
+    public Task(long id, String text, TaskStatus status, Optional<Task> masterTask) {
         this.id = id;
         this.text = text;
         this.status = status;
+        this.masterTask = masterTask;
     }
 
     public long getId() {
@@ -44,7 +45,7 @@ public class Task {
     }
 
     public TaskStatus getStatus() {
-        return (status.isDone() || !masterAction.isPresent() || !masterAction.get().getStatus().isDone())
+        return (status.isDone() || !masterTask.isPresent() || !masterTask.get().getStatus().isDone())
                 ? status
                 : TaskStatus.Cancelled;
     }
@@ -73,8 +74,8 @@ public class Task {
         this.status = status;
     }
 
-    public Optional<Task> getMasterAction() {
-        return masterAction;
+    public Optional<Task> getMasterTask() {
+        return masterTask;
     }
 
     @Override

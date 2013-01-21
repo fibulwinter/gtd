@@ -4,6 +4,11 @@
               android:layout_width="fill_parent"
               android:layout_height="fill_parent"
         >
+    <TextView
+            android:id="@+id/master_task_title"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            />
     <EditText
             android:id="@+id/task_title"
             android:layout_width="fill_parent"
@@ -15,6 +20,13 @@
             android:layout_height="wrap_content"
             android:text="@string/save_task"
             android:onClick="onSave"
+            />
+    <Button
+            android:id="@+id/task_create_sub_task"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/new_sub_task"
+            android:onClick="onNewSubTask"
             />
 </LinearLayout>
 

@@ -53,11 +53,11 @@ public class TaskTest {
     }
 
     public void itShouldHaveMasterAction() {
-        assertThat(new Task(SUB_ACTION_TEXT, Optional.of(task)).getMasterAction().get(), is(task));
+        assertThat(new Task(SUB_ACTION_TEXT, Optional.of(task)).getMasterTask().get(), is(task));
     }
 
     public void itShouldNotHaveMasterActionByDefault() {
-        assertThat(task.getMasterAction().isPresent(), is(false));
+        assertThat(task.getMasterTask().isPresent(), is(false));
     }
 
     public void itShouldBeNotProjectByDefault() {

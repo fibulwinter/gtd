@@ -35,6 +35,7 @@ public class TaskContentProvider extends ContentProvider {
         tasksProjectionMap.put(TaskTableColumns.TASK_ID, TaskTableColumns.TASK_ID);
         tasksProjectionMap.put(TaskTableColumns.TITLE, TaskTableColumns.TITLE);
         tasksProjectionMap.put(TaskTableColumns.STATUS, TaskTableColumns.STATUS);
+        tasksProjectionMap.put(TaskTableColumns.MASTER, TaskTableColumns.MASTER);
 
     }
 
@@ -52,7 +53,8 @@ public class TaskContentProvider extends ContentProvider {
             db.execSQL("CREATE TABLE " + TASKS_TABLE_NAME + " ("
                     + TaskTableColumns.TASK_ID + " INTEGER PRIMARY KEY, "
                     + TaskTableColumns.TITLE + " TEXT, "
-                    + TaskTableColumns.STATUS + " TEXT "
+                    + TaskTableColumns.STATUS + " TEXT, "
+                    + TaskTableColumns.MASTER + " INTEGER "
                     + ");");
         }
 

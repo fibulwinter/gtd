@@ -12,5 +12,6 @@ public interface TaskTableColumns extends BaseColumns {
     public static final String TASK_ID = "_id";
     public static final String TITLE = "title";
     public static final String STATUS = "status";
+    public static final String MASTER = "master";
 }
 

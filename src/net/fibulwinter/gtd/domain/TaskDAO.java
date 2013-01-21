@@ -21,7 +21,7 @@ public class TaskDAO {
         List<Task> levels = newArrayList();
         Cursor cursor = contentResolver.query(
                 TaskTableColumns.CONTENT_URI,
-                new String[]{TaskTableColumns.TASK_ID, TaskTableColumns.TITLE, TaskTableColumns.STATUS},
+                new String[]{TaskTableColumns.TASK_ID, TaskTableColumns.TITLE, TaskTableColumns.STATUS, TaskTableColumns.MASTER},
                 null,
                 new String[]{},
                 TaskTableColumns.TASK_ID);
@@ -36,7 +36,7 @@ public class TaskDAO {
     public Optional<Task> getById(long levelId) {
         Cursor cursor = contentResolver.query(
                 TaskTableColumns.CONTENT_URI,
-                new String[]{TaskTableColumns.TASK_ID, TaskTableColumns.TITLE, TaskTableColumns.STATUS},
+                new String[]{TaskTableColumns.TASK_ID, TaskTableColumns.TITLE, TaskTableColumns.STATUS, TaskTableColumns.MASTER},
                 TaskTableColumns.TASK_ID + "=?",
                 new String[]{String.valueOf(levelId)},
                 null);
@@ -54,6 +54,7 @@ public class TaskDAO {
         values.put(TaskTableColumns.TASK_ID, task.getId());
         values.put(TaskTableColumns.TITLE, task.getText());
         values.put(TaskTableColumns.STATUS, task.getStatus().name());
+        values.put(TaskTableColumns.MASTER, task.getMasterTask().isPresent() ? task.getMasterTask().get().getId() : 0);
         int updatedRows = contentResolver.update(
                 TaskTableColumns.CONTENT_URI,
                 values,
@@ -68,7 +69,8 @@ public class TaskDAO {
         long id = cursor.getLong(0);
         String text = cursor.getString(1);
         TaskStatus status = TaskStatus.valueOf(cursor.getString(2));
-        return new Task(id, text, status);
+        long masterId = cursor.getLong(3);
+        return new Task(id, text, status, getById(masterId));
     }
 
 }

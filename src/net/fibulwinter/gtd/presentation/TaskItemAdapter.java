@@ -7,6 +7,7 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.CheckBox;
 import android.widget.TextView;
+import com.google.common.base.Optional;
 import net.fibulwinter.gtd.R;
 import net.fibulwinter.gtd.domain.Task;
 import net.fibulwinter.gtd.domain.TaskStatus;
@@ -84,7 +85,8 @@ public class TaskItemAdapter extends ArrayAdapter<Task> {
 
         void update() {
             text.setText(task.getText());
-            details.setText(task.getStatus().name());
+            Optional<Task> masterTask = task.getMasterTask();
+            details.setText(masterTask.isPresent() ? "for " + masterTask.get().getText() : "<no project>");
             doneStatus.setChecked(task.getStatus().isDone());
         }
     }
