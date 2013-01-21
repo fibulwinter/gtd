@@ -26,48 +26,45 @@ public class TaskItemAdapter extends ArrayAdapter<Task> {
 
     @Override
     public View getView(final int position, View convertView, ViewGroup parent) {
-        final ViewHolder holder;
-        final Task task = items.get(position);
-
+        ViewHolder holder;
         if (convertView == null) {
             convertView = inflater.inflate(R.layout.task_list_item, null);
-
-            holder = new ViewHolder(task);
-            holder.doneStatus = (CheckBox) convertView.findViewById(R.id.task_list_item_status);
-            holder.text = (TextView) convertView.findViewById(R.id.task_list_item_text);
-            holder.details = (TextView) convertView.findViewById(R.id.task_list_item_details);
+            holder = new ViewHolder(items.get(position), convertView);
             convertView.setTag(holder);
         } else {
             holder = (ViewHolder) convertView.getTag();
         }
-
-
-        holder.doneStatus.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (holder.doneStatus.isChecked()) {
-                    task.complete();
-                } else {
-                    task.setStatus(TaskStatus.NextAction);
-                }
-                holder.update();
-            }
-
-        });
         holder.update();
-
         return convertView;
     }
 
-    static class ViewHolder {
-        Task task;
+    private static class ViewHolder {
+        private Task task;
 
-        CheckBox doneStatus;
-        TextView text;
-        TextView details;
+        private CheckBox doneStatus;
+        private TextView text;
+        private TextView details;
 
-        ViewHolder(Task task) {
-            this.task = task;
+        ViewHolder(Task aTask, View convertView) {
+            this.task = aTask;
+            doneStatus = (CheckBox) convertView.findViewById(R.id.task_list_item_status);
+            text = (TextView) convertView.findViewById(R.id.task_list_item_text);
+            details = (TextView) convertView.findViewById(R.id.task_list_item_details);
+            doneStatus.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    onDoneStatusUpdated();
+                }
+            });
+        }
+
+        private void onDoneStatusUpdated() {
+            if (doneStatus.isChecked()) {
+                task.complete();
+            } else {
+                task.setStatus(TaskStatus.NextAction);
+            }
+            update();
         }
 
         void update() {
