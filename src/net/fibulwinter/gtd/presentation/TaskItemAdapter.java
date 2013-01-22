@@ -1,6 +1,7 @@
 package net.fibulwinter.gtd.presentation;
 
 import android.content.Context;
+import android.graphics.Paint;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -84,15 +85,24 @@ public class TaskItemAdapter extends ArrayAdapter<Task> {
         }
 
         void update() {
-            text.setText(task.getText());
+            text.setText(task.getText() + (task.getStatus() == TaskStatus.Maybe ? " ???" : ""));
+            if (task.getStatus() == TaskStatus.Cancelled) {
+                text.setPaintFlags(text.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
+            } else {
+                text.setPaintFlags(text.getPaintFlags() & ~Paint.STRIKE_THRU_TEXT_FLAG);
+            }
             if (showProject) {
                 Optional<Task> masterTask = task.getMasterTask();
-                details.setText(masterTask.isPresent() ? "for " + masterTask.get().getText() : "<no project>");
+                details.setText(masterTask.isPresent() ? "to " + masterTask.get().getText() : "<no project>");
             } else {
                 int subTasksCount = task.getSubTasks().size();
                 details.setText(subTasksCount == 0 ? "" : subTasksCount + " subtasks");
             }
-            doneStatus.setChecked(!task.getStatus().isActive());
+            doneStatus.setChecked(task.getStatus() == TaskStatus.Completed);
+            doneStatus.setEnabled(task.getStatus().isActive() || task.getStatus() == TaskStatus.Completed);
+            if (task.getStatus() == TaskStatus.Maybe) {
+
+            }
         }
     }
 

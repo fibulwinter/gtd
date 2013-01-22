@@ -8,6 +8,16 @@
     <string-array name="modes_array">
         <item>All</item>
         <item>Next Actions</item>
+        <item>Waiting For</item>
+        <item>Done</item>
+        <item>May Be</item>
         <item>Projects without actions</item>
+    </string-array>
+    <string-array name="status_array">
+        <item>Next Action</item>
+        <item>Waiting For</item>
+        <item>May Be</item>
+        <item>Done</item>
+        <item>Cancelled</item>
     </string-array>
 </resources>

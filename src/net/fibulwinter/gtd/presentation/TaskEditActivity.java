@@ -6,13 +6,12 @@ import android.content.ContentUris;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.view.View;
-import android.widget.EditText;
-import android.widget.ListView;
-import android.widget.TextView;
+import android.widget.*;
 import net.fibulwinter.gtd.R;
 import net.fibulwinter.gtd.domain.Task;
 import net.fibulwinter.gtd.domain.TaskDAO;
 import net.fibulwinter.gtd.domain.TaskRepository;
+import net.fibulwinter.gtd.domain.TaskStatus;
 
 import java.util.List;
 
@@ -23,6 +22,7 @@ public class TaskEditActivity extends Activity {
     private ListView masterTaskList;
     private ListView subTaskList;
     private TextView title;
+    private Spinner statusSpinner;
     private Task task;
     private TaskUpdateListener taskUpdateListener = new TaskUpdateListener() {
         @Override
@@ -50,7 +50,23 @@ public class TaskEditActivity extends Activity {
         masterActionsTitle = (TextView) findViewById(R.id.master_task_title);
         masterTaskList = (ListView) findViewById(R.id.master_task_ist);
         subTaskList = (ListView) findViewById(R.id.subTaskList);
+        statusSpinner = (Spinner) findViewById(R.id.task_status_spinner);
+        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this,
+                R.array.status_array, android.R.layout.simple_spinner_item);
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        statusSpinner.setAdapter(adapter);
+        statusSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+                task.setStatus(TaskStatus.values()[i]);
+                taskRepository.save(task);
+                updateToTask();
+            }
 
+            @Override
+            public void onNothingSelected(AdapterView<?> adapterView) {
+            }
+        });
         taskRepository = new TaskRepository(new TaskDAO(getContentResolver()));
         boolean isNew = id == -1;
         task = isNew ? new Task("") : taskRepository.getById(id).get();
@@ -58,7 +74,6 @@ public class TaskEditActivity extends Activity {
         if (isNew) {
             onTitleClick(title);
         }
-
     }
 
     private void updateToTask() {
@@ -67,6 +82,7 @@ public class TaskEditActivity extends Activity {
         masterActionsTitle.setVisibility(masterTasks.isEmpty() ? View.INVISIBLE : View.VISIBLE);
         masterTaskList.setAdapter(new TaskItemAdapter(this, taskUpdateListener, masterTasks, false));
         subTaskList.setAdapter(new TaskItemAdapter(this, taskUpdateListener, task.getSubTasks(), false));
+        statusSpinner.setSelection(task.getStatus().ordinal());
     }
 
     public void onTitleClick(View view) {

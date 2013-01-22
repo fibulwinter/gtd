@@ -39,7 +39,7 @@ public class ListActivity extends Activity {
     };
     private TaskListService taskListService;
 
-    private enum Mode {ALL, NEXT_ACTIONS, PROJECTS_WITHOUT_ACTIONS}
+    private enum Mode {ALL, NEXT_ACTIONS, WAITING_FOR, DONE, MAY_BE, PROJECTS_WITHOUT_ACTIONS}
 
     ;
 
@@ -88,6 +88,15 @@ public class ListActivity extends Activity {
                 break;
             case NEXT_ACTIONS:
                 tasks = taskListService.getNextActions();
+                break;
+            case WAITING_FOR:
+                tasks = taskListService.getWaitingFor();
+                break;
+            case DONE:
+                tasks = taskListService.getDone();
+                break;
+            case MAY_BE:
+                tasks = taskListService.getMaybe();
                 break;
             case PROJECTS_WITHOUT_ACTIONS:
                 tasks = taskListService.getProjectsWithoutNextAction();
