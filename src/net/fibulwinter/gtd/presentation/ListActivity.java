@@ -10,14 +10,13 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.Spinner;
-import com.google.common.base.Predicate;
 import net.fibulwinter.gtd.R;
 import net.fibulwinter.gtd.domain.Task;
 import net.fibulwinter.gtd.domain.TaskDAO;
 import net.fibulwinter.gtd.domain.TaskRepository;
 import net.fibulwinter.gtd.infrastructure.TaskTableColumns;
+import net.fibulwinter.gtd.service.TaskListService;
 
-import static com.google.common.collect.FluentIterable.from;
 import static com.google.common.collect.Lists.newArrayList;
 
 public class ListActivity extends Activity {
@@ -38,8 +37,9 @@ public class ListActivity extends Activity {
             taskRepository.save(updatedTask);
         }
     };
+    private TaskListService taskListService;
 
-    private enum Mode {ALL, NEXT_ACTIONS, PROJECTS}
+    private enum Mode {ALL, NEXT_ACTIONS, PROJECTS_WITHOUT_ACTIONS}
 
     ;
 
@@ -54,6 +54,7 @@ public class ListActivity extends Activity {
         setContentView(R.layout.main);
         taskList = (ListView) findViewById(R.id.taskList);
         taskRepository = new TaskRepository(new TaskDAO(getContentResolver()));
+        taskListService = new TaskListService(taskRepository);
         Spinner spinner = (Spinner) findViewById(R.id.mode_spinner);
         ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this,
                 R.array.modes_array, android.R.layout.simple_spinner_item);
@@ -86,25 +87,10 @@ public class ListActivity extends Activity {
             case ALL:
                 break;
             case NEXT_ACTIONS:
-                tasks = from(tasks).filter(new Predicate<Task>() {
-                    @Override
-                    public boolean apply(Task task) {
-                        return !task.isProject() && !task.getStatus().isDone();
-                    }
-                });
+                tasks = taskListService.getNextActions();
                 break;
-            case PROJECTS:
-                tasks = from(tasks).filter(new Predicate<Task>() {
-                    @Override
-                    public boolean apply(Task task) {
-                        return task.isProject() && !task.getStatus().isDone() && (from(task.getSubTasks()).allMatch(new Predicate<Task>() {
-                            @Override
-                            public boolean apply(Task task) {
-                                return task.getStatus().isDone();
-                            }
-                        }));
-                    }
-                });
+            case PROJECTS_WITHOUT_ACTIONS:
+                tasks = taskListService.getProjectsWithoutNextAction();
                 break;
         }
         taskList.setAdapter(new TaskItemAdapter(this, taskUpdateListener, newArrayList(tasks), true));

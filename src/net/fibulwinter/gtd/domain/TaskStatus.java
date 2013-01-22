@@ -1,18 +1,18 @@
 package net.fibulwinter.gtd.domain;
 
 public enum TaskStatus {
-    NextAction(false),
-    Completed(true),
-    Cancelled(true),;
+    NextAction(true),
+    Completed(false),
+    Cancelled(false),;
 
 
-    private boolean done;
+    private boolean active;
 
-    private TaskStatus(boolean done) {
-        this.done = done;
+    private TaskStatus(boolean active) {
+        this.active = active;
     }
 
-    public boolean isDone() {
-        return done;
+    public boolean isActive() {
+        return active;
     }
 }

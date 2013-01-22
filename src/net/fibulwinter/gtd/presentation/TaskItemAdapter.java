@@ -92,7 +92,7 @@ public class TaskItemAdapter extends ArrayAdapter<Task> {
                 int subTasksCount = task.getSubTasks().size();
                 details.setText(subTasksCount == 0 ? "" : subTasksCount + " subtasks");
             }
-            doneStatus.setChecked(task.getStatus().isDone());
+            doneStatus.setChecked(!task.getStatus().isActive());
         }
     }
 
