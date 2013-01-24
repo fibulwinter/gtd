@@ -6,11 +6,20 @@ import android.database.Cursor;
 import com.google.common.base.Optional;
 import net.fibulwinter.gtd.infrastructure.TaskTableColumns;
 
+import java.util.Date;
 import java.util.Map;
 
 import static com.google.common.collect.Maps.newHashMap;
 
 public class TaskDAO {
+    public static final String[] PROJECTION = new String[]{
+            TaskTableColumns.TASK_ID,
+            TaskTableColumns.TITLE,
+            TaskTableColumns.STATUS,
+            TaskTableColumns.MASTER,
+            TaskTableColumns.START_DATE,
+            TaskTableColumns.DUE_DATE
+    };
     private ContentResolver contentResolver;
 
     public TaskDAO(ContentResolver contentResolver) {
@@ -21,7 +30,7 @@ public class TaskDAO {
         Map<Task, Long> tasks = newHashMap();
         Cursor cursor = contentResolver.query(
                 TaskTableColumns.CONTENT_URI,
-                new String[]{TaskTableColumns.TASK_ID, TaskTableColumns.TITLE, TaskTableColumns.STATUS, TaskTableColumns.MASTER},
+                PROJECTION,
                 null,
                 new String[]{},
                 TaskTableColumns.TASK_ID);
@@ -36,7 +45,7 @@ public class TaskDAO {
     public Optional<Task> getById(long levelId) {
         Cursor cursor = contentResolver.query(
                 TaskTableColumns.CONTENT_URI,
-                new String[]{TaskTableColumns.TASK_ID, TaskTableColumns.TITLE, TaskTableColumns.STATUS, TaskTableColumns.MASTER},
+                PROJECTION,
                 TaskTableColumns.TASK_ID + "=?",
                 new String[]{String.valueOf(levelId)},
                 null);
@@ -55,6 +64,8 @@ public class TaskDAO {
         values.put(TaskTableColumns.TITLE, task.getText());
         values.put(TaskTableColumns.STATUS, task.getStatus().name());
         values.put(TaskTableColumns.MASTER, task.getMasterTask().isPresent() ? task.getMasterTask().get().getId() : 0);
+        values.put(TaskTableColumns.START_DATE, task.getStartingDate().isPresent() ? task.getStartingDate().get().getTime() : 0);
+        values.put(TaskTableColumns.DUE_DATE, task.getDueDate().isPresent() ? task.getDueDate().get().getTime() : 0);
         int updatedRows = contentResolver.update(
                 TaskTableColumns.CONTENT_URI,
                 values,
@@ -69,7 +80,16 @@ public class TaskDAO {
         long id = cursor.getLong(0);
         String text = cursor.getString(1);
         TaskStatus status = TaskStatus.valueOf(cursor.getString(2));
-        return new Task(id, text, status);
+        long startDate = cursor.getLong(4);
+        long dueDate = cursor.getLong(5);
+        Task task = new Task(id, text, status);
+        if (startDate != 0) {
+            task.setStartingDate(Optional.of(new Date(startDate)));
+        }
+        if (dueDate != 0) {
+            task.setDueDate(Optional.of(new Date(dueDate)));
+        }
+        return task;
     }
 
     private long cursor2MasterId(Cursor cursor) {

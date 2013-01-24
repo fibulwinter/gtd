@@ -2,17 +2,23 @@ package net.fibulwinter.gtd.presentation;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.DatePickerDialog;
 import android.content.ContentUris;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.*;
+import com.google.common.base.Optional;
 import net.fibulwinter.gtd.R;
 import net.fibulwinter.gtd.domain.Task;
 import net.fibulwinter.gtd.domain.TaskDAO;
 import net.fibulwinter.gtd.domain.TaskRepository;
 import net.fibulwinter.gtd.domain.TaskStatus;
+import net.fibulwinter.gtd.infrastructure.DateUtils;
 
+import java.util.Calendar;
+import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.List;
 
 public class TaskEditActivity extends Activity {
@@ -23,6 +29,8 @@ public class TaskEditActivity extends Activity {
     private ListView subTaskList;
     private TextView title;
     private Spinner statusSpinner;
+    private Button startingDatePicker;
+    private Button dueDatePicker;
     private Task task;
     private TaskUpdateListener taskUpdateListener = new TaskUpdateListener() {
         @Override
@@ -51,6 +59,8 @@ public class TaskEditActivity extends Activity {
         masterTaskList = (ListView) findViewById(R.id.master_task_ist);
         subTaskList = (ListView) findViewById(R.id.subTaskList);
         statusSpinner = (Spinner) findViewById(R.id.task_status_spinner);
+        startingDatePicker = (Button) findViewById(R.id.startingDatePicker);
+        dueDatePicker = (Button) findViewById(R.id.dueDatePicker);
         ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this,
                 R.array.status_array, android.R.layout.simple_spinner_item);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
@@ -83,6 +93,8 @@ public class TaskEditActivity extends Activity {
         masterTaskList.setAdapter(new TaskItemAdapter(this, taskUpdateListener, masterTasks, false));
         subTaskList.setAdapter(new TaskItemAdapter(this, taskUpdateListener, task.getSubTasks(), false));
         statusSpinner.setSelection(task.getStatus().ordinal());
+        startingDatePicker.setText(DateUtils.optionalDateToString(task.getStartingDate()));
+        dueDatePicker.setText(DateUtils.optionalDateToString(task.getDueDate()));
     }
 
     public void onTitleClick(View view) {
@@ -106,6 +118,42 @@ public class TaskEditActivity extends Activity {
                 }).show();
     }
 
+
+    public void onStartDateClick(View view) {
+        Date date = task.getStartingDate().or(new Date());
+        GregorianCalendar calendar = new GregorianCalendar();
+        calendar.setTime(date);
+        new DatePickerDialog(this,
+                new DatePickerDialog.OnDateSetListener() {
+                    @Override
+                    public void onDateSet(DatePicker datePicker, int year, int month, int day) {
+                        GregorianCalendar calendar = new GregorianCalendar();
+                        calendar.set(year, month, day, 0, 0, 0);
+                        task.setStartingDate(Optional.of(calendar.getTime()));
+                        taskRepository.save(task);
+                        updateToTask();
+                    }
+                },
+                calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), calendar.get(Calendar.DAY_OF_MONTH)).show();
+    }
+
+    public void onDueDateClick(View view) {
+        Date date = task.getDueDate().or(new Date());
+        GregorianCalendar calendar = new GregorianCalendar();
+        calendar.setTime(date);
+        new DatePickerDialog(this,
+                new DatePickerDialog.OnDateSetListener() {
+                    @Override
+                    public void onDateSet(DatePicker datePicker, int year, int month, int day) {
+                        GregorianCalendar calendar = new GregorianCalendar();
+                        calendar.set(year, month, day, 0, 0, 0);
+                        task.setDueDate(Optional.of(calendar.getTime()));
+                        taskRepository.save(task);
+                        updateToTask();
+                    }
+                },
+                calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), calendar.get(Calendar.DAY_OF_MONTH)).show();
+    }
 
     public void onNewSubTask(View view) {
         Task master = task;

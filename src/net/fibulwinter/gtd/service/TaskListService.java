@@ -5,9 +5,18 @@ import net.fibulwinter.gtd.domain.Task;
 import net.fibulwinter.gtd.domain.TaskRepository;
 import net.fibulwinter.gtd.domain.TaskStatus;
 
+import java.util.Date;
+
 import static com.google.common.collect.FluentIterable.from;
 
 public class TaskListService {
+    private static final Predicate<Task> CAN_START_PREDICATE = new Predicate<Task>() {
+        @Override
+        public boolean apply(Task task) {
+            return !task.getStartingDate().isPresent() || task.getStartingDate().get().before(new Date());
+        }
+    };
+
     private static final Predicate<Task> NEXT_ACTION_PREDICATE = new Predicate<Task>() {
         @Override
         public boolean apply(Task task) {
@@ -55,15 +64,15 @@ public class TaskListService {
     }
 
     public Iterable<Task> getNextActions() {
-        return from(taskRepository.getAll()).filter(NEXT_ACTION_PREDICATE);
+        return from(taskRepository.getAll()).filter(NEXT_ACTION_PREDICATE).filter(CAN_START_PREDICATE);
     }
 
     public Iterable<Task> getWaitingFor() {
-        return from(taskRepository.getAll()).filter(WAITING_FOR_PREDICATE);
+        return from(taskRepository.getAll()).filter(WAITING_FOR_PREDICATE).filter(CAN_START_PREDICATE);
     }
 
     public Iterable<Task> getMaybe() {
-        return from(taskRepository.getAll()).filter(MAYBE_PREDICATE);
+        return from(taskRepository.getAll()).filter(MAYBE_PREDICATE).filter(CAN_START_PREDICATE);
     }
 
     public Iterable<Task> getDone() {

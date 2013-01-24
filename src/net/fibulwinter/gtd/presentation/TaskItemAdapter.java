@@ -1,6 +1,7 @@
 package net.fibulwinter.gtd.presentation;
 
 import android.content.Context;
+import android.graphics.Color;
 import android.graphics.Paint;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -12,7 +13,9 @@ import com.google.common.base.Optional;
 import net.fibulwinter.gtd.R;
 import net.fibulwinter.gtd.domain.Task;
 import net.fibulwinter.gtd.domain.TaskStatus;
+import net.fibulwinter.gtd.infrastructure.DateUtils;
 
+import java.util.Date;
 import java.util.List;
 
 public class TaskItemAdapter extends ArrayAdapter<Task> {
@@ -91,12 +94,28 @@ public class TaskItemAdapter extends ArrayAdapter<Task> {
             } else {
                 text.setPaintFlags(text.getPaintFlags() & ~Paint.STRIKE_THRU_TEXT_FLAG);
             }
+            if (task.getDueDate().isPresent() && task.getDueDate().get().before(new Date())) {
+                text.setTextColor(Color.RED);
+            } else {
+                text.setTextColor(Color.WHITE);
+            }
             if (showProject) {
                 Optional<Task> masterTask = task.getMasterTask();
-                details.setText(masterTask.isPresent() ? "to " + masterTask.get().getText() : "<no project>");
+                String detailsText = masterTask.isPresent() ? "to " + masterTask.get().getText() : "<no project>";
+                if (task.getDueDate().isPresent()) {
+                    detailsText = detailsText + " due to " + DateUtils.optionalDateToString(task.getDueDate());
+                }
+                details.setText(detailsText);
             } else {
                 int subTasksCount = task.getSubTasks().size();
-                details.setText(subTasksCount == 0 ? "" : subTasksCount + " subtasks");
+                String detailsText = subTasksCount == 0 ? "" : subTasksCount + " subtasks";
+                if (task.getStartingDate().isPresent()) {
+                    detailsText = detailsText + " from " + DateUtils.optionalDateToString(task.getStartingDate());
+                }
+                if (task.getDueDate().isPresent()) {
+                    detailsText = detailsText + " due to " + DateUtils.optionalDateToString(task.getDueDate());
+                }
+                details.setText(detailsText);
             }
             doneStatus.setChecked(task.getStatus() == TaskStatus.Completed);
             doneStatus.setEnabled(task.getStatus().isActive() || task.getStatus() == TaskStatus.Completed);

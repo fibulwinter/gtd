@@ -3,6 +3,7 @@ package net.fibulwinter.gtd.domain;
 import com.google.common.base.Optional;
 
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
@@ -14,6 +15,8 @@ public class Task {
     private TaskStatus status;
     private List<Task> subTasks = newArrayList();
     private Optional<Task> masterTask = Optional.absent();
+    private Optional<Date> startingDate = Optional.absent();
+    private Optional<Date> dueDate = Optional.absent();
 
     public Task(String text) {
         this.id = UUID.randomUUID().getLeastSignificantBits();
@@ -94,5 +97,21 @@ public class Task {
         } else {
             return newArrayList();
         }
+    }
+
+    public Optional<Date> getStartingDate() {
+        return startingDate;
+    }
+
+    public void setStartingDate(Optional<Date> startingDate) {
+        this.startingDate = startingDate;
+    }
+
+    public Optional<Date> getDueDate() {
+        return dueDate;
+    }
+
+    public void setDueDate(Optional<Date> dueDate) {
+        this.dueDate = dueDate;
     }
 }
