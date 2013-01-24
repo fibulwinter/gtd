@@ -64,7 +64,7 @@ public class Task {
     }
 
     public boolean isProject() {
-        return !subTasks.isEmpty();
+        return status == TaskStatus.Project || !subTasks.isEmpty();
     }
 
     public void setStatus(TaskStatus status) {

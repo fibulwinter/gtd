@@ -95,25 +95,28 @@ public class TaskItemAdapter extends ArrayAdapter<Task> {
                 text.setPaintFlags(text.getPaintFlags() & ~Paint.STRIKE_THRU_TEXT_FLAG);
             }
             if (task.getDueDate().isPresent() && task.getDueDate().get().before(new Date())) {
-                text.setTextColor(Color.RED);
+                details.setTextColor(Color.RED);
             } else {
-                text.setTextColor(Color.WHITE);
+                details.setTextColor(Color.LTGRAY);
             }
             if (showProject) {
                 Optional<Task> masterTask = task.getMasterTask();
-                String detailsText = masterTask.isPresent() ? "to " + masterTask.get().getText() : "<no project>";
+                String detailsText = "";
+                if (masterTask.isPresent()) {
+                    detailsText += "to " + masterTask.get().getText();
+                }
                 if (task.getDueDate().isPresent()) {
-                    detailsText = detailsText + " due to " + DateUtils.optionalDateToString(task.getDueDate());
+                    detailsText += " due to " + DateUtils.optionalDateToString(task.getDueDate());
                 }
                 details.setText(detailsText);
             } else {
                 int subTasksCount = task.getSubTasks().size();
                 String detailsText = subTasksCount == 0 ? "" : subTasksCount + " subtasks";
                 if (task.getStartingDate().isPresent()) {
-                    detailsText = detailsText + " from " + DateUtils.optionalDateToString(task.getStartingDate());
+                    detailsText += " from " + DateUtils.optionalDateToString(task.getStartingDate());
                 }
                 if (task.getDueDate().isPresent()) {
-                    detailsText = detailsText + " due to " + DateUtils.optionalDateToString(task.getDueDate());
+                    detailsText += " due to " + DateUtils.optionalDateToString(task.getDueDate());
                 }
                 details.setText(detailsText);
             }

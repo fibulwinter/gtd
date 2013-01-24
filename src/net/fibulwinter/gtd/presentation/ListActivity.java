@@ -43,9 +43,7 @@ public class ListActivity extends Activity {
     };
     private TaskListService taskListService;
 
-    private enum Mode {ALL, NEXT_ACTIONS, WAITING_FOR, DONE, MAY_BE, PROJECTS_WITHOUT_ACTIONS}
-
-    ;
+    private enum Mode {ALL, NEXT_ACTIONS, WAITING_FOR, DONE, MAY_BE, PROJECTS_WITHOUT_ACTIONS, OVERDUE, TODAY}
 
     private Mode mode = Mode.NEXT_ACTIONS;
 
@@ -104,6 +102,12 @@ public class ListActivity extends Activity {
                 break;
             case PROJECTS_WITHOUT_ACTIONS:
                 tasks = taskListService.getProjectsWithoutNextAction();
+                break;
+            case OVERDUE:
+                tasks = taskListService.getOverdueActions();
+                break;
+            case TODAY:
+                tasks = taskListService.getTodayActions();
                 break;
         }
         ArrayList<Task> taskArrayList = newArrayList(tasks);
