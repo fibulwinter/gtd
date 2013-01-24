@@ -56,8 +56,8 @@ public class TaskContentProvider extends ContentProvider {
                     + TaskTableColumns.TASK_ID + " INTEGER PRIMARY KEY, "
                     + TaskTableColumns.TITLE + " TEXT, "
                     + TaskTableColumns.STATUS + " TEXT, "
-                    + TaskTableColumns.MASTER + " INTEGER "
-                    + TaskTableColumns.START_DATE + " INTEGER "
+                    + TaskTableColumns.MASTER + " INTEGER, "
+                    + TaskTableColumns.START_DATE + " INTEGER, "
                     + TaskTableColumns.DUE_DATE + " INTEGER "
                     + ");");
         }
