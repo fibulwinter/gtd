@@ -2,7 +2,6 @@ package net.fibulwinter.gtd.presentation;
 
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.app.DatePickerDialog;
 import android.content.ContentUris;
 import android.content.DialogInterface;
 import android.os.Bundle;
@@ -69,8 +68,7 @@ public class TaskEditActivity extends Activity {
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
                 task.setStatus(TaskStatus.values()[i]);
-                taskRepository.save(task);
-                updateToTask();
+                saveAndUpdate();
             }
 
             @Override
@@ -107,8 +105,7 @@ public class TaskEditActivity extends Activity {
                 .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int whichButton) {
                         task.setText(input.getText().toString());
-                        taskRepository.save(task);
-                        updateToTask();
+                        saveAndUpdate();
                     }
                 })
                 .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
@@ -118,41 +115,62 @@ public class TaskEditActivity extends Activity {
                 }).show();
     }
 
+    private static interface DatePickListener {
+        void setOptionalDate(Optional<Date> date);
+    }
 
-    public void onStartDateClick(View view) {
-        Date date = task.getStartingDate().or(new Date());
+    public void pickDate(String title, Optional<Date> optionalDate, final DatePickListener listener) {
+        Date date = optionalDate.or(new Date());
         GregorianCalendar calendar = new GregorianCalendar();
         calendar.setTime(date);
-        new DatePickerDialog(this,
-                new DatePickerDialog.OnDateSetListener() {
-                    @Override
-                    public void onDateSet(DatePicker datePicker, int year, int month, int day) {
+        // Set an EditText view to get user input
+        final DatePicker input = new DatePicker(this);
+        input.updateDate(calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), calendar.get(Calendar.DAY_OF_MONTH));
+        new AlertDialog.Builder(this)
+                .setTitle(title)
+                .setView(input)
+                .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int whichButton) {
                         GregorianCalendar calendar = new GregorianCalendar();
-                        calendar.set(year, month, day, 0, 0, 0);
-                        task.setStartingDate(Optional.of(calendar.getTime()));
-                        taskRepository.save(task);
-                        updateToTask();
+                        calendar.set(input.getYear(), input.getMonth(), input.getDayOfMonth(), 0, 0, 0);
+                        listener.setOptionalDate(Optional.of(calendar.getTime()));
                     }
-                },
-                calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), calendar.get(Calendar.DAY_OF_MONTH)).show();
+                })
+                .setNeutralButton("Clear", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int whichButton) {
+                        listener.setOptionalDate(Optional.<Date>absent());
+                    }
+                }).setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int whichButton) {
+                // Do nothing.
+            }
+        }).show();
+    }
+
+
+    public void onStartDateClick(View view) {
+        pickDate("Edit task start", task.getStartingDate(), new DatePickListener() {
+            @Override
+            public void setOptionalDate(Optional<Date> date) {
+                task.setStartingDate(date);
+                saveAndUpdate();
+            }
+        });
     }
 
     public void onDueDateClick(View view) {
-        Date date = task.getDueDate().or(new Date());
-        GregorianCalendar calendar = new GregorianCalendar();
-        calendar.setTime(date);
-        new DatePickerDialog(this,
-                new DatePickerDialog.OnDateSetListener() {
-                    @Override
-                    public void onDateSet(DatePicker datePicker, int year, int month, int day) {
-                        GregorianCalendar calendar = new GregorianCalendar();
-                        calendar.set(year, month, day, 0, 0, 0);
-                        task.setDueDate(Optional.of(calendar.getTime()));
-                        taskRepository.save(task);
-                        updateToTask();
-                    }
-                },
-                calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), calendar.get(Calendar.DAY_OF_MONTH)).show();
+        pickDate("Edit task due date", task.getDueDate(), new DatePickListener() {
+            @Override
+            public void setOptionalDate(Optional<Date> date) {
+                task.setDueDate(date);
+                saveAndUpdate();
+            }
+        });
+    }
+
+    private void saveAndUpdate() {
+        taskRepository.save(task);
+        updateToTask();
     }
 
     public void onNewSubTask(View view) {

@@ -35,28 +35,33 @@
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             />
-    <TextView
+    <LinearLayout
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:text="Starting"
-            />
-    <Button android:id="@+id/startingDatePicker"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text=""
-            android:onClick="onStartDateClick"
-            />
-    <TextView
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:text="Due to"
-            />
-    <Button android:id="@+id/dueDatePicker"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text=""
-            android:onClick="onDueDateClick"
-            />
+            android:orientation="horizontal">
+        <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="starting"
+                />
+        <Button android:id="@+id/startingDatePicker"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text=""
+                android:onClick="onStartDateClick"
+                />
+        <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="due to"
+                />
+        <Button android:id="@+id/dueDatePicker"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text=""
+                android:onClick="onDueDateClick"
+                />
+    </LinearLayout>
     <TextView
             android:id="@+id/sub_task_title"
             android:layout_width="fill_parent"
