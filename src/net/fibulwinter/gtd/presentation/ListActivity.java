@@ -17,6 +17,10 @@ import net.fibulwinter.gtd.domain.TaskRepository;
 import net.fibulwinter.gtd.infrastructure.TaskTableColumns;
 import net.fibulwinter.gtd.service.TaskListService;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+
 import static com.google.common.collect.Lists.newArrayList;
 
 public class ListActivity extends Activity {
@@ -102,7 +106,14 @@ public class ListActivity extends Activity {
                 tasks = taskListService.getProjectsWithoutNextAction();
                 break;
         }
-        taskList.setAdapter(new TaskItemAdapter(this, taskUpdateListener, newArrayList(tasks), true));
+        ArrayList<Task> taskArrayList = newArrayList(tasks);
+        Collections.sort(taskArrayList, new Comparator<Task>() {
+            @Override
+            public int compare(Task task, Task task1) {
+                return task.getText().compareTo(task1.getText());
+            }
+        });
+        taskList.setAdapter(new TaskItemAdapter(this, taskUpdateListener, taskArrayList, true));
     }
 
     private void editTask(Task task) {
