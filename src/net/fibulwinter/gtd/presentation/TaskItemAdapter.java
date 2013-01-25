@@ -112,9 +112,7 @@ public class TaskItemAdapter extends ArrayAdapter<Task> {
                 if (masterTask.isPresent()) {
                     detailsText += "to " + masterTask.get().getText();
                 }
-                if (task.getDueDate().isPresent()) {
-                    detailsText += " due to " + DateUtils.optionalDateToString(task.getDueDate());
-                }
+                detailsText += dueDate();
                 details.setText(detailsText);
             } else {
                 int subTasksCount = task.getSubTasks().size();
@@ -122,15 +120,28 @@ public class TaskItemAdapter extends ArrayAdapter<Task> {
                 if (task.getStartingDate().isPresent()) {
                     detailsText += " from " + DateUtils.optionalDateToString(task.getStartingDate());
                 }
-                if (task.getDueDate().isPresent()) {
-                    detailsText += " due to " + DateUtils.optionalDateToString(task.getDueDate());
-                }
+                detailsText += dueDate();
                 details.setText(detailsText);
             }
             doneStatus.setChecked(task.getStatus() == TaskStatus.Completed);
             doneStatus.setEnabled(task.getStatus().isActive() || task.getStatus() == TaskStatus.Completed);
             if (task.getStatus() == TaskStatus.Maybe) {
 
+            }
+        }
+
+        private String dueDate() {
+            if (task.getDueDate().isPresent()) {
+                long days = DateUtils.daysBefore(task.getDueDate().get());
+                if (days > 0) {
+                    return " in " + days + " days";
+                } else if (days == 0) {
+                    return " today";
+                } else {
+                    return " due to " + DateUtils.optionalDateToString(task.getDueDate());
+                }
+            } else {
+                return "";
             }
         }
     }

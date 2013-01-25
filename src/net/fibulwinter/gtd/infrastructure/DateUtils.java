@@ -8,6 +8,9 @@ import java.util.Date;
 import java.util.GregorianCalendar;
 
 public class DateUtils {
+
+    public static final int MS_IN_24H = 24 * 60 * 60 * 1000;
+
     public static String optionalDateToString(Optional<Date> dateOptional) {
         if (dateOptional.isPresent()) {
             return DateFormat.format("yyyy-MM-dd", dateOptional.get()).toString();
@@ -35,5 +38,14 @@ public class DateUtils {
         calendar.setTime(date);
         calendar.add(Calendar.DAY_OF_MONTH, 1);
         return calendar.getTime();
+    }
+
+    public static long daysBefore(Date date) {
+        long ms = date.getTime() - System.currentTimeMillis();
+        if (ms < 0) {
+            return -1;
+        } else {
+            return ms / MS_IN_24H;
+        }
     }
 }
