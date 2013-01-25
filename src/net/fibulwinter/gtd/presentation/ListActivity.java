@@ -3,11 +3,11 @@ package net.fibulwinter.gtd.presentation;
 import android.app.Activity;
 import android.content.ContentUris;
 import android.content.Intent;
+import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.*;
-import com.google.common.collect.Iterables;
 import net.fibulwinter.gtd.R;
 import net.fibulwinter.gtd.domain.Task;
 import net.fibulwinter.gtd.domain.TaskDAO;
@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 
+import static com.google.common.collect.Iterables.isEmpty;
 import static com.google.common.collect.Lists.newArrayList;
 
 public class ListActivity extends Activity {
@@ -39,7 +40,6 @@ public class ListActivity extends Activity {
         }
     };
     private TaskListService taskListService;
-    private TextView doneCounter;
     private TextView todayCounter;
     private TextView overdueCounter;
     private TextView projectsWithouActionCounter;
@@ -67,7 +67,6 @@ public class ListActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
         ListView taskList = (ListView) findViewById(R.id.taskList);
-        doneCounter = (TextView) findViewById(R.id.doneTodayCounter);
         todayCounter = (TextView) findViewById(R.id.dueTodayCounter);
         overdueCounter = (TextView) findViewById(R.id.overdueCounter);
         projectsWithouActionCounter = (TextView) findViewById(R.id.projectWithoutActionCounter);
@@ -140,10 +139,10 @@ public class ListActivity extends Activity {
             }
         });
         taskItemAdapter.setData(taskArrayList);
-        doneCounter.setText("" + Iterables.size(taskListService.getDone()));
-        todayCounter.setText("" + Iterables.size(taskListService.getTodayActions()));
-        overdueCounter.setText("" + Iterables.size(taskListService.getOverdueActions()));
-        projectsWithouActionCounter.setText("" + Iterables.size(taskListService.getProjectsWithoutNextAction()));
+        todayCounter.setTextColor(isEmpty(taskListService.getTodayActions()) ? Color.DKGRAY : Color.YELLOW);
+        overdueCounter.setTextColor(isEmpty(taskListService.getOverdueActions()) ? Color.DKGRAY : Color.YELLOW);
+        projectsWithouActionCounter.setTextColor(isEmpty(taskListService.getProjectsWithoutNextAction())
+                ? Color.DKGRAY : Color.YELLOW);
     }
 
     private void editTask(Task task) {

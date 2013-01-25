@@ -5,6 +5,9 @@
     <string name="edit_task">Edit task</string>
     <string name="save_task">Save</string>
     <string name="new_sub_task">New sub task</string>
+    <string name="today_warning">!</string>
+    <string name="overdue_warning">!!!</string>
+    <string name="projects_without_actions_warning">\?</string>
     <string-array name="modes_array">
         <item>All</item>
         <item>Next Actions</item>
