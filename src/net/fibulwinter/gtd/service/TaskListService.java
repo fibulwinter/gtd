@@ -9,6 +9,7 @@ import net.fibulwinter.gtd.infrastructure.DateUtils;
 import java.util.Date;
 
 import static com.google.common.base.Predicates.and;
+import static com.google.common.base.Predicates.not;
 import static com.google.common.collect.FluentIterable.from;
 
 public class TaskListService {
@@ -100,6 +101,13 @@ public class TaskListService {
         }
     };
 
+    private static final Predicate<Task> PROJECT_PREDICATE = new Predicate<Task>() {
+        @Override
+        public boolean apply(Task task) {
+            return task.isProject();
+        }
+    };
+
     private static final Predicate<Task> TOP_PROJECT_PREDICATE = new Predicate<Task>() {
         @Override
         public boolean apply(Task task) {
@@ -114,7 +122,7 @@ public class TaskListService {
     }
 
     public Iterable<Task> getNextActions() {
-        return from(taskRepository.getAll()).filter(and(ACTIVE_PREDICATE, CAN_START_PREDICATE()));
+        return from(taskRepository.getAll()).filter(and(ACTIVE_PREDICATE, CAN_START_PREDICATE(), not(PROJECT_PREDICATE)));
     }
 
     public Iterable<Task> getMaybe() {
