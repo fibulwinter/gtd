@@ -6,7 +6,6 @@ import android.content.DialogInterface;
 import android.widget.DatePicker;
 import com.google.common.base.Optional;
 
-import java.lang.reflect.Method;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
@@ -26,13 +25,13 @@ public class ClearDatePicker {
         final DatePicker input = new DatePicker(context);
         input.init(calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), calendar.get(Calendar.DAY_OF_MONTH), null);
         int currentapiVersion = android.os.Build.VERSION.SDK_INT;
-        if (currentapiVersion >= 11) {
-            try {
-                Method m = input.getClass().getMethod("setCalendarViewShown", boolean.class);
-                m.invoke(input, true);
-            } catch (Exception e) {
-            } // eat exception in our case
-        }
+//        if (currentapiVersion >= 11) {
+//            try {
+//                Method m = input.getClass().getMethod("setCalendarViewShown", boolean.class);
+//                m.invoke(input, true);
+//            } catch (Exception e) {
+//            } // eat exception in our case
+//        }
         new AlertDialog.Builder(context)
                 .setTitle(title)
                 .setView(input)
