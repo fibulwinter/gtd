@@ -25,7 +25,6 @@ public class ListActivity extends Activity {
 
     private static final int EDIT_REQUEST = 1;
 
-    private ListView taskList;
     private TaskRepository taskRepository;
     private TaskUpdateListener taskUpdateListener = new TaskUpdateListener() {
 
@@ -45,6 +44,7 @@ public class ListActivity extends Activity {
     private TextView overdueCounter;
     private TextView projectsWithouActionCounter;
     private Spinner modeSpinner;
+    private TaskItemAdapter taskItemAdapter;
 
     private enum Mode {
         ALL,
@@ -66,7 +66,7 @@ public class ListActivity extends Activity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
-        taskList = (ListView) findViewById(R.id.taskList);
+        ListView taskList = (ListView) findViewById(R.id.taskList);
         doneCounter = (TextView) findViewById(R.id.doneTodayCounter);
         todayCounter = (TextView) findViewById(R.id.dueTodayCounter);
         overdueCounter = (TextView) findViewById(R.id.overdueCounter);
@@ -89,6 +89,8 @@ public class ListActivity extends Activity {
             public void onNothingSelected(AdapterView<?> adapterView) {
             }
         });
+        taskItemAdapter = new TaskItemAdapter(this, taskUpdateListener, true);
+        taskList.setAdapter(taskItemAdapter);
         modeSpinner.setSelection(Mode.NEXT_ACTIONS.ordinal());
     }
 
@@ -134,8 +136,7 @@ public class ListActivity extends Activity {
                 return task.getText().compareTo(task1.getText());
             }
         });
-        taskList.setAdapter(null);
-        taskList.setAdapter(new TaskItemAdapter(this, taskUpdateListener, taskArrayList, true));
+        taskItemAdapter.setData(taskArrayList);
         doneCounter.setText("" + Iterables.size(taskListService.getDone()));
         todayCounter.setText("" + Iterables.size(taskListService.getTodayActions()));
         overdueCounter.setText("" + Iterables.size(taskListService.getOverdueActions()));

@@ -22,8 +22,6 @@ public class TaskEditActivity extends Activity {
 
     private TaskRepository taskRepository;
     private TextView masterActionsTitle;
-    private ListView masterTaskList;
-    private ListView subTaskList;
     private TextView title;
     private Spinner statusSpinner;
     private Button startingDatePicker;
@@ -42,6 +40,8 @@ public class TaskEditActivity extends Activity {
         }
     };
     private ClearDatePicker clearDatePicker;
+    private TaskItemAdapter masterTasksAdapter;
+    private TaskItemAdapter subTasksAdapter;
 
 
     /**
@@ -54,11 +54,16 @@ public class TaskEditActivity extends Activity {
         long id = ContentUris.parseId(getIntent().getData());
         title = (TextView) findViewById(R.id.task_title);
         masterActionsTitle = (TextView) findViewById(R.id.master_task_title);
-        masterTaskList = (ListView) findViewById(R.id.master_task_ist);
-        subTaskList = (ListView) findViewById(R.id.subTaskList);
+        ListView masterTaskList = (ListView) findViewById(R.id.master_task_ist);
+        ListView subTaskList = (ListView) findViewById(R.id.subTaskList);
         statusSpinner = (Spinner) findViewById(R.id.task_status_spinner);
         startingDatePicker = (Button) findViewById(R.id.startingDatePicker);
         dueDatePicker = (Button) findViewById(R.id.dueDatePicker);
+        masterTasksAdapter = new TaskItemAdapter(this, taskUpdateListener, false);
+        masterTaskList.setAdapter(masterTasksAdapter);
+        subTasksAdapter = new TaskItemAdapter(this, taskUpdateListener, false);
+        subTaskList.setAdapter(subTasksAdapter);
+
         ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this,
                 R.array.status_array, android.R.layout.simple_spinner_item);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
@@ -88,8 +93,8 @@ public class TaskEditActivity extends Activity {
         title.setText(task.getText());
         List<Task> masterTasks = task.getMasterTasks();
         masterActionsTitle.setVisibility(masterTasks.isEmpty() ? View.INVISIBLE : View.VISIBLE);
-        masterTaskList.setAdapter(new TaskItemAdapter(this, taskUpdateListener, masterTasks, false));
-        subTaskList.setAdapter(new TaskItemAdapter(this, taskUpdateListener, task.getSubTasks(), false));
+        masterTasksAdapter.setData(task.getMasterTasks());
+        subTasksAdapter.setData(task.getSubTasks());
         statusSpinner.setSelection(task.getStatus().ordinal());
         startingDatePicker.setText(DateUtils.optionalDateToString(task.getStartingDate()));
         dueDatePicker.setText(DateUtils.optionalDateToString(task.getDueDate()));

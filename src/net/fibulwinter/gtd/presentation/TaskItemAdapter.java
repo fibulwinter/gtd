@@ -10,27 +10,33 @@ import android.widget.ArrayAdapter;
 import android.widget.CheckBox;
 import android.widget.TextView;
 import com.google.common.base.Optional;
+import com.google.common.collect.Lists;
 import net.fibulwinter.gtd.R;
 import net.fibulwinter.gtd.domain.Task;
 import net.fibulwinter.gtd.domain.TaskStatus;
 import net.fibulwinter.gtd.infrastructure.DateUtils;
 
 import java.util.Date;
-import java.util.List;
 
 public class TaskItemAdapter extends ArrayAdapter<Task> {
-    private List<Task> items;
     private final boolean showProject;
     private LayoutInflater inflater;
     private final TaskUpdateListener taskUpdateListener;
 
 
-    public TaskItemAdapter(Context context, TaskUpdateListener taskUpdateListener, List<Task> objects, boolean showProject) {
-        super(context, R.layout.task_list_item, objects);
+    public TaskItemAdapter(Context context, TaskUpdateListener taskUpdateListener, boolean showProject) {
+        super(context, R.layout.task_list_item, Lists.<Task>newArrayList());
         this.taskUpdateListener = taskUpdateListener;
-        this.items = objects;
         this.showProject = showProject;
         inflater = LayoutInflater.from(context);
+    }
+
+    public void setData(Iterable<Task> tasks) {
+        clear();
+        for (Task task : tasks) {
+            add(task);
+        }
+        notifyDataSetChanged();
     }
 
     @Override
@@ -38,12 +44,12 @@ public class TaskItemAdapter extends ArrayAdapter<Task> {
         ViewHolder holder;
         if (convertView == null) {
             convertView = inflater.inflate(R.layout.task_list_item, null);
-            holder = new ViewHolder(items.get(position), convertView);
+            holder = new ViewHolder(getItem(position), convertView);
             convertView.setTag(holder);
         } else {
             holder = (ViewHolder) convertView.getTag();
         }
-        holder.update();
+        holder.update(getItem(position));
         return convertView;
     }
 
@@ -84,10 +90,11 @@ public class TaskItemAdapter extends ArrayAdapter<Task> {
                 task.setStatus(TaskStatus.NextAction);
             }
             taskUpdateListener.onTaskUpdated(task);
-            update();
+            update(task);
         }
 
-        void update() {
+        void update(Task item) {
+            task = item;
             text.setText(task.getText() + (task.getStatus() == TaskStatus.Maybe ? " ???" : ""));
             if (task.getStatus() == TaskStatus.Cancelled) {
                 text.setPaintFlags(text.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
