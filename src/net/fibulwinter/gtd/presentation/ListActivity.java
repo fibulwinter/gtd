@@ -103,9 +103,10 @@ public class ListActivity extends Activity {
 
     private void fillData() {
         modeSpinner.setSelection(mode.ordinal());
-        Iterable<Task> tasks = taskRepository.getAll();
+        Iterable<Task> tasks;
         switch (mode) {
             case ALL:
+                tasks = taskRepository.getAll();
                 break;
             case NEXT_ACTIONS:
                 tasks = taskListService.getNextActions();
@@ -128,6 +129,8 @@ public class ListActivity extends Activity {
             case PROJECTS_TOP:
                 tasks = taskListService.getTopProjects();
                 break;
+            default:
+                throw new Error("Missed mode: " + mode);
         }
         ArrayList<Task> taskArrayList = newArrayList(tasks);
         Collections.sort(taskArrayList, new Comparator<Task>() {

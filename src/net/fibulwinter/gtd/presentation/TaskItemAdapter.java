@@ -101,7 +101,7 @@ public class TaskItemAdapter extends ArrayAdapter<Task> {
             } else {
                 text.setPaintFlags(text.getPaintFlags() & ~Paint.STRIKE_THRU_TEXT_FLAG);
             }
-            if (task.getDueDate().isPresent() && task.getDueDate().get().before(new Date())) {
+            if (task.getStatus().isActive() && task.getDueDate().isPresent() && task.getDueDate().get().before(new Date())) {
                 details.setTextColor(Color.RED);
             } else {
                 details.setTextColor(Color.LTGRAY);
