@@ -8,12 +8,12 @@
     <string-array name="modes_array">
         <item>All</item>
         <item>Next Actions</item>
-        <item>Waiting For</item>
+        <item>Today actions</item>
+        <item>Overdue actions</item>
         <item>Done</item>
         <item>May Be</item>
+        <item>Top-level Projects</item>
         <item>Projects without actions</item>
-        <item>Overdue actions</item>
-        <item>Today actions</item>
     </string-array>
     <string-array name="status_array">
         <item>Next Action</item>

@@ -29,4 +29,11 @@ public class DateUtils {
         calendar.add(Calendar.DAY_OF_MONTH, 1);
         return calendar.getTime();
     }
+
+    public static Date nextDay(Date date) {
+        GregorianCalendar calendar = new GregorianCalendar();
+        calendar.setTime(date);
+        calendar.add(Calendar.DAY_OF_MONTH, 1);
+        return calendar.getTime();
+    }
 }

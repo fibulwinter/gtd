@@ -8,6 +8,7 @@ import net.fibulwinter.gtd.infrastructure.DateUtils;
 
 import java.util.Date;
 
+import static com.google.common.base.Predicates.and;
 import static com.google.common.collect.FluentIterable.from;
 
 public class TaskListService {
@@ -38,11 +39,14 @@ public class TaskListService {
 
     private static Predicate<Task> TODAY_PREDICATE() {
         return new Predicate<Task>() {
-            private Date nextMidnight = DateUtils.nextMidnight(new Date());
+            private Date now = new Date();
+            private Date plusDay = DateUtils.nextDay(now);
 
             @Override
             public boolean apply(Task task) {
-                return task.getStatus().isActive() && task.getDueDate().isPresent() && task.getDueDate().equals(nextMidnight);
+                return task.getStatus().isActive() && task.getDueDate().isPresent()
+                        && task.getDueDate().get().after(now)
+                        && task.getDueDate().get().before(plusDay);
             }
         };
     }
@@ -96,6 +100,13 @@ public class TaskListService {
         }
     };
 
+    private static final Predicate<Task> TOP_PROJECT_PREDICATE = new Predicate<Task>() {
+        @Override
+        public boolean apply(Task task) {
+            return task.isProject() && !task.getMasterTask().isPresent();
+        }
+    };
+
     private TaskRepository taskRepository;
 
     public TaskListService(TaskRepository taskRepository) {
@@ -103,15 +114,11 @@ public class TaskListService {
     }
 
     public Iterable<Task> getNextActions() {
-        return from(taskRepository.getAll()).filter(NEXT_ACTION_PREDICATE).filter(CAN_START_PREDICATE());
-    }
-
-    public Iterable<Task> getWaitingFor() {
-        return from(taskRepository.getAll()).filter(WAITING_FOR_PREDICATE).filter(CAN_START_PREDICATE());
+        return from(taskRepository.getAll()).filter(and(ACTIVE_PREDICATE, CAN_START_PREDICATE()));
     }
 
     public Iterable<Task> getMaybe() {
-        return from(taskRepository.getAll()).filter(MAYBE_PREDICATE).filter(CAN_START_PREDICATE());
+        return from(taskRepository.getAll()).filter(and(MAYBE_PREDICATE, CAN_START_PREDICATE()));
     }
 
     public Iterable<Task> getDone() {
@@ -128,5 +135,9 @@ public class TaskListService {
 
     public Iterable<Task> getTodayActions() {
         return from(taskRepository.getAll()).filter(TODAY_PREDICATE());
+    }
+
+    public Iterable<Task> getTopProjects() {
+        return from(taskRepository.getAll()).filter(and(ACTIVE_PREDICATE, TOP_PROJECT_PREDICATE));
     }
 }

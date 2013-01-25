@@ -6,10 +6,8 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.view.View;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
-import android.widget.ListView;
-import android.widget.Spinner;
+import android.widget.*;
+import com.google.common.collect.Iterables;
 import net.fibulwinter.gtd.R;
 import net.fibulwinter.gtd.domain.Task;
 import net.fibulwinter.gtd.domain.TaskDAO;
@@ -42,8 +40,22 @@ public class ListActivity extends Activity {
         }
     };
     private TaskListService taskListService;
+    private TextView doneCounter;
+    private TextView todayCounter;
+    private TextView overdueCounter;
+    private TextView projectsWithouActionCounter;
+    private Spinner modeSpinner;
 
-    private enum Mode {ALL, NEXT_ACTIONS, WAITING_FOR, DONE, MAY_BE, PROJECTS_WITHOUT_ACTIONS, OVERDUE, TODAY}
+    private enum Mode {
+        ALL,
+        NEXT_ACTIONS,
+        NEXT_ACTIONS_TODAY,
+        NEXT_ACTIONS_OVERDUE,
+        DONE,
+        MAY_BE,
+        PROJECTS_TOP,
+        PROJECTS_WITHOUT_ACTIONS
+    }
 
     private Mode mode = Mode.NEXT_ACTIONS;
 
@@ -55,14 +67,18 @@ public class ListActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
         taskList = (ListView) findViewById(R.id.taskList);
+        doneCounter = (TextView) findViewById(R.id.doneTodayCounter);
+        todayCounter = (TextView) findViewById(R.id.dueTodayCounter);
+        overdueCounter = (TextView) findViewById(R.id.overdueCounter);
+        projectsWithouActionCounter = (TextView) findViewById(R.id.projectWithoutActionCounter);
         taskRepository = new TaskRepository(new TaskDAO(getContentResolver()));
         taskListService = new TaskListService(taskRepository);
-        Spinner spinner = (Spinner) findViewById(R.id.mode_spinner);
+        modeSpinner = (Spinner) findViewById(R.id.mode_spinner);
         ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this,
                 R.array.modes_array, android.R.layout.simple_spinner_item);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        spinner.setAdapter(adapter);
-        spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+        modeSpinner.setAdapter(adapter);
+        modeSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
                 mode = Mode.values()[i];
@@ -73,7 +89,7 @@ public class ListActivity extends Activity {
             public void onNothingSelected(AdapterView<?> adapterView) {
             }
         });
-        spinner.setSelection(Mode.NEXT_ACTIONS.ordinal());
+        modeSpinner.setSelection(Mode.NEXT_ACTIONS.ordinal());
     }
 
 
@@ -84,15 +100,13 @@ public class ListActivity extends Activity {
     }
 
     private void fillData() {
+        modeSpinner.setSelection(mode.ordinal());
         Iterable<Task> tasks = taskRepository.getAll();
         switch (mode) {
             case ALL:
                 break;
             case NEXT_ACTIONS:
                 tasks = taskListService.getNextActions();
-                break;
-            case WAITING_FOR:
-                tasks = taskListService.getWaitingFor();
                 break;
             case DONE:
                 tasks = taskListService.getDone();
@@ -103,11 +117,14 @@ public class ListActivity extends Activity {
             case PROJECTS_WITHOUT_ACTIONS:
                 tasks = taskListService.getProjectsWithoutNextAction();
                 break;
-            case OVERDUE:
+            case NEXT_ACTIONS_OVERDUE:
                 tasks = taskListService.getOverdueActions();
                 break;
-            case TODAY:
+            case NEXT_ACTIONS_TODAY:
                 tasks = taskListService.getTodayActions();
+                break;
+            case PROJECTS_TOP:
+                tasks = taskListService.getTopProjects();
                 break;
         }
         ArrayList<Task> taskArrayList = newArrayList(tasks);
@@ -117,7 +134,12 @@ public class ListActivity extends Activity {
                 return task.getText().compareTo(task1.getText());
             }
         });
+        taskList.setAdapter(null);
         taskList.setAdapter(new TaskItemAdapter(this, taskUpdateListener, taskArrayList, true));
+        doneCounter.setText("" + Iterables.size(taskListService.getDone()));
+        todayCounter.setText("" + Iterables.size(taskListService.getTodayActions()));
+        overdueCounter.setText("" + Iterables.size(taskListService.getOverdueActions()));
+        projectsWithouActionCounter.setText("" + Iterables.size(taskListService.getProjectsWithoutNextAction()));
     }
 
     private void editTask(Task task) {
@@ -130,5 +152,25 @@ public class ListActivity extends Activity {
         Uri uri = ContentUris.withAppendedId(TaskTableColumns.CONTENT_URI, -1);
         Intent intent = new Intent("edit", uri, this, TaskEditActivity.class);
         startActivityForResult(intent, EDIT_REQUEST);
+    }
+
+    public void onDoneTodayCounter(View view) {
+        mode = Mode.DONE;
+        fillData();
+    }
+
+    public void onDueTodayCounter(View view) {
+        mode = Mode.NEXT_ACTIONS_TODAY;
+        fillData();
+    }
+
+    public void onOverdueCounter(View view) {
+        mode = Mode.NEXT_ACTIONS_OVERDUE;
+        fillData();
+    }
+
+    public void onProjectWithoutActionCounter(View view) {
+        mode = Mode.PROJECTS_WITHOUT_ACTIONS;
+        fillData();
     }
 }
