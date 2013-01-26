@@ -62,18 +62,30 @@
                 android:onClick="onDueDateClick"
                 />
     </LinearLayout>
+    <LinearLayout
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+        <Button
+                android:id="@+id/task_create_sub_task"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/new_sub_task"
+                android:onClick="onNewSubTask"
+                />
+        <Button
+                android:id="@+id/task_delete"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/delete_task"
+                android:onClick="onDeleteSubTask"
+                />
+    </LinearLayout>
     <TextView
             android:id="@+id/sub_task_title"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:text="Sub tasks"
-            />
-    <Button
-            android:id="@+id/task_create_sub_task"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/new_sub_task"
-            android:onClick="onNewSubTask"
             />
     <ListView
             android:id="@+id/subTaskList"

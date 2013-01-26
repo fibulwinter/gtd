@@ -154,4 +154,31 @@ public class TaskEditActivity extends Activity {
         onTitleClick(title);
     }
 
+    public void onDeleteSubTask(View view) {
+        new AlertDialog.Builder(this)
+                .setTitle("Delete task?")
+                .setPositiveButton("Yes, delete", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        delete();
+                    }
+                })
+                .setNegativeButton("No, keep it", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                    }
+                }).show();
+    }
+
+    private void delete() {
+        Optional<Task> masterTask = task.getMasterTask();
+        taskRepository.delete(task);
+        if (masterTask.isPresent()) {
+            task = taskRepository.getById(masterTask.get().getId()).get();
+            updateToTask();
+        } else {
+            finish();
+        }
+    }
+
 }

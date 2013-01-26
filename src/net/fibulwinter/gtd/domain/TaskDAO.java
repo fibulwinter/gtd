@@ -76,6 +76,16 @@ public class TaskDAO {
         }
     }
 
+    public void delete(Task task) {
+        for (Task subTask : task.getSubTasks()) {
+            delete(subTask);
+        }
+        contentResolver.delete(
+                TaskTableColumns.CONTENT_URI,
+                TaskTableColumns.TASK_ID + "=? ",
+                new String[]{Long.toString(task.getId())});
+    }
+
     private Task cursor2LevelRecord(Cursor cursor) {
         long id = cursor.getLong(0);
         String text = cursor.getString(1);
@@ -95,5 +105,4 @@ public class TaskDAO {
     private long cursor2MasterId(Cursor cursor) {
         return cursor.getLong(3);
     }
-
 }

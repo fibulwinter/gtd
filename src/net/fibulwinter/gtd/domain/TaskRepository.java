@@ -39,4 +39,9 @@ public class TaskRepository {
         Map<Long, Task> idMap = getIdMap();
         return idMap.containsKey(id) ? Optional.of(idMap.get(id)) : Optional.<Task>absent();
     }
+
+    public void delete(Task task) {
+        taskDAO.delete(task);
+
+    }
 }
