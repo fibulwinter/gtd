@@ -21,6 +21,7 @@ public class TaskEditActivity extends Activity {
     private TextView masterActionsTitle;
     private TextView title;
     private Spinner statusSpinner;
+    private Spinner contextSpinner;
     private Button startingDatePicker;
     private Button dueDatePicker;
     private Task task;
@@ -54,6 +55,7 @@ public class TaskEditActivity extends Activity {
         ListView masterTaskList = (ListView) findViewById(R.id.master_task_ist);
         ListView subTaskList = (ListView) findViewById(R.id.subTaskList);
         statusSpinner = (Spinner) findViewById(R.id.task_status_spinner);
+        contextSpinner = (Spinner) findViewById(R.id.task_context_spinner);
         startingDatePicker = (Button) findViewById(R.id.startingDatePicker);
         dueDatePicker = (Button) findViewById(R.id.dueDatePicker);
         masterTasksAdapter = new TaskItemAdapter(this, taskUpdateListener, false);
@@ -76,8 +78,26 @@ public class TaskEditActivity extends Activity {
             public void onNothingSelected(AdapterView<?> adapterView) {
             }
         });
+        final ContextRepository contextRepository = new ContextRepository();
+        ArrayAdapter<Context> contextArrayAdapter = new ArrayAdapter<Context>(this, android.R.layout.simple_spinner_item);
+        for (Context context : contextRepository.getAll()) {
+            contextArrayAdapter.add(context);
+        }
+        contextArrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        contextSpinner.setAdapter(contextArrayAdapter);
+        contextSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+                task.setContext(contextRepository.getAll().get(i));
+                saveAndUpdate();
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> adapterView) {
+            }
+        });
         clearDatePicker = new ClearDatePicker(this);
-        taskRepository = new TaskRepository(new TaskDAO(getContentResolver(), new ContextRepository()));
+        taskRepository = new TaskRepository(new TaskDAO(getContentResolver(), contextRepository));
         boolean isNew = id == -1;
         task = isNew ? new Task("") : taskRepository.getById(id).get();
         updateToTask();
