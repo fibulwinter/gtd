@@ -13,7 +13,10 @@ public class ContextRepository {
     private List<Context> contexts = newArrayList(
             Context.DEFAULT,
             new Context("@Work"),
-            new Context("@Home")
+            new Context("@Home"),
+            new Context("@Errands"),
+            new Context("@Waiting"),
+            new Context("@Read")
     );
     private Map<String, Context> contextMap = newHashMap();
 

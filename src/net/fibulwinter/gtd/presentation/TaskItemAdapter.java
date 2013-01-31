@@ -112,7 +112,7 @@ public class TaskItemAdapter extends ArrayAdapter<Task> {
                 if (masterTask.isPresent()) {
                     detailsText += "to " + masterTask.get().getText();
                 }
-                detailsText += " " + task.getContext();
+                detailsText += addContext();
                 detailsText += dueDate();
                 details.setText(detailsText);
             } else {
@@ -121,6 +121,7 @@ public class TaskItemAdapter extends ArrayAdapter<Task> {
                 if (task.getStartingDate().isPresent()) {
                     detailsText += " from " + DateUtils.optionalDateToString(task.getStartingDate());
                 }
+                detailsText += addContext();
                 detailsText += dueDate();
                 details.setText(detailsText);
             }
@@ -129,6 +130,13 @@ public class TaskItemAdapter extends ArrayAdapter<Task> {
             if (task.getStatus() == TaskStatus.Maybe) {
 
             }
+        }
+
+        private String addContext() {
+            if (!task.getContext().equals(net.fibulwinter.gtd.domain.Context.DEFAULT)) {
+                return " " + task.getContext();
+            }
+            return "";
         }
 
         private String dueDate() {

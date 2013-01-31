@@ -115,6 +115,7 @@ public class ListActivity extends Activity {
     private void fillData() {
         modeSpinner.setSelection(mode.ordinal());
         contextSpinner.setSelection(contextRepository.getAll().indexOf(context));
+        contextSpinner.setVisibility(mode == Mode.NEXT_ACTIONS ? View.VISIBLE : View.GONE);
         Iterable<Task> tasks;
         switch (mode) {
             case ALL:
@@ -124,7 +125,7 @@ public class ListActivity extends Activity {
                 tasks = from(taskListService.getNextActions()).filter(new Predicate<Task>() {
                     @Override
                     public boolean apply(Task task) {
-                        return context.equals(Context.DEFAULT) || task.getContext().equals(context);
+                        return task.getContext().equals(context);
                     }
                 });
                 break;
