@@ -9,10 +9,7 @@ import android.view.View;
 import android.widget.*;
 import com.google.common.base.Optional;
 import net.fibulwinter.gtd.R;
-import net.fibulwinter.gtd.domain.Task;
-import net.fibulwinter.gtd.domain.TaskDAO;
-import net.fibulwinter.gtd.domain.TaskRepository;
-import net.fibulwinter.gtd.domain.TaskStatus;
+import net.fibulwinter.gtd.domain.*;
 import net.fibulwinter.gtd.infrastructure.DateUtils;
 
 import java.util.Date;
@@ -80,7 +77,7 @@ public class TaskEditActivity extends Activity {
             }
         });
         clearDatePicker = new ClearDatePicker(this);
-        taskRepository = new TaskRepository(new TaskDAO(getContentResolver()));
+        taskRepository = new TaskRepository(new TaskDAO(getContentResolver(), new ContextRepository()));
         boolean isNew = id == -1;
         task = isNew ? new Task("") : taskRepository.getById(id).get();
         updateToTask();

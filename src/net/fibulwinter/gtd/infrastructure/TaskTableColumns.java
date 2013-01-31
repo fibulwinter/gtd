@@ -15,5 +15,6 @@ public interface TaskTableColumns extends BaseColumns {
     public static final String MASTER = "master";
     public static final String START_DATE = "starting";
     public static final String DUE_DATE = "duedate";
+    public static final String CONTEXT = "context";
 }
 

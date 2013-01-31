@@ -15,7 +15,7 @@ import java.util.HashMap;
 public class TaskContentProvider extends ContentProvider {
     private static final String TAG = "TasksContentProvider";
 
-    private static final int DATABASE_VERSION = 2;
+    private static final int DATABASE_VERSION = 3;
     private static final String DATABASE_NAME = "gtd_db";
     private static final String TASKS_TABLE_NAME = "tasks";
 
@@ -38,6 +38,7 @@ public class TaskContentProvider extends ContentProvider {
         tasksProjectionMap.put(TaskTableColumns.MASTER, TaskTableColumns.MASTER);
         tasksProjectionMap.put(TaskTableColumns.START_DATE, TaskTableColumns.START_DATE);
         tasksProjectionMap.put(TaskTableColumns.DUE_DATE, TaskTableColumns.DUE_DATE);
+        tasksProjectionMap.put(TaskTableColumns.CONTEXT, TaskTableColumns.CONTEXT);
 
     }
 
@@ -58,7 +59,8 @@ public class TaskContentProvider extends ContentProvider {
                     + TaskTableColumns.STATUS + " TEXT, "
                     + TaskTableColumns.MASTER + " INTEGER, "
                     + TaskTableColumns.START_DATE + " INTEGER, "
-                    + TaskTableColumns.DUE_DATE + " INTEGER "
+                    + TaskTableColumns.DUE_DATE + " INTEGER, "
+                    + TaskTableColumns.CONTEXT + " TEXT "
                     + ");");
         }
 
@@ -69,6 +71,9 @@ public class TaskContentProvider extends ContentProvider {
             if (oldVersion < 2) {
                 db.execSQL("ALTER TABLE " + TASKS_TABLE_NAME + " ADD COLUMN " + TaskTableColumns.START_DATE + " INTEGER");
                 db.execSQL("ALTER TABLE " + TASKS_TABLE_NAME + " ADD COLUMN " + TaskTableColumns.DUE_DATE + " INTEGER");
+            }
+            if (oldVersion < 3) {
+                db.execSQL("ALTER TABLE " + TASKS_TABLE_NAME + " ADD COLUMN " + TaskTableColumns.CONTEXT + " TEXT");
             }
         }
     }

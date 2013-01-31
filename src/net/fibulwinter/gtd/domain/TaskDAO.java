@@ -4,6 +4,7 @@ import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.database.Cursor;
 import com.google.common.base.Optional;
+import com.google.common.base.Strings;
 import net.fibulwinter.gtd.infrastructure.TaskTableColumns;
 
 import java.util.Date;
@@ -18,12 +19,15 @@ public class TaskDAO {
             TaskTableColumns.STATUS,
             TaskTableColumns.MASTER,
             TaskTableColumns.START_DATE,
-            TaskTableColumns.DUE_DATE
+            TaskTableColumns.DUE_DATE,
+            TaskTableColumns.CONTEXT
     };
     private ContentResolver contentResolver;
+    private final ContextRepository contextRepository;
 
-    public TaskDAO(ContentResolver contentResolver) {
+    public TaskDAO(ContentResolver contentResolver, ContextRepository contextRepository) {
         this.contentResolver = contentResolver;
+        this.contextRepository = contextRepository;
     }
 
     public Map<Task, Long> getAll() {
@@ -66,6 +70,7 @@ public class TaskDAO {
         values.put(TaskTableColumns.MASTER, task.getMasterTask().isPresent() ? task.getMasterTask().get().getId() : 0);
         values.put(TaskTableColumns.START_DATE, task.getStartingDate().isPresent() ? task.getStartingDate().get().getTime() : 0);
         values.put(TaskTableColumns.DUE_DATE, task.getDueDate().isPresent() ? task.getDueDate().get().getTime() : 0);
+        values.put(TaskTableColumns.CONTEXT, Context.DEFAULT.equals(task.getContext()) ? "" : task.getContext().getName());
         int updatedRows = contentResolver.update(
                 TaskTableColumns.CONTENT_URI,
                 values,
@@ -92,12 +97,16 @@ public class TaskDAO {
         TaskStatus status = TaskStatus.valueOf(cursor.getString(2));
         long startDate = cursor.getLong(4);
         long dueDate = cursor.getLong(5);
+        String context = cursor.getString(6);
         Task task = new Task(id, text, status);
         if (startDate != 0) {
             task.setStartingDate(Optional.of(new Date(startDate)));
         }
         if (dueDate != 0) {
             task.setDueDate(Optional.of(new Date(dueDate)));
+        }
+        if (!Strings.isNullOrEmpty(context)) {
+            task.setContext(contextRepository.getByName(context).get());
         }
         return task;
     }

@@ -9,6 +9,7 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.*;
 import net.fibulwinter.gtd.R;
+import net.fibulwinter.gtd.domain.ContextRepository;
 import net.fibulwinter.gtd.domain.Task;
 import net.fibulwinter.gtd.domain.TaskDAO;
 import net.fibulwinter.gtd.domain.TaskRepository;
@@ -70,7 +71,7 @@ public class ListActivity extends Activity {
         todayCounter = (TextView) findViewById(R.id.dueTodayCounter);
         overdueCounter = (TextView) findViewById(R.id.overdueCounter);
         projectsWithouActionCounter = (TextView) findViewById(R.id.projectWithoutActionCounter);
-        taskRepository = new TaskRepository(new TaskDAO(getContentResolver()));
+        taskRepository = new TaskRepository(new TaskDAO(getContentResolver(), new ContextRepository()));
         taskListService = new TaskListService(taskRepository);
         modeSpinner = (Spinner) findViewById(R.id.mode_spinner);
         ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this,

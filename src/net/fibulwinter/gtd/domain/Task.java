@@ -17,6 +17,7 @@ public class Task {
     private Optional<Task> masterTask = Optional.absent();
     private Optional<Date> startingDate = Optional.absent();
     private Optional<Date> dueDate = Optional.absent();
+    private Context context = Context.DEFAULT;
 
     public Task(String text) {
         this.id = UUID.randomUUID().getLeastSignificantBits();
@@ -113,5 +114,13 @@ public class Task {
 
     public void setDueDate(Optional<Date> dueDate) {
         this.dueDate = dueDate;
+    }
+
+    public Context getContext() {
+        return context;
+    }
+
+    public void setContext(Context context) {
+        this.context = context;
     }
 }

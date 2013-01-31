@@ -112,6 +112,7 @@ public class TaskItemAdapter extends ArrayAdapter<Task> {
                 if (masterTask.isPresent()) {
                     detailsText += "to " + masterTask.get().getText();
                 }
+                detailsText += " " + task.getContext();
                 detailsText += dueDate();
                 details.setText(detailsText);
             } else {
