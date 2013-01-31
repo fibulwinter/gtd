@@ -6,6 +6,8 @@ import android.content.Intent;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
+import android.view.GestureDetector;
+import android.view.MotionEvent;
 import android.view.View;
 import android.widget.*;
 import com.google.common.base.Predicate;
@@ -17,6 +19,7 @@ import net.fibulwinter.gtd.service.TaskListService;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.List;
 
 import static com.google.common.collect.FluentIterable.from;
 import static com.google.common.collect.Iterables.isEmpty;
@@ -98,6 +101,30 @@ public class ListActivity extends Activity {
             public void onSelectedContext(Context context) {
                 ListActivity.this.context = context;
                 fillData();
+            }
+        });
+
+        final GestureDetector gestureDetector = new GestureDetector(this, new GestureDetector.SimpleOnGestureListener() {
+            @Override
+            public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
+                List<Context> contextList = contextRepository.getAll();
+                if (velocityX > 5) {
+                    context = contextList.get((contextList.indexOf(context) + 1) % contextList.size());
+                    fillData();
+                    return true;
+                }
+                if (velocityX < 5) {
+                    context = contextList.get((contextList.indexOf(context) + contextList.size() - 1) % contextList.size());
+                    fillData();
+                    return true;
+                }
+                return super.onFling(e1, e2, velocityX, velocityY);
+            }
+        });
+        contextSpinner.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View view, MotionEvent motionEvent) {
+                return gestureDetector.onTouchEvent(motionEvent);
             }
         });
         taskItemAdapter = new TaskItemAdapter(this, taskUpdateListener, true);
