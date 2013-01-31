@@ -40,6 +40,7 @@ public class TaskEditActivity extends Activity {
     private ClearDatePicker clearDatePicker;
     private TaskItemAdapter masterTasksAdapter;
     private TaskItemAdapter subTasksAdapter;
+    private ContextRepository contextRepository;
 
 
     /**
@@ -78,22 +79,12 @@ public class TaskEditActivity extends Activity {
             public void onNothingSelected(AdapterView<?> adapterView) {
             }
         });
-        final ContextRepository contextRepository = new ContextRepository();
-        ArrayAdapter<Context> contextArrayAdapter = new ArrayAdapter<Context>(this, android.R.layout.simple_spinner_item);
-        for (Context context : contextRepository.getAll()) {
-            contextArrayAdapter.add(context);
-        }
-        contextArrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        contextSpinner.setAdapter(contextArrayAdapter);
-        contextSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+        contextRepository = new ContextRepository();
+        SpinnerUtils.setupContextSpinner(this, contextRepository, contextSpinner, new SpinnerUtils.ContextSpinnerListener() {
             @Override
-            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-                task.setContext(contextRepository.getAll().get(i));
+            public void onSelectedContext(Context context) {
+                task.setContext(context);
                 saveAndUpdate();
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> adapterView) {
             }
         });
         clearDatePicker = new ClearDatePicker(this);
@@ -113,6 +104,7 @@ public class TaskEditActivity extends Activity {
         masterTasksAdapter.setData(task.getMasterTasks());
         subTasksAdapter.setData(task.getSubTasks());
         statusSpinner.setSelection(task.getStatus().ordinal());
+        contextSpinner.setSelection(contextRepository.getAll().indexOf(task.getContext()));
         startingDatePicker.setText(DateUtils.optionalDateToString(task.getStartingDate()));
         dueDatePicker.setText(DateUtils.optionalDateToString(task.getDueDate()));
     }

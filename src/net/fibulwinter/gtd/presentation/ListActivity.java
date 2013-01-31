@@ -8,11 +8,9 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.*;
+import com.google.common.base.Predicate;
 import net.fibulwinter.gtd.R;
-import net.fibulwinter.gtd.domain.ContextRepository;
-import net.fibulwinter.gtd.domain.Task;
-import net.fibulwinter.gtd.domain.TaskDAO;
-import net.fibulwinter.gtd.domain.TaskRepository;
+import net.fibulwinter.gtd.domain.*;
 import net.fibulwinter.gtd.infrastructure.TaskTableColumns;
 import net.fibulwinter.gtd.service.TaskListService;
 
@@ -20,6 +18,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 
+import static com.google.common.collect.FluentIterable.from;
 import static com.google.common.collect.Iterables.isEmpty;
 import static com.google.common.collect.Lists.newArrayList;
 
@@ -45,7 +44,9 @@ public class ListActivity extends Activity {
     private TextView overdueCounter;
     private TextView projectsWithouActionCounter;
     private Spinner modeSpinner;
+    private Spinner contextSpinner;
     private TaskItemAdapter taskItemAdapter;
+    private ContextRepository contextRepository;
 
     private enum Mode {
         ALL,
@@ -59,6 +60,7 @@ public class ListActivity extends Activity {
     }
 
     private Mode mode = Mode.NEXT_ACTIONS;
+    private Context context = Context.DEFAULT;
 
     /**
      * Called when the activity is first created.
@@ -71,9 +73,11 @@ public class ListActivity extends Activity {
         todayCounter = (TextView) findViewById(R.id.dueTodayCounter);
         overdueCounter = (TextView) findViewById(R.id.overdueCounter);
         projectsWithouActionCounter = (TextView) findViewById(R.id.projectWithoutActionCounter);
-        taskRepository = new TaskRepository(new TaskDAO(getContentResolver(), new ContextRepository()));
+        contextRepository = new ContextRepository();
+        taskRepository = new TaskRepository(new TaskDAO(getContentResolver(), contextRepository));
         taskListService = new TaskListService(taskRepository);
         modeSpinner = (Spinner) findViewById(R.id.mode_spinner);
+        contextSpinner = (Spinner) findViewById(R.id.context_spinner);
         ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this,
                 R.array.modes_array, android.R.layout.simple_spinner_item);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
@@ -87,6 +91,13 @@ public class ListActivity extends Activity {
 
             @Override
             public void onNothingSelected(AdapterView<?> adapterView) {
+            }
+        });
+        SpinnerUtils.setupContextSpinner(this, contextRepository, contextSpinner, new SpinnerUtils.ContextSpinnerListener() {
+            @Override
+            public void onSelectedContext(Context context) {
+                ListActivity.this.context = context;
+                fillData();
             }
         });
         taskItemAdapter = new TaskItemAdapter(this, taskUpdateListener, true);
@@ -103,13 +114,19 @@ public class ListActivity extends Activity {
 
     private void fillData() {
         modeSpinner.setSelection(mode.ordinal());
+        contextSpinner.setSelection(contextRepository.getAll().indexOf(context));
         Iterable<Task> tasks;
         switch (mode) {
             case ALL:
                 tasks = taskRepository.getAll();
                 break;
             case NEXT_ACTIONS:
-                tasks = taskListService.getNextActions();
+                tasks = from(taskListService.getNextActions()).filter(new Predicate<Task>() {
+                    @Override
+                    public boolean apply(Task task) {
+                        return context.equals(Context.DEFAULT) || task.getContext().equals(context);
+                    }
+                });
                 break;
             case DONE:
                 tasks = taskListService.getDone();
