@@ -6,6 +6,7 @@ public class TaskItemAdapterConfig {
     private boolean showSubActions = false;
     private boolean showStartingDate = false;
     private boolean showDueDate = true;
+    private boolean allowChangeStatus = true;
 
     public boolean isShowContext() {
         return showContext;
@@ -45,5 +46,13 @@ public class TaskItemAdapterConfig {
 
     public void setShowDueDate(boolean showDueDate) {
         this.showDueDate = showDueDate;
+    }
+
+    public boolean isAllowChangeStatus() {
+        return allowChangeStatus;
+    }
+
+    public void setAllowChangeStatus(boolean allowChangeStatus) {
+        this.allowChangeStatus = allowChangeStatus;
     }
 }

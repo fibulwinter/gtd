@@ -20,6 +20,8 @@ import net.fibulwinter.gtd.domain.TaskStatus;
 import net.fibulwinter.gtd.infrastructure.DateUtils;
 import net.fibulwinter.gtd.service.TaskListService;
 
+import java.util.List;
+
 public class TaskItemAdapter extends ArrayAdapter<Task> {
     public static final int TODAY_FG_COLOR = Color.parseColor("#ff8000");
     public static final int TODAY_BG_COLOR = Color.parseColor("#663000");
@@ -109,17 +111,24 @@ public class TaskItemAdapter extends ArrayAdapter<Task> {
             SpannedText extra = new SpannedText("");
 
             if (canShowMasterProject()) {
-                extra = extra.space().join("to ").join(new SpannedText(task.getMasterTask().get().getText(),
-                        new StyleSpan(Typeface.ITALIC)));
+                extra = extra.space().join("to ").join(task.getMasterTask().get().getText(),
+                        new StyleSpan(Typeface.ITALIC));
             }
             if (canShowSubActions()) {
-                extra = extra.join(task.getSubTasks().size() + " subtasks");
+                List<Task> subTasks = task.getSubTasks();
+                if (TaskListService.PROJECT_WITHOUT_ACTIONS_PREDICATE.apply(task)) {
+                    extra = extra.space().join("No Next Action",
+                            new ForegroundColorSpan(TODAY_FG_COLOR),
+                            new BackgroundColorSpan(TODAY_BG_COLOR)
+                    );
+                }
+                extra = extra.space().join(subTasks.size() + " subtasks");
             }
             if (canShowContext()) {
-                extra = extra.space().join(new SpannedText(task.getContext().getName(),
+                extra = extra.space().join(task.getContext().getName(),
                         new ForegroundColorSpan(CONTEXT_FG_COLOR),
                         new BackgroundColorSpan(CONTEXT_BG_COLOR)
-                ));
+                );
             }
             if (canShowStartingDate()) {
                 extra = extra.space().join("from " + DateUtils.optionalDateToString(task.getStartingDate()));
@@ -127,15 +136,15 @@ public class TaskItemAdapter extends ArrayAdapter<Task> {
             if (canShowDueDate()) {
                 String dueDate = dueDate();
                 if (TaskListService.TODAY_PREDICATE().apply(task)) {
-                    extra = extra.space().join(new SpannedText(dueDate,
+                    extra = extra.space().join(dueDate,
                             new ForegroundColorSpan(TODAY_FG_COLOR),
                             new BackgroundColorSpan(TODAY_BG_COLOR)
-                    ));
+                    );
                 } else if (TaskListService.OVERDUE_PREDICATE().apply(task)) {
-                    extra = extra.space().join(new SpannedText(dueDate,
+                    extra = extra.space().join(dueDate,
                             new ForegroundColorSpan(OVERDUE_FG_COLOR),
                             new BackgroundColorSpan(OVERDUE_BG_COLOR)
-                    ));
+                    );
                 } else {
                     extra = extra.space().join(dueDate);
                 }
@@ -145,7 +154,7 @@ public class TaskItemAdapter extends ArrayAdapter<Task> {
             }
             text.apply(this.text);
             doneStatus.setChecked(task.getStatus() == TaskStatus.Completed);
-            doneStatus.setEnabled(task.getStatus().isActive() || task.getStatus() == TaskStatus.Completed);
+            doneStatus.setClickable(config.isAllowChangeStatus() && (task.getStatus().isActive() || task.getStatus() == TaskStatus.Completed));
         }
 
         private boolean canShowContext() {
@@ -157,7 +166,7 @@ public class TaskItemAdapter extends ArrayAdapter<Task> {
         }
 
         private boolean canShowSubActions() {
-            return config.isShowSubActions() && !task.getSubTasks().isEmpty();
+            return config.isShowSubActions() && task.isProject();
         }
 
         private boolean canShowStartingDate() {

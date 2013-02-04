@@ -46,6 +46,10 @@ public class SpannedText {
         return join(new SpannedText(string));
     }
 
+    public SpannedText join(String string, Object... styles) {
+        return join(new SpannedText(string, styles));
+    }
+
     public SpannedText join(SpannedText anotherText) {
         SpannedText joined = new SpannedText(this.string + anotherText.string);
         joined.styles.addAll(this.styles);

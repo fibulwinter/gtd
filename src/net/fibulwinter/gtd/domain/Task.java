@@ -43,7 +43,7 @@ public class Task {
     }
 
     public TaskStatus getStatus() {
-        return (!status.isActive() || !masterTask.isPresent() || masterTask.get().getStatus().isActive())
+        return ((status == TaskStatus.Completed || status == TaskStatus.Cancelled) || !masterTask.isPresent() || masterTask.get().getStatus().isActive())
                 ? status
                 : TaskStatus.Cancelled;
     }

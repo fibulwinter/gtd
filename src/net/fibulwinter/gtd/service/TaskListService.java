@@ -68,13 +68,6 @@ public class TaskListService {
         }
     };
 
-    private static final Predicate<Task> WAITING_FOR_PREDICATE = new Predicate<Task>() {
-        @Override
-        public boolean apply(Task task) {
-            return !task.isProject() && task.getStatus() == TaskStatus.WaitingFor;
-        }
-    };
-
     private static final Predicate<Task> MAYBE_PREDICATE = new Predicate<Task>() {
         @Override
         public boolean apply(Task task) {
@@ -89,7 +82,7 @@ public class TaskListService {
         }
     };
 
-    private static final Predicate<Task> PROJECT_WITHOUT_ACTIONS_PREDICATE = new Predicate<Task>() {
+    public static final Predicate<Task> PROJECT_WITHOUT_ACTIONS_PREDICATE = new Predicate<Task>() {
         @Override
         public boolean apply(Task task) {
             return task.isProject() && task.getStatus().isActive() && (from(task.getSubTasks()).allMatch(new Predicate<Task>() {

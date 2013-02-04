@@ -34,7 +34,9 @@ public class ProjectListActivity extends Activity {
         TaskRepository taskRepository = new TaskRepository(new TaskDAO(getContentResolver(), new ContextRepository()));
         TaskUpdateListener taskUpdateListener = TaskUpdateListenerFactory.simple(this, taskRepository);
         taskListService = new TaskListService(taskRepository);
-        taskItemAdapter = new TaskItemAdapter(this, taskUpdateListener, new TaskItemAdapterConfig());
+        TaskItemAdapterConfig config = new TaskItemAdapterConfig();
+        config.setShowSubActions(true);
+        taskItemAdapter = new TaskItemAdapter(this, taskUpdateListener, config);
         taskList.setAdapter(taskItemAdapter);
     }
 
