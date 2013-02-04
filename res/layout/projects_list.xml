@@ -10,6 +10,13 @@
               android:textColor="@color/orange"
               android:clickable="true"
               android:onClick="onProjectWithoutActionCounter"/>
+    <Button android:id="@+id/new_task"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="right"
+            android:text="@string/new_project"
+            android:onClick="onNewTask"
+            />
     <ListView
             android:id="@+id/taskList"
             android:layout_width="fill_parent"

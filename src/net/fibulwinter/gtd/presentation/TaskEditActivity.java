@@ -17,7 +17,8 @@ import java.util.List;
 
 public class TaskEditActivity extends Activity {
 
-    static final int EDIT_REQUEST = 1;
+    public static final String TYPE = "type";
+
     private TaskRepository taskRepository;
     private TextView masterActionsTitle;
     private TextView title;
@@ -96,7 +97,14 @@ public class TaskEditActivity extends Activity {
         clearDatePicker = new ClearDatePicker(this);
         taskRepository = new TaskRepository(new TaskDAO(getContentResolver(), contextRepository));
         boolean isNew = id == -1;
-        task = isNew ? new Task("") : taskRepository.getById(id).get();
+        if (isNew) {
+            task = new Task("");
+            if (getIntent().hasExtra(TYPE)) {
+                task.setStatus((TaskStatus) getIntent().getExtras().get(TYPE));
+            }
+        } else {
+            task = taskRepository.getById(id).get();
+        }
         updateToTask();
         if (isNew) {
             onTitleClick(title);
@@ -118,18 +126,24 @@ public class TaskEditActivity extends Activity {
     public void onTitleClick(View view) {
         // Set an EditText view to get user input
         final EditText input = new EditText(this);
-        input.setText(task.getText());
+        final String initialText = task.getText();
+        input.setText(initialText);
         new AlertDialog.Builder(this)
                 .setTitle("Edit task text")
                 .setView(input)
                 .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int whichButton) {
-                        task.setText(input.getText().toString());
-                        saveAndUpdate();
+                        if (!input.getText().toString().isEmpty()) {
+                            task.setText(input.getText().toString());
+                            saveAndUpdate();
+                        }
                     }
                 })
                 .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int whichButton) {
+                        if (initialText.isEmpty() && input.getText().toString().isEmpty()) {
+                            finish();
+                        }
                         // Do nothing.
                     }
                 }).show();
@@ -157,7 +171,9 @@ public class TaskEditActivity extends Activity {
     }
 
     private void saveAndUpdate() {
-        taskRepository.save(task);
+        if (!task.getText().isEmpty()) {
+            taskRepository.save(task);
+        }
         updateToTask();
     }
 

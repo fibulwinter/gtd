@@ -1,16 +1,17 @@
 package net.fibulwinter.gtd.presentation;
 
 import android.app.Activity;
+import android.content.ContentUris;
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.ListView;
 import android.widget.TextView;
 import com.google.common.collect.Iterables;
 import net.fibulwinter.gtd.R;
-import net.fibulwinter.gtd.domain.ContextRepository;
-import net.fibulwinter.gtd.domain.Task;
-import net.fibulwinter.gtd.domain.TaskDAO;
-import net.fibulwinter.gtd.domain.TaskRepository;
+import net.fibulwinter.gtd.domain.*;
+import net.fibulwinter.gtd.infrastructure.TaskTableColumns;
 import net.fibulwinter.gtd.service.TaskListService;
 
 import java.util.ArrayList;
@@ -64,4 +65,12 @@ public class ProjectListActivity extends Activity {
     public void onProjectWithoutActionCounter(View view) {
         fillData();
     }
+
+    public void onNewTask(View view) {
+        Uri uri = ContentUris.withAppendedId(TaskTableColumns.CONTENT_URI, -1);
+        Intent intent = new Intent("edit", uri, this, TaskEditActivity.class);
+        intent.putExtra(TaskEditActivity.TYPE, TaskStatus.Project);
+        startActivity(intent);
+    }
+
 }

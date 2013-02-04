@@ -104,7 +104,8 @@ public class NextActionListActivity extends Activity {
     public void onNewTask(View view) {
         Uri uri = ContentUris.withAppendedId(TaskTableColumns.CONTENT_URI, -1);
         Intent intent = new Intent("edit", uri, this, TaskEditActivity.class);
-        startActivityForResult(intent, TaskEditActivity.EDIT_REQUEST);
+        intent.putExtra(TaskEditActivity.TYPE, TaskStatus.NextAction);
+        startActivity(intent);
     }
 
 

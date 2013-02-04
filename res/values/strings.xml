@@ -2,27 +2,15 @@
 <resources>
     <string name="app_name">GTD</string>
     <string name="new_task">New task</string>
+    <string name="new_project">New project</string>
+    <string name="new_may_be">New may be</string>
     <string name="edit_task">Edit task</string>
     <string name="save_task">Save</string>
     <string name="new_sub_task">New sub task</string>
     <string name="delete_task">Delete task</string>
-    <string name="today_warning">!</string>
-    <string name="overdue_warning">!!!</string>
-    <string name="projects_without_actions_warning">\?</string>
-    <string-array name="modes_array">
-        <item>All</item>
-        <item>Next Actions</item>
-        <item>Today actions</item>
-        <item>Overdue actions</item>
-        <item>Done</item>
-        <item>May Be</item>
-        <item>Top-level Projects</item>
-        <item>Projects without actions</item>
-    </string-array>
     <string-array name="status_array">
         <item>Next Action</item>
         <item>Project</item>
-        <item>Waiting For</item>
         <item>May Be</item>
         <item>Done</item>
         <item>Cancelled</item>
