@@ -26,7 +26,7 @@ public class TaskListService {
         };
     }
 
-    private static Predicate<Task> OVERDUE_PREDICATE() {
+    public static Predicate<Task> OVERDUE_PREDICATE() {
         return new Predicate<Task>() {
             private Date now;
 
@@ -38,7 +38,7 @@ public class TaskListService {
         };
     }
 
-    private static Predicate<Task> TODAY_PREDICATE() {
+    public static Predicate<Task> TODAY_PREDICATE() {
         return new Predicate<Task>() {
             private Date now = new Date();
             private Date plusDay = DateUtils.nextDay(now);
@@ -147,5 +147,9 @@ public class TaskListService {
 
     public Iterable<Task> getTopProjects() {
         return from(taskRepository.getAll()).filter(and(ACTIVE_PREDICATE, TOP_PROJECT_PREDICATE));
+    }
+
+    public Iterable<Task> getProjects() {
+        return from(taskRepository.getAll()).filter(and(ACTIVE_PREDICATE, PROJECT_PREDICATE));
     }
 }

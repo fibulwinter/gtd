@@ -17,6 +17,7 @@ import java.util.List;
 
 public class TaskEditActivity extends Activity {
 
+    static final int EDIT_REQUEST = 1;
     private TaskRepository taskRepository;
     private TextView masterActionsTitle;
     private TextView title;
@@ -86,7 +87,7 @@ public class TaskEditActivity extends Activity {
                 task.setContext(context);
                 saveAndUpdate();
             }
-        });
+        }, true);
         clearDatePicker = new ClearDatePicker(this);
         taskRepository = new TaskRepository(new TaskDAO(getContentResolver(), contextRepository));
         boolean isNew = id == -1;

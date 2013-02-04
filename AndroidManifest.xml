@@ -7,7 +7,7 @@
     <application android:label="@string/app_name">
         <provider android:authorities="net.fibulwinter.gtd.infrastructure.TaskContentProvider"
                   android:name=".infrastructure.TaskContentProvider"/>
-        <activity android:name=".presentation.ListActivity"
+        <activity android:name=".presentation.TabListActivity"
                   android:label="@string/app_name">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
@@ -16,5 +16,9 @@
         </activity>
         <activity android:name=".presentation.TaskEditActivity"
                   android:label="@string/edit_task"/>
+        <activity android:name=".presentation.NextActionListActivity"/>
+        <activity android:name=".presentation.ProjectListActivity"/>
+        <activity android:name=".presentation.MayBeListActivity"/>
+        <activity android:name=".presentation.DoneListActivity"/>
     </application>
 </manifest>

@@ -3,6 +3,7 @@ package net.fibulwinter.gtd.domain;
 import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.database.Cursor;
+import android.util.Log;
 import com.google.common.base.Optional;
 import com.google.common.base.Strings;
 import net.fibulwinter.gtd.infrastructure.TaskTableColumns;
@@ -106,7 +107,12 @@ public class TaskDAO {
             task.setDueDate(Optional.of(new Date(dueDate)));
         }
         if (!Strings.isNullOrEmpty(context)) {
-            task.setContext(contextRepository.getByName(context).get());
+            Optional<Context> contextOptional = contextRepository.getByName(context);
+            if (!contextOptional.isPresent()) {
+                Log.e("gtd", context + " is not found");
+                contextOptional = Optional.of(Context.DEFAULT);
+            }
+            task.setContext(contextOptional.get());
         }
         return task;
     }
