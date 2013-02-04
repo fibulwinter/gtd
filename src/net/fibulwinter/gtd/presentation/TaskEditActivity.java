@@ -60,9 +60,14 @@ public class TaskEditActivity extends Activity {
         contextSpinner = (Spinner) findViewById(R.id.task_context_spinner);
         startingDatePicker = (Button) findViewById(R.id.startingDatePicker);
         dueDatePicker = (Button) findViewById(R.id.dueDatePicker);
-        masterTasksAdapter = new TaskItemAdapter(this, taskUpdateListener, false);
+        TaskItemAdapterConfig taskItemAdapterConfig = new TaskItemAdapterConfig();
+        taskItemAdapterConfig.setShowMasterProject(false);
+        taskItemAdapterConfig.setShowSubActions(true);
+        taskItemAdapterConfig.setShowStartingDate(true);
+        taskItemAdapterConfig.setShowDueDate(true);
+        masterTasksAdapter = new TaskItemAdapter(this, taskUpdateListener, taskItemAdapterConfig);
         masterTaskList.setAdapter(masterTasksAdapter);
-        subTasksAdapter = new TaskItemAdapter(this, taskUpdateListener, false);
+        subTasksAdapter = new TaskItemAdapter(this, taskUpdateListener, taskItemAdapterConfig);
         subTaskList.setAdapter(subTasksAdapter);
 
         ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this,

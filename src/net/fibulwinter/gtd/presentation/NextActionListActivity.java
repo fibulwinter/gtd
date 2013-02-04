@@ -30,7 +30,8 @@ public class NextActionListActivity extends Activity {
     private TextView overdueCounter;
     private Spinner contextSpinner;
     private TaskItemAdapter taskItemAdapter;
-    private Context context = Context.ANY;
+    private Context context = Context.DEFAULT;
+    private TaskItemAdapterConfig taskItemAdapterConfig;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,7 +46,8 @@ public class NextActionListActivity extends Activity {
         TaskRepository taskRepository = new TaskRepository(new TaskDAO(getContentResolver(), contextRepository));
         TaskUpdateListener taskUpdateListener = TaskUpdateListenerFactory.simple(this, taskRepository);
         taskListService = new TaskListService(taskRepository);
-        taskItemAdapter = new TaskItemAdapter(this, taskUpdateListener, true);
+        taskItemAdapterConfig = new TaskItemAdapterConfig();
+        taskItemAdapter = new TaskItemAdapter(this, taskUpdateListener, taskItemAdapterConfig);
         taskList.setAdapter(taskItemAdapter);
 
         SpinnerUtils.setupContextSpinner(this, contextRepository, contextSpinner, new SpinnerUtils.ContextSpinnerListener() {
@@ -79,6 +81,7 @@ public class NextActionListActivity extends Activity {
                 return task.getText().compareTo(task1.getText());
             }
         });
+        taskItemAdapterConfig.setShowContext(context.isSpecial());
         taskItemAdapter.setData(taskArrayList);
         int todaySize = Iterables.size(taskListService.getTodayActions());
         todayCounter.setVisibility(todaySize > 0 ? View.VISIBLE : View.GONE);

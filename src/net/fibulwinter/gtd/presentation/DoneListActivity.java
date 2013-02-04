@@ -28,7 +28,7 @@ public class DoneListActivity extends Activity {
         TaskRepository taskRepository = new TaskRepository(new TaskDAO(getContentResolver(), new ContextRepository()));
         TaskUpdateListener taskUpdateListener = TaskUpdateListenerFactory.simple(this, taskRepository);
         taskListService = new TaskListService(taskRepository);
-        taskItemAdapter = new TaskItemAdapter(this, taskUpdateListener, true);
+        taskItemAdapter = new TaskItemAdapter(this, taskUpdateListener, new TaskItemAdapterConfig());
         taskList.setAdapter(taskItemAdapter);
     }
 

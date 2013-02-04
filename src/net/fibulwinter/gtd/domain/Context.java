@@ -5,19 +5,19 @@ import net.fibulwinter.gtd.service.TaskListService;
 public class Context {
 
     public static final Context DEFAULT = new Context("@Anywhere");
-    public static final Context ANY = new Context("<Any>", false) {
+    public static final Context ANY = new Context("<Any>", true) {
         @Override
         public boolean match(Task task) {
             return true;
         }
     };
-    public static final Context TODAY = new Context("<Today>", false) {
+    public static final Context TODAY = new Context("<Today>", true) {
         @Override
         public boolean match(Task task) {
             return TaskListService.TODAY_PREDICATE().apply(task);
         }
     };
-    public static final Context OVERDUE = new Context("<Overdue>", false) {
+    public static final Context OVERDUE = new Context("<Overdue>", true) {
         @Override
         public boolean match(Task task) {
             return TaskListService.OVERDUE_PREDICATE().apply(task);
@@ -42,6 +42,10 @@ public class Context {
 
     public boolean isSpecial() {
         return special;
+    }
+
+    public boolean isDefault() {
+        return Context.DEFAULT.equals(this);
     }
 
     public boolean match(Task task) {
