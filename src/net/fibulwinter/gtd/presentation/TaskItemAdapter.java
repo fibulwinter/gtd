@@ -11,7 +11,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
-import android.widget.CheckBox;
+import android.widget.ImageButton;
 import android.widget.TextView;
 import com.google.common.collect.Lists;
 import net.fibulwinter.gtd.R;
@@ -29,6 +29,7 @@ public class TaskItemAdapter extends ArrayAdapter<Task> {
     public static final int OVERDUE_BG_COLOR = Color.parseColor("#660000");
     public static final int CONTEXT_FG_COLOR = Color.parseColor("#6666cc");
     public static final int CONTEXT_BG_COLOR = Color.parseColor("#303066");
+
     private LayoutInflater inflater;
     private final TaskUpdateListener taskUpdateListener;
     private final TaskItemAdapterConfig config;
@@ -66,12 +67,12 @@ public class TaskItemAdapter extends ArrayAdapter<Task> {
     private class ViewHolder {
         private Task task;
 
-        private CheckBox doneStatus;
+        private ImageButton doneStatus;
         private TextView text;
 
         ViewHolder(Task aTask, View convertView) {
             this.task = aTask;
-            doneStatus = (CheckBox) convertView.findViewById(R.id.task_list_item_status);
+            doneStatus = (ImageButton) convertView.findViewById(R.id.task_list_item_status);
             text = (TextView) convertView.findViewById(R.id.task_list_item_text);
             doneStatus.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -92,7 +93,7 @@ public class TaskItemAdapter extends ArrayAdapter<Task> {
         }
 
         private void onDoneStatusUpdated() {
-            if (doneStatus.isChecked()) {
+            if (task.getStatus().isActive()) {
                 task.complete();
             } else {
                 task.setStatus(TaskStatus.NextAction);
@@ -153,7 +154,24 @@ public class TaskItemAdapter extends ArrayAdapter<Task> {
                 text = text.join("\n").join(extra);
             }
             text.apply(this.text);
-            doneStatus.setChecked(task.getStatus() == TaskStatus.Completed);
+            int image = 0;
+            switch (task.getStatus()) {
+                case Project:
+                case NextAction:
+                    image = task.isProject() ? R.drawable.project : R.drawable.not_done;
+                    break;
+                case Maybe:
+                    image = R.drawable.maybe;
+                    break;
+                case Completed:
+                    image = task.isProject() ? R.drawable.project_done : R.drawable.done;
+                    break;
+                case Cancelled:
+                    image = R.drawable.cancelled;
+                    break;
+            }
+
+            doneStatus.setImageDrawable(getContext().getResources().getDrawable(image));
             doneStatus.setClickable(config.isAllowChangeStatus() && (task.getStatus().isActive() || task.getStatus() == TaskStatus.Completed));
         }
 
