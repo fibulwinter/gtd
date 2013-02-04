@@ -25,15 +25,4 @@
             android:gravity="center_vertical"
             android:text="Text"
             />
-    <TextView
-            android:id="@+id/task_list_item_details"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_alignParentLeft="true"
-            android:layout_below="@id/task_list_item_text"
-            android:layout_toLeftOf="@id/task_list_item_status"
-            android:gravity="center_vertical"
-            android:textColor="@color/silver"
-            android:text="Details"
-            />
 </RelativeLayout>

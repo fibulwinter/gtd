@@ -7,11 +7,13 @@
     <TextView android:id="@+id/dueTodayCounter"
               android:layout_width="fill_parent"
               android:layout_height="wrap_content"
+              android:textColor="@color/orange"
               android:clickable="true"
               android:onClick="onDueTodayCounter"/>
     <TextView android:id="@+id/overdueCounter"
               android:layout_width="fill_parent"
               android:layout_height="wrap_content"
+              android:textColor="@color/red"
               android:clickable="true"
               android:onClick="onOverdueCounter"/>
     <RelativeLayout

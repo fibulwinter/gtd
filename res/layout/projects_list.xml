@@ -7,6 +7,7 @@
     <TextView android:id="@+id/projectWithoutActionCounter"
               android:layout_width="fill_parent"
               android:layout_height="wrap_content"
+              android:textColor="@color/orange"
               android:clickable="true"
               android:onClick="onProjectWithoutActionCounter"/>
     <ListView
