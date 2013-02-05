@@ -158,21 +158,24 @@ public class TaskItemAdapter extends ArrayAdapter<Task> {
             switch (task.getStatus()) {
                 case Project:
                 case NextAction:
-                    image = task.isProject() ? R.drawable.project : R.drawable.not_done;
+                    image = TaskListService.PROJECT_WITHOUT_ACTIONS_PREDICATE.apply(task) ? R.drawable.p_no_action : R.drawable.a_not_done;
                     break;
                 case Maybe:
-                    image = R.drawable.maybe;
+                    image = R.drawable.a_maybe;
                     break;
                 case Completed:
-                    image = task.isProject() ? R.drawable.project_done : R.drawable.done;
+                    image = R.drawable.a_done;
                     break;
                 case Cancelled:
-                    image = R.drawable.cancelled;
+                    image = R.drawable.a_cancelled;
                     break;
             }
 
             doneStatus.setImageDrawable(getContext().getResources().getDrawable(image));
             doneStatus.setClickable(config.isAllowChangeStatus() && (task.getStatus().isActive() || task.getStatus() == TaskStatus.Completed));
+            if (canShowLevel()) {
+                this.text.setPadding(task.getMasterTasks().size() * 24, 5, 5, 5);
+            }
         }
 
         private boolean canShowContext() {
@@ -193,6 +196,10 @@ public class TaskItemAdapter extends ArrayAdapter<Task> {
 
         private boolean canShowDueDate() {
             return config.isShowDueDate() && task.getDueDate().isPresent() && task.getStatus().isActive();
+        }
+
+        private boolean canShowLevel() {
+            return config.isShowLevel();
         }
 
         private String dueDate() {

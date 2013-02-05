@@ -30,7 +30,7 @@ public class NextActionListActivity extends Activity {
     private TextView overdueCounter;
     private Spinner contextSpinner;
     private TaskItemAdapter taskItemAdapter;
-    private Context context = Context.DEFAULT;
+    private Context context = Context.ANY;
     private TaskItemAdapterConfig taskItemAdapterConfig;
 
     @Override

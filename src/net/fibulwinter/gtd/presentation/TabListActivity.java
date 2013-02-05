@@ -17,15 +17,15 @@ public class TabListActivity extends TabActivity {
         setContentView(R.layout.tab);
         TabHost tabHost = (TabHost) findViewById(android.R.id.tabhost);
 
-        addTab(tabHost, "Next Action", NextActionListActivity.class);
-        addTab(tabHost, "Projects", ProjectListActivity.class);
-        addTab(tabHost, "May Be", MayBeListActivity.class);
-        addTab(tabHost, "Done", DoneListActivity.class);
+        addTab(tabHost, "Next Action", NextActionListActivity.class, R.drawable.a_not_done);
+        addTab(tabHost, "Projects", ProjectListActivity.class, R.drawable.p_not_done);
+        addTab(tabHost, "May Be", MayBeListActivity.class, R.drawable.a_maybe);
+        addTab(tabHost, "Done", DoneListActivity.class, R.drawable.a_done);
     }
 
-    private void addTab(TabHost tabHost, String label, Class<? extends Activity> targetClass) {
+    private void addTab(TabHost tabHost, String label, Class<? extends Activity> targetClass, int icon) {
         TabHost.TabSpec nextActionTabSpec = tabHost.newTabSpec(TAB_TAG);
-        nextActionTabSpec.setIndicator(label).setContent(new Intent(this, targetClass));
+        nextActionTabSpec.setIndicator(label, getResources().getDrawable(icon)).setContent(new Intent(this, targetClass));
         tabHost.addTab(nextActionTabSpec);
     }
 }
