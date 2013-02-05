@@ -13,6 +13,7 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ImageButton;
 import android.widget.TextView;
+import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 import net.fibulwinter.gtd.R;
 import net.fibulwinter.gtd.domain.Task;
@@ -33,6 +34,7 @@ public class TaskItemAdapter extends ArrayAdapter<Task> {
     private LayoutInflater inflater;
     private final TaskUpdateListener taskUpdateListener;
     private final TaskItemAdapterConfig config;
+    private Optional<Task> highlightedTask = Optional.absent();
 
 
     public TaskItemAdapter(Context context, TaskUpdateListener taskUpdateListener, TaskItemAdapterConfig config) {
@@ -40,6 +42,10 @@ public class TaskItemAdapter extends ArrayAdapter<Task> {
         this.taskUpdateListener = taskUpdateListener;
         this.config = config;
         inflater = LayoutInflater.from(context);
+    }
+
+    public void setHighlightedTask(Optional<Task> highlightedTask) {
+        this.highlightedTask = highlightedTask;
     }
 
     public void setData(Iterable<Task> tasks) {
@@ -67,11 +73,13 @@ public class TaskItemAdapter extends ArrayAdapter<Task> {
     private class ViewHolder {
         private Task task;
 
+        private final View convertView;
         private ImageButton doneStatus;
         private TextView text;
 
         ViewHolder(Task aTask, View convertView) {
             this.task = aTask;
+            this.convertView = convertView;
             doneStatus = (ImageButton) convertView.findViewById(R.id.task_list_item_status);
             text = (TextView) convertView.findViewById(R.id.task_list_item_text);
             doneStatus.setOnClickListener(new View.OnClickListener() {
@@ -175,6 +183,11 @@ public class TaskItemAdapter extends ArrayAdapter<Task> {
             doneStatus.setClickable(config.isAllowChangeStatus() && (task.getStatus().isActive() || task.getStatus() == TaskStatus.Completed));
             if (canShowLevel()) {
                 this.text.setPadding(task.getMasterTasks().size() * 24, 5, 5, 5);
+                if (highlightedTask.isPresent() && highlightedTask.get().equals(task)) {
+                    this.convertView.setBackgroundColor(getContext().getResources().getColor(android.R.color.secondary_text_dark));
+                } else {
+                    this.convertView.setBackgroundColor(getContext().getResources().getColor(android.R.color.background_dark));
+                }
             }
         }
 

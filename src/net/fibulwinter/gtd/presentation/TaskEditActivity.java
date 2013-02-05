@@ -20,7 +20,6 @@ public class TaskEditActivity extends Activity {
     public static final String TYPE = "type";
 
     private TaskRepository taskRepository;
-    private TextView masterActionsTitle;
     private TextView title;
     private Spinner statusSpinner;
     private Spinner contextSpinner;
@@ -41,8 +40,8 @@ public class TaskEditActivity extends Activity {
     };
     private ClearDatePicker clearDatePicker;
     private TaskItemAdapter masterTasksAdapter;
-    private TaskItemAdapter subTasksAdapter;
     private ContextRepository contextRepository;
+    private ListView masterTaskList;
 
 
     /**
@@ -54,22 +53,19 @@ public class TaskEditActivity extends Activity {
         setContentView(R.layout.task_edit);
         long id = ContentUris.parseId(getIntent().getData());
         title = (TextView) findViewById(R.id.task_title);
-        masterActionsTitle = (TextView) findViewById(R.id.master_task_title);
-        ListView masterTaskList = (ListView) findViewById(R.id.master_task_ist);
-        ListView subTaskList = (ListView) findViewById(R.id.subTaskList);
+        masterTaskList = (ListView) findViewById(R.id.task_list);
         statusSpinner = (Spinner) findViewById(R.id.task_status_spinner);
         contextSpinner = (Spinner) findViewById(R.id.task_context_spinner);
         startingDatePicker = (Button) findViewById(R.id.startingDatePicker);
         dueDatePicker = (Button) findViewById(R.id.dueDatePicker);
         TaskItemAdapterConfig taskItemAdapterConfig = new TaskItemAdapterConfig();
         taskItemAdapterConfig.setShowMasterProject(false);
-        taskItemAdapterConfig.setShowSubActions(true);
+        taskItemAdapterConfig.setShowSubActions(false);
         taskItemAdapterConfig.setShowStartingDate(true);
         taskItemAdapterConfig.setShowDueDate(true);
+        taskItemAdapterConfig.setShowLevel(true);
         masterTasksAdapter = new TaskItemAdapter(this, taskUpdateListener, taskItemAdapterConfig);
         masterTaskList.setAdapter(masterTasksAdapter);
-        subTasksAdapter = new TaskItemAdapter(this, taskUpdateListener, taskItemAdapterConfig);
-        subTaskList.setAdapter(subTasksAdapter);
 
         ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this,
                 R.array.status_array, android.R.layout.simple_spinner_item);
@@ -113,10 +109,9 @@ public class TaskEditActivity extends Activity {
 
     private void updateToTask() {
         title.setText(task.getText());
-        List<Task> masterTasks = task.getMasterTasks();
-        masterActionsTitle.setVisibility(masterTasks.isEmpty() ? View.INVISIBLE : View.VISIBLE);
-        masterTasksAdapter.setData(task.getMasterTasks());
-        subTasksAdapter.setData(task.getSubTasks());
+        List<Task> masterTasks = task.getProjectRoot().getProjectView();
+        masterTasksAdapter.setData(masterTasks);
+        masterTasksAdapter.setHighlightedTask(Optional.of(task));
         statusSpinner.setSelection(task.getStatus().ordinal());
         contextSpinner.setSelection(contextRepository.getAll().indexOf(task.getContext()));
         startingDatePicker.setText(DateUtils.optionalDateToString(task.getStartingDate()));

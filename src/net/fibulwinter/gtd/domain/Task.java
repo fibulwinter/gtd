@@ -100,6 +100,19 @@ public class Task {
         }
     }
 
+    public Task getProjectRoot() {
+        return masterTask.isPresent() ? masterTask.get().getProjectRoot() : this;
+    }
+
+    public List<Task> getProjectView() {
+        List<Task> result = newArrayList();
+        result.add(this);
+        for (Task subTask : getSubTasks()) {
+            result.addAll(subTask.getProjectView());
+        }
+        return result;
+    }
+
     public Optional<Date> getStartingDate() {
         return startingDate;
     }
@@ -122,5 +135,22 @@ public class Task {
 
     public void setContext(Context context) {
         this.context = context;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Task task = (Task) o;
+
+        if (id != task.id) return false;
+
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        return (int) (id ^ (id >>> 32));
     }
 }

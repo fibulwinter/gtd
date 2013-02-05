@@ -1,101 +1,101 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              android:orientation="vertical"
-              android:layout_width="fill_parent"
-              android:layout_height="fill_parent"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                android:orientation="vertical"
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent"
         >
-    <TextView
-            android:id="@+id/master_task_title"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:text="Master tasks"
-            />
-    <ListView
-            android:id="@+id/master_task_ist"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            />
-    <TextView
-            android:id="@+id/focused_task_title"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:text="Focused task"
-            />
-    <TextView
-            android:id="@+id/task_title"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:onClick="onTitleClick"
-            android:clickable="true"
-            android:textColor="@color/yellow"
-            android:textSize="20dp"
-            />
-    <Spinner
-            android:id="@+id/task_status_spinner"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            />
-    <Spinner
-            android:id="@+id/task_context_spinner"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            />
     <LinearLayout
+            android:id="@+id/task_details"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal">
+            android:orientation="vertical"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentRight="true"
+            >
         <TextView
-                android:layout_width="wrap_content"
+                android:id="@+id/task_title"
+                android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
-                android:text="starting"
+                android:onClick="onTitleClick"
+                android:clickable="true"
+                android:textColor="@color/yellow"
+                android:textSize="20dp"
                 />
-        <Button android:id="@+id/startingDatePicker"
-                android:layout_width="wrap_content"
+        <LinearLayout
+                android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
-                android:text=""
-                android:onClick="onStartDateClick"
-                />
-        <TextView
-                android:layout_width="wrap_content"
+                android:orientation="horizontal"
+                >
+            <Spinner
+                    android:id="@+id/task_status_spinner"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="left"
+                    />
+            <Spinner
+                    android:id="@+id/task_context_spinner"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="right"
+                    />
+        </LinearLayout>
+        <LinearLayout
+                android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
-                android:text="due to"
-                />
-        <Button android:id="@+id/dueDatePicker"
-                android:layout_width="wrap_content"
+                android:orientation="horizontal">
+            <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="starting"
+                    />
+            <Button android:id="@+id/startingDatePicker"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text=""
+                    android:onClick="onStartDateClick"
+                    />
+            <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="due to"
+                    />
+            <Button android:id="@+id/dueDatePicker"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text=""
+                    android:onClick="onDueDateClick"
+                    />
+        </LinearLayout>
+        <LinearLayout
+                android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
-                android:text=""
-                android:onClick="onDueDateClick"
-                />
+                android:orientation="horizontal">
+            <Button
+                    android:id="@+id/task_create_sub_task"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/new_sub_task"
+                    android:onClick="onNewSubTask"
+                    />
+            <Button
+                    android:id="@+id/task_delete"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/delete_task"
+                    android:onClick="onDeleteSubTask"
+                    />
+        </LinearLayout>
     </LinearLayout>
-    <LinearLayout
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal">
-        <Button
-                android:id="@+id/task_create_sub_task"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/new_sub_task"
-                android:onClick="onNewSubTask"
-                />
-        <Button
-                android:id="@+id/task_delete"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/delete_task"
-                android:onClick="onDeleteSubTask"
-                />
-    </LinearLayout>
-    <TextView
-            android:id="@+id/sub_task_title"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:text="Sub tasks"
-            />
     <ListView
-            android:id="@+id/subTaskList"
+            android:id="@+id/task_list"
             android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="fill_parent"
+            android:layout_above="@id/task_details"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentRight="true"
             />
-</LinearLayout>
+
+</RelativeLayout>
 
