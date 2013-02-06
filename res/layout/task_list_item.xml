@@ -12,6 +12,7 @@
             android:layout_alignParentRight="true"
             android:layout_alignParentTop="true"
             android:layout_alignParentBottom="true"
+            android:background="@android:color/background_dark"
             android:clickable="true"
             android:gravity="center"
             />

@@ -88,7 +88,7 @@ public class NextActionListActivity extends Activity {
         todayCounter.setText("" + todaySize + " action(s) need to be done today");
         int overdueSize = Iterables.size(taskListService.getOverdueActions());
         overdueCounter.setVisibility(overdueSize > 0 ? View.VISIBLE : View.GONE);
-        overdueCounter.setText("" + todaySize + " action(s) are overdue");
+        overdueCounter.setText("" + overdueSize + " action(s) are overdue");
     }
 
     public void onOverdueCounter(View view) {
