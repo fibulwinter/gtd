@@ -21,7 +21,8 @@ public class TaskDAO {
             TaskTableColumns.MASTER,
             TaskTableColumns.START_DATE,
             TaskTableColumns.DUE_DATE,
-            TaskTableColumns.CONTEXT
+            TaskTableColumns.CONTEXT,
+            TaskTableColumns.COMPLETED_DATE
     };
     private ContentResolver contentResolver;
     private final ContextRepository contextRepository;
@@ -72,6 +73,7 @@ public class TaskDAO {
         values.put(TaskTableColumns.START_DATE, task.getStartingDate().isPresent() ? task.getStartingDate().get().getTime() : 0);
         values.put(TaskTableColumns.DUE_DATE, task.getDueDate().isPresent() ? task.getDueDate().get().getTime() : 0);
         values.put(TaskTableColumns.CONTEXT, Context.DEFAULT.equals(task.getContext()) ? "" : task.getContext().getName());
+        values.put(TaskTableColumns.COMPLETED_DATE, task.getCompleteDate().isPresent() ? task.getCompleteDate().get().getTime() : 0);
         int updatedRows = contentResolver.update(
                 TaskTableColumns.CONTENT_URI,
                 values,
@@ -99,6 +101,7 @@ public class TaskDAO {
         long startDate = cursor.getLong(4);
         long dueDate = cursor.getLong(5);
         String context = cursor.getString(6);
+        long completeDate = cursor.getLong(7);
         Task task = new Task(id, text, status);
         if (startDate != 0) {
             task.setStartingDate(Optional.of(new Date(startDate)));
@@ -113,6 +116,9 @@ public class TaskDAO {
                 contextOptional = Optional.of(Context.DEFAULT);
             }
             task.setContext(contextOptional.get());
+        }
+        if (completeDate != 0) {
+            task.setCompleteDate(Optional.of(new Date(completeDate)));
         }
         return task;
     }

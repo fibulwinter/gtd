@@ -75,10 +75,10 @@ public class TaskListService {
         }
     };
 
-    private static final Predicate<Task> DONE_PREDICATE = new Predicate<Task>() {
+    private static final Predicate<Task> COMPLETED_PREDICATE = new Predicate<Task>() {
         @Override
         public boolean apply(Task task) {
-            return task.getStatus() == TaskStatus.Completed;
+            return task.getCompleteDate().isPresent();
         }
     };
 
@@ -122,8 +122,8 @@ public class TaskListService {
         return from(taskRepository.getAll()).filter(and(MAYBE_PREDICATE, CAN_START_PREDICATE()));
     }
 
-    public Iterable<Task> getDone() {
-        return from(taskRepository.getAll()).filter(DONE_PREDICATE);
+    public Iterable<Task> getCompleted() {
+        return from(taskRepository.getAll()).filter(COMPLETED_PREDICATE);
     }
 
     public Iterable<Task> getProjectsWithoutNextAction() {

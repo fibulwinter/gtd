@@ -23,6 +23,10 @@ public class DateUtils {
         }
     }
 
+    public static String dateTimeToString(Date date) {
+        return DateFormat.format("yyyy-MM-dd hh:mm:ss", date).toString();
+    }
+
     public static Date nextMidnight(Date date) {
         GregorianCalendar calendar = new GregorianCalendar();
         calendar.setTime(date);

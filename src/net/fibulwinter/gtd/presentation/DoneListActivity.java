@@ -30,6 +30,9 @@ public class DoneListActivity extends Activity {
         taskListService = new TaskListService(taskRepository);
         TaskItemAdapterConfig taskItemAdapterConfig = new TaskItemAdapterConfig();
         taskItemAdapterConfig.setAllowChangeStatus(false);
+        taskItemAdapterConfig.setShowStartingDate(false);
+        taskItemAdapterConfig.setShowCompletedDate(true);
+        taskItemAdapterConfig.setShowContext(false);
         taskItemAdapter = new TaskItemAdapter(this, taskUpdateListener, taskItemAdapterConfig);
         taskList.setAdapter(taskItemAdapter);
     }
@@ -41,12 +44,13 @@ public class DoneListActivity extends Activity {
     }
 
     private void fillData() {
-        Iterable<Task> tasks = taskListService.getDone();
+        Iterable<Task> tasks = taskListService.getCompleted();
         ArrayList<Task> tasksArrayList = newArrayList(tasks);
         Collections.sort(tasksArrayList, new Comparator<Task>() {
             @Override
             public int compare(Task task, Task task1) {
-                return task.getText().compareTo(task1.getText());
+                int c = -(task.getCompleteDate().get().compareTo(task1.getCompleteDate().get()));
+                return c != 0 ? c : task.getText().compareTo(task1.getText());
             }
         });
         taskItemAdapter.setData(tasksArrayList);

@@ -18,6 +18,7 @@ public class Task {
     private Optional<Date> startingDate = Optional.absent();
     private Optional<Date> dueDate = Optional.absent();
     private Context context = Context.DEFAULT;
+    private Optional<Date> completeDate = Optional.absent();
 
     public Task(String text) {
         this.id = UUID.randomUUID().getLeastSignificantBits();
@@ -49,11 +50,11 @@ public class Task {
     }
 
     public void complete() {
-        this.status = TaskStatus.Completed;
+        setStatus(TaskStatus.Completed);
     }
 
     public void cancel() {
-        this.status = TaskStatus.Cancelled;
+        setStatus(TaskStatus.Cancelled);
     }
 
     private void addSubAction(Task subTask) {
@@ -70,6 +71,11 @@ public class Task {
 
     public void setStatus(TaskStatus status) {
         this.status = status;
+        if (status == TaskStatus.Cancelled || status == TaskStatus.Completed) {
+            this.completeDate = Optional.of(new Date());
+        } else {
+            this.completeDate = Optional.absent();
+        }
     }
 
     public Optional<Task> getMasterTask() {
@@ -135,6 +141,14 @@ public class Task {
 
     public void setContext(Context context) {
         this.context = context;
+    }
+
+    public Optional<Date> getCompleteDate() {
+        return completeDate;
+    }
+
+    public void setCompleteDate(Optional<Date> completeDate) {
+        this.completeDate = completeDate;
     }
 
     @Override

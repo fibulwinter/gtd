@@ -119,6 +119,9 @@ public class TaskItemAdapter extends ArrayAdapter<Task> {
 
             SpannedText extra = new SpannedText("");
 
+            if (canShowCompletedDate()) {
+                extra = extra.space().join("at " + DateUtils.dateTimeToString(task.getCompleteDate().get()));
+            }
             if (canShowMasterProject()) {
                 extra = extra.space().join("to ").join(task.getMasterTask().get().getText(),
                         new StyleSpan(Typeface.ITALIC));
@@ -205,6 +208,10 @@ public class TaskItemAdapter extends ArrayAdapter<Task> {
 
         private boolean canShowStartingDate() {
             return config.isShowStartingDate() && task.getStartingDate().isPresent();
+        }
+
+        private boolean canShowCompletedDate() {
+            return config.isShowCompletedDate() && task.getCompleteDate().isPresent();
         }
 
         private boolean canShowDueDate() {

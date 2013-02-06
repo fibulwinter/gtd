@@ -8,6 +8,7 @@ public class TaskItemAdapterConfig {
     private boolean showDueDate = true;
     private boolean allowChangeStatus = true;
     private boolean showLevel = false;
+    private boolean showCompletedDate = false;
 
     public boolean isShowContext() {
         return showContext;
@@ -63,5 +64,13 @@ public class TaskItemAdapterConfig {
 
     public void setShowLevel(boolean showLevel) {
         this.showLevel = showLevel;
+    }
+
+    public boolean isShowCompletedDate() {
+        return showCompletedDate;
+    }
+
+    public void setShowCompletedDate(boolean showCompletedDate) {
+        this.showCompletedDate = showCompletedDate;
     }
 }

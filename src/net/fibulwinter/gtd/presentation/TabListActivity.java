@@ -20,7 +20,7 @@ public class TabListActivity extends TabActivity {
         addTab(tabHost, "Next Action", NextActionListActivity.class, R.drawable.a_not_done);
         addTab(tabHost, "Projects", ProjectListActivity.class, R.drawable.p_not_done);
         addTab(tabHost, "May Be", MayBeListActivity.class, R.drawable.a_maybe);
-        addTab(tabHost, "Done", DoneListActivity.class, R.drawable.a_done);
+        addTab(tabHost, "Log", DoneListActivity.class, R.drawable.a_done);
     }
 
     private void addTab(TabHost tabHost, String label, Class<? extends Activity> targetClass, int icon) {

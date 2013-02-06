@@ -9,13 +9,15 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.database.sqlite.SQLiteQueryBuilder;
 import android.net.Uri;
 import android.util.Log;
+import net.fibulwinter.gtd.domain.TaskStatus;
 
+import java.util.Date;
 import java.util.HashMap;
 
 public class TaskContentProvider extends ContentProvider {
     private static final String TAG = "TasksContentProvider";
 
-    private static final int DATABASE_VERSION = 3;
+    private static final int DATABASE_VERSION = 4;
     private static final String DATABASE_NAME = "gtd_db";
     private static final String TASKS_TABLE_NAME = "tasks";
 
@@ -39,6 +41,7 @@ public class TaskContentProvider extends ContentProvider {
         tasksProjectionMap.put(TaskTableColumns.START_DATE, TaskTableColumns.START_DATE);
         tasksProjectionMap.put(TaskTableColumns.DUE_DATE, TaskTableColumns.DUE_DATE);
         tasksProjectionMap.put(TaskTableColumns.CONTEXT, TaskTableColumns.CONTEXT);
+        tasksProjectionMap.put(TaskTableColumns.COMPLETED_DATE, TaskTableColumns.COMPLETED_DATE);
 
     }
 
@@ -60,7 +63,8 @@ public class TaskContentProvider extends ContentProvider {
                     + TaskTableColumns.MASTER + " INTEGER, "
                     + TaskTableColumns.START_DATE + " INTEGER, "
                     + TaskTableColumns.DUE_DATE + " INTEGER, "
-                    + TaskTableColumns.CONTEXT + " TEXT "
+                    + TaskTableColumns.CONTEXT + " TEXT, "
+                    + TaskTableColumns.COMPLETED_DATE + " INTEGER "
                     + ");");
         }
 
@@ -74,6 +78,15 @@ public class TaskContentProvider extends ContentProvider {
             }
             if (oldVersion < 3) {
                 db.execSQL("ALTER TABLE " + TASKS_TABLE_NAME + " ADD COLUMN " + TaskTableColumns.CONTEXT + " TEXT");
+            }
+            if (oldVersion < 4) {
+                db.execSQL("ALTER TABLE " + TASKS_TABLE_NAME + " ADD COLUMN " + TaskTableColumns.COMPLETED_DATE + " INTEGER");
+                long time = new Date().getTime();
+                db.execSQL("UPDATE " + TASKS_TABLE_NAME + " SET " + TaskTableColumns.COMPLETED_DATE + "=" + time
+                        + " WHERE " + TaskTableColumns.STATUS + "='" + TaskStatus.Completed.name() +
+                        "' OR " + TaskTableColumns.STATUS + "='"
+                        + TaskStatus.Cancelled.name() +
+                        "'");
             }
         }
     }
