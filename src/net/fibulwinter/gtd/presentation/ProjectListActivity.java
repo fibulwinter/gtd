@@ -12,6 +12,7 @@ import com.google.common.collect.Iterables;
 import net.fibulwinter.gtd.R;
 import net.fibulwinter.gtd.domain.*;
 import net.fibulwinter.gtd.infrastructure.TaskTableColumns;
+import net.fibulwinter.gtd.service.TaskExportService;
 import net.fibulwinter.gtd.service.TaskListService;
 
 import java.util.ArrayList;
@@ -32,7 +33,7 @@ public class ProjectListActivity extends Activity {
         setContentView(R.layout.projects_list);
         ListView taskList = (ListView) findViewById(R.id.taskList);
         projectWithoutActionCounter = (TextView) findViewById(R.id.projectWithoutActionCounter);
-        TaskRepository taskRepository = new TaskRepository(new TaskDAO(getContentResolver(), new ContextRepository()));
+        TaskRepository taskRepository = new TaskRepository(new TaskDAO(getContentResolver(), new ContextRepository()), new TaskExportService());
         TaskUpdateListener taskUpdateListener = TaskUpdateListenerFactory.simple(this, taskRepository);
         taskListService = new TaskListService(taskRepository);
         TaskItemAdapterConfig config = new TaskItemAdapterConfig();

@@ -11,6 +11,7 @@ import com.google.common.base.Optional;
 import net.fibulwinter.gtd.R;
 import net.fibulwinter.gtd.domain.*;
 import net.fibulwinter.gtd.infrastructure.DateUtils;
+import net.fibulwinter.gtd.service.TaskExportService;
 
 import java.util.Date;
 import java.util.List;
@@ -91,7 +92,7 @@ public class TaskEditActivity extends Activity {
             }
         }, true);
         clearDatePicker = new ClearDatePicker(this);
-        taskRepository = new TaskRepository(new TaskDAO(getContentResolver(), contextRepository));
+        taskRepository = new TaskRepository(new TaskDAO(getContentResolver(), contextRepository), new TaskExportService());
         boolean isNew = id == -1;
         if (isNew) {
             task = new Task("");

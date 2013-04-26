@@ -1,5 +1,6 @@
 package net.fibulwinter.gtd.domain;
 
+import net.fibulwinter.gtd.service.TaskExportService;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -12,7 +13,7 @@ public class TaskRepositoryTest {
 
     @BeforeMethod
     public void givenActionList() {
-        taskRepository = new TaskRepository(null);
+        taskRepository = new TaskRepository(null, new TaskExportService());
     }
 
     public void itShouldHaveActionWhenActionWasSaved() {

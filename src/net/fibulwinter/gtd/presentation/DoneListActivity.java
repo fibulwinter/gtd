@@ -8,6 +8,7 @@ import net.fibulwinter.gtd.domain.ContextRepository;
 import net.fibulwinter.gtd.domain.Task;
 import net.fibulwinter.gtd.domain.TaskDAO;
 import net.fibulwinter.gtd.domain.TaskRepository;
+import net.fibulwinter.gtd.service.TaskExportService;
 import net.fibulwinter.gtd.service.TaskListService;
 
 import java.util.ArrayList;
@@ -25,7 +26,7 @@ public class DoneListActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.done_list);
         ListView taskList = (ListView) findViewById(R.id.taskList);
-        TaskRepository taskRepository = new TaskRepository(new TaskDAO(getContentResolver(), new ContextRepository()));
+        TaskRepository taskRepository = new TaskRepository(new TaskDAO(getContentResolver(), new ContextRepository()), new TaskExportService());
         TaskUpdateListener taskUpdateListener = TaskUpdateListenerFactory.simple(this, taskRepository);
         taskListService = new TaskListService(taskRepository);
         TaskItemAdapterConfig taskItemAdapterConfig = new TaskItemAdapterConfig();

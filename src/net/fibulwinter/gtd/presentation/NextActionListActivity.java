@@ -14,6 +14,7 @@ import com.google.common.collect.Iterables;
 import net.fibulwinter.gtd.R;
 import net.fibulwinter.gtd.domain.*;
 import net.fibulwinter.gtd.infrastructure.TaskTableColumns;
+import net.fibulwinter.gtd.service.TaskExportService;
 import net.fibulwinter.gtd.service.TaskListService;
 
 import java.util.ArrayList;
@@ -43,7 +44,7 @@ public class NextActionListActivity extends Activity {
         contextSpinner = (Spinner) findViewById(R.id.context_spinner);
 
         ContextRepository contextRepository = new ContextRepository();
-        TaskRepository taskRepository = new TaskRepository(new TaskDAO(getContentResolver(), contextRepository));
+        TaskRepository taskRepository = new TaskRepository(new TaskDAO(getContentResolver(), contextRepository), new TaskExportService());
         TaskUpdateListener taskUpdateListener = TaskUpdateListenerFactory.simple(this, taskRepository);
         taskListService = new TaskListService(taskRepository);
         taskItemAdapterConfig = new TaskItemAdapterConfig();

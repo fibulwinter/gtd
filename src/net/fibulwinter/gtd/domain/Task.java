@@ -1,6 +1,7 @@
 package net.fibulwinter.gtd.domain;
 
 import com.google.common.base.Optional;
+import com.google.common.base.Predicate;
 
 import java.util.Collections;
 import java.util.Date;
@@ -8,6 +9,8 @@ import java.util.List;
 import java.util.UUID;
 
 import static com.google.common.collect.Lists.newArrayList;
+
+import javax.annotation.Nullable;
 
 public class Task {
     private long id;
@@ -19,6 +22,12 @@ public class Task {
     private Optional<Date> dueDate = Optional.absent();
     private Context context = Context.DEFAULT;
     private Optional<Date> completeDate = Optional.absent();
+    public static final Predicate<? super Task> IS_PROJECT_ROOT = new Predicate<Task>() {
+        @Override
+        public boolean apply(Task task) {
+            return task.getProjectRoot()==task;
+        }
+    };
 
     public Task(String text) {
         this.id = UUID.randomUUID().getLeastSignificantBits();

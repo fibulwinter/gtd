@@ -23,6 +23,18 @@ public class DateUtils {
         }
     }
 
+    public static String optionalDateTimeToString(Optional<Date> dateTimeOptional) {
+        if (dateTimeOptional.isPresent()) {
+            return dateTimeToString(dateTimeOptional.get());
+//            return dateOptional.get().toString();
+//            GregorianCalendar calendar = new GregorianCalendar();
+//            calendar.setTime(dateOptional.get());
+//            return calendar.get(Calendar.YEAR)+"."+(calendar.get(Calendar.MONTH)+1)+"."+calendar.get(Calendar.DAY_OF_MONTH);
+        } else {
+            return "<>";
+        }
+    }
+
     public static String dateTimeToString(Date date) {
         return DateFormat.format("yyyy-MM-dd hh:mm:ss", date).toString();
     }

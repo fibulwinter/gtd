@@ -1,6 +1,7 @@
 package net.fibulwinter.gtd.domain;
 
 import com.google.common.base.Optional;
+import net.fibulwinter.gtd.service.TaskExportService;
 
 import java.util.Map;
 
@@ -8,13 +9,16 @@ import static com.google.common.collect.Maps.newHashMap;
 
 public class TaskRepository {
     private final TaskDAO taskDAO;
+    private final TaskExportService taskExportService;
 
-    public TaskRepository(TaskDAO taskDAO) {
+    public TaskRepository(TaskDAO taskDAO, TaskExportService taskExportService) {
         this.taskDAO = taskDAO;
+        this.taskExportService = taskExportService;
     }
 
     public void save(Task task) {
         taskDAO.save(task);
+        taskExportService.export(getAll());
     }
 
     public Iterable<Task> getAll() {
