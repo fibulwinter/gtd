@@ -1,11 +1,13 @@
 package net.fibulwinter.gtd.infrastructure;
 
-import android.text.format.DateFormat;
-import com.google.common.base.Optional;
-
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
+
+import android.text.format.DateFormat;
+import com.google.common.base.Optional;
 
 public class DateUtils {
 
@@ -20,6 +22,30 @@ public class DateUtils {
 //            return calendar.get(Calendar.YEAR)+"."+(calendar.get(Calendar.MONTH)+1)+"."+calendar.get(Calendar.DAY_OF_MONTH);
         } else {
             return "<Any>";
+        }
+    }
+
+    public static Optional<Date> stringToOptionalDate(String string) {
+        if ("<Any>".equals(string)) {
+            return Optional.absent();
+        } else {
+            try {
+                return Optional.of(new SimpleDateFormat("yyyy-MM-dd").parse(string));
+            } catch (ParseException e) {
+                return Optional.absent();
+            }
+        }
+    }
+
+    public static Optional<Date> stringToOptionalDateTime(String string) {
+        if ("<>".equals(string)) {
+            return Optional.absent();
+        } else {
+            try {
+                return Optional.of(new SimpleDateFormat("yyyy-MM-dd hh:mm:ss").parse(string));
+            } catch (ParseException e) {
+                return Optional.absent();
+            }
         }
     }
 

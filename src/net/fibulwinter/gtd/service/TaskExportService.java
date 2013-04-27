@@ -9,10 +9,8 @@ import java.io.PrintStream;
 import java.util.List;
 
 import android.os.Environment;
-import com.google.common.base.Joiner;
 import com.google.common.base.Strings;
 import net.fibulwinter.gtd.domain.Task;
-import net.fibulwinter.gtd.domain.TaskRepository;
 import net.fibulwinter.gtd.domain.TaskStatus;
 import net.fibulwinter.gtd.infrastructure.DateUtils;
 
@@ -21,25 +19,27 @@ public class TaskExportService {
     public TaskExportService() {
     }
 
-    public void export(Iterable<Task> tasks){
+    public String export(Iterable<Task> tasks) {
         List<Task> sorted = newArrayList();
-        for(Task task:from(tasks).filter(Task.IS_PROJECT_ROOT)){
+        for (Task task : from(tasks).filter(Task.IS_PROJECT_ROOT)) {
             sorted.addAll(task.getProjectView());
         }
         try {
             File externalStorageDirectory = Environment.getExternalStorageDirectory();
-            File pictures = new File(externalStorageDirectory, "Pictures");
-            File file = new File(pictures, "gtd.txt");
+//            File pictures = new File(externalStorageDirectory, "Pictures");
+            File file = new File(externalStorageDirectory, "gtd.txt");
             PrintStream out = new PrintStream(file);
             export(sorted, out);
             out.close();
+            return file.getAbsolutePath();
         } catch (FileNotFoundException e) {
             e.printStackTrace();
+            return null;
         }
     }
 
     private void export(List<Task> tasks, PrintStream out) {
-        for(Task task:tasks){
+        for (Task task : tasks) {
             export(task, out);
         }
     }
@@ -47,34 +47,34 @@ public class TaskExportService {
     private void export(Task task, PrintStream out) {
         out.println(
                 Strings.repeat("    ", task.getMasterTasks().size())
-                + status(task.getStatus())+" "
-                + task.getContext().getName() + " "
-                + DateUtils.optionalDateToString(task.getStartingDate()) + " "
-                + DateUtils.optionalDateToString(task.getDueDate()) + " "
-                + DateUtils.optionalDateTimeToString(task.getCompleteDate()) + " "
-                + task.getText().replace('\n',' ')
+                        + status(task.getStatus()) + " "
+                        + task.getContext().getName() + " "
+                        + DateUtils.optionalDateToString(task.getStartingDate()) + " "
+                        + DateUtils.optionalDateToString(task.getDueDate()) + " "
+                        + DateUtils.optionalDateTimeToString(task.getCompleteDate()) + " "
+                        + task.getText().replace('\n', ' ')
         );
     }
 
     private String status(TaskStatus status) {
-        String s=" ";
+        String s = " ";
         switch (status) {
             case NextAction:
-                s=" ";
+                s = " ";
                 break;
             case Project:
-                s="P";
+                s = "P";
                 break;
             case Maybe:
-                s="?";
+                s = "?";
                 break;
             case Completed:
-                s="+";
+                s = "+";
                 break;
             case Cancelled:
-                s="-";
+                s = "-";
                 break;
         }
-        return "["+s+"]";
+        return "[" + s + "]";
     }
 }

@@ -1,11 +1,10 @@
 package net.fibulwinter.gtd.domain;
 
-import net.fibulwinter.gtd.service.TaskExportService;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
-
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
+
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
 
 @Test
 public class TaskRepositoryTest {
@@ -13,7 +12,7 @@ public class TaskRepositoryTest {
 
     @BeforeMethod
     public void givenActionList() {
-        taskRepository = new TaskRepository(null, new TaskExportService());
+        taskRepository = new TaskRepository(null, null, null);
     }
 
     public void itShouldHaveActionWhenActionWasSaved() {

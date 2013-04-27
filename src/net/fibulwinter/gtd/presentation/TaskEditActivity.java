@@ -1,5 +1,8 @@
 package net.fibulwinter.gtd.presentation;
 
+import java.util.Date;
+import java.util.List;
+
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.ContentUris;
@@ -12,9 +15,7 @@ import net.fibulwinter.gtd.R;
 import net.fibulwinter.gtd.domain.*;
 import net.fibulwinter.gtd.infrastructure.DateUtils;
 import net.fibulwinter.gtd.service.TaskExportService;
-
-import java.util.Date;
-import java.util.List;
+import net.fibulwinter.gtd.service.TaskImportService;
 
 public class TaskEditActivity extends Activity {
 
@@ -92,7 +93,7 @@ public class TaskEditActivity extends Activity {
             }
         }, true);
         clearDatePicker = new ClearDatePicker(this);
-        taskRepository = new TaskRepository(new TaskDAO(getContentResolver(), contextRepository), new TaskExportService());
+        taskRepository = new TaskRepository(new TaskDAO(getContentResolver(), contextRepository), new TaskExportService(), new TaskImportService(contextRepository));
         boolean isNew = id == -1;
         if (isNew) {
             task = new Task("");

@@ -1,24 +1,46 @@
 package net.fibulwinter.gtd.domain;
 
-import com.google.common.base.Optional;
-import net.fibulwinter.gtd.service.TaskExportService;
+import static com.google.common.collect.Maps.newHashMap;
 
+import java.util.List;
 import java.util.Map;
 
-import static com.google.common.collect.Maps.newHashMap;
+import com.google.common.base.Optional;
+import net.fibulwinter.gtd.service.TaskExportService;
+import net.fibulwinter.gtd.service.TaskImportService;
 
 public class TaskRepository {
     private final TaskDAO taskDAO;
     private final TaskExportService taskExportService;
+    private TaskImportService taskImportService;
 
-    public TaskRepository(TaskDAO taskDAO, TaskExportService taskExportService) {
+    public TaskRepository(TaskDAO taskDAO, TaskExportService taskExportService, TaskImportService taskImportService) {
         this.taskDAO = taskDAO;
         this.taskExportService = taskExportService;
+        this.taskImportService = taskImportService;
+    }
+
+    public String exportTasks() {
+        return taskExportService.export(getAll());
+    }
+
+    public int importTasks() {
+        List<Task> tasks = taskImportService.importTasks();
+        int count = tasks.size();
+        if (count > 0) {
+            Map<Task, Long> allTasks = taskDAO.getAll();
+            for (Task task : allTasks.keySet()) {
+                taskDAO.delete(task);
+            }
+            for (Task task : tasks) {
+                taskDAO.save(task);
+            }
+        }
+        return count;
     }
 
     public void save(Task task) {
         taskDAO.save(task);
-        taskExportService.export(getAll());
     }
 
     public Iterable<Task> getAll() {

@@ -4,6 +4,24 @@
               android:layout_width="fill_parent"
               android:layout_height="fill_parent"
         >
+    <LinearLayout android:orientation="horizontal"
+                  android:layout_width="fill_parent"
+                  android:layout_height="wrap_content">
+        <Button android:id="@+id/export_tasks"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="left"
+                android:text="@string/export_tasks"
+                android:onClick="onExport"
+                />
+        <Button android:id="@+id/import_tasks"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="right"
+                android:text="@string/import_tasks"
+                android:onClick="onImport"
+                />
+    </LinearLayout>
     <ListView
             android:id="@+id/taskList"
             android:layout_width="fill_parent"

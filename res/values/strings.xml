@@ -7,6 +7,16 @@
     <string name="edit_task">Edit task</string>
     <string name="save_task">Save</string>
     <string name="new_sub_task">New sub task</string>
+    <string name="export_tasks">Export</string>
+    <string name="import_tasks">Import</string>
+    <string name="are_you_sure_to_import_title">All todos would be replaced by imported ones</string>
+    <string name="are_you_sure_to_import">Are you sure to do this?</string>
+    <string name="ok_to_import">Yes, import and replace</string>
+    <string name="cancel_to_import">No, keep current ones</string>
+    <string name="export_complete">Export complete</string>
+    <string name="import_complete">Import complete</string>
+    <string name="import_failed">Import failed</string>
+    <string name="import_failed_desc">There are no tasks in imported file!</string>
     <string name="delete_task">Delete task</string>
     <string-array name="status_array">
         <item>Next Action</item>
