@@ -130,15 +130,21 @@ public class TaskEditActivity extends Activity {
                 .setView(input)
                 .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int whichButton) {
-                        if (!input.getText().toString().isEmpty()) {
-                            task.setText(input.getText().toString());
+                        if (!getInputText().isEmpty()) {
+                            task.setText(getInputText());
                             saveAndUpdate();
+                        } else if (initialText.isEmpty()) {
+                            finish();
                         }
+                    }
+
+                    private String getInputText() {
+                        return input.getText().toString().trim();
                     }
                 })
                 .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int whichButton) {
-                        if (initialText.isEmpty() && input.getText().toString().isEmpty()) {
+                        if (initialText.isEmpty() && input.getText().toString().trim().isEmpty()) {
                             finish();
                         }
                         // Do nothing.
