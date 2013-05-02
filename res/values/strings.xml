@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">GTD</string>
-    <string name="new_task">New task</string>
-    <string name="new_project">New project</string>
-    <string name="new_may_be">New may be</string>
-    <string name="edit_task">Edit task</string>
+    <string name="app_name">Zen GTD</string>
+    <string name="new_task">New Action</string>
+    <string name="new_project">New Project</string>
+    <string name="new_may_be">New May be</string>
+    <string name="edit_task">Project view</string>
     <string name="save_task">Save</string>
-    <string name="new_sub_task">New sub task</string>
+    <string name="new_sub_task">New sub action</string>
     <string name="export_tasks">Export</string>
     <string name="import_tasks">Import</string>
-    <string name="are_you_sure_to_import_title">All todos would be replaced by imported ones</string>
+    <string name="are_you_sure_to_import_title">All tasks would be replaced by imported ones</string>
     <string name="are_you_sure_to_import">Are you sure to do this?</string>
     <string name="ok_to_import">Yes, import and replace</string>
     <string name="cancel_to_import">No, keep current ones</string>

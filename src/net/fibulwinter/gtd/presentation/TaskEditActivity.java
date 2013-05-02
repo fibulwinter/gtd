@@ -155,20 +155,11 @@ public class TaskEditActivity extends Activity {
 
 
     public void onStartDateClick(View view) {
-        clearDatePicker.pickDate("Edit task start", task.getStartingDate(), new ClearDatePicker.DatePickListener() {
+        clearDatePicker.pickDate("Time constraints", task.getStartingDate(), task.getDueDate(), new ClearDatePicker.DatePickListener() {
             @Override
-            public void setOptionalDate(Optional<Date> date) {
-                task.setStartingDate(date);
-                saveAndUpdate();
-            }
-        });
-    }
-
-    public void onDueDateClick(View view) {
-        clearDatePicker.pickDate("Edit task due date", task.getDueDate(), new ClearDatePicker.DatePickListener() {
-            @Override
-            public void setOptionalDate(Optional<Date> date) {
-                task.setDueDate(date);
+            public void setOptionalDate(Optional<Date> dateStart, Optional<Date> dateDue) {
+                task.setStartingDate(dateStart);
+                task.setDueDate(dateDue);
                 saveAndUpdate();
             }
         });

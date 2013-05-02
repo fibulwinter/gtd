@@ -84,8 +84,7 @@ public class TaskItemAdapter extends ArrayAdapter<Task> {
         private ImageButton doneStatus;
         private TextView text;
         private TextView contextSpinner;
-        private TextView taskStartBtn;
-        private TextView taskDueBtn;
+        private TextView timeConstraints;
         private LinearLayout extraPanel;
 
         ViewHolder(Task aTask, View convertView) {
@@ -117,28 +116,15 @@ public class TaskItemAdapter extends ArrayAdapter<Task> {
 
                 }
             });
-            taskStartBtn = (TextView) convertView.findViewById(R.id.task_start);
-            taskStartBtn.setOnClickListener(new View.OnClickListener() {
+            timeConstraints = (TextView) convertView.findViewById(R.id.time_constraints);
+            timeConstraints.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    clearDatePicker.pickDate("Edit task start", task.getStartingDate(), new ClearDatePicker.DatePickListener() {
+                    clearDatePicker.pickDate("Time constraints", task.getStartingDate(), task.getDueDate(), new ClearDatePicker.DatePickListener() {
                         @Override
-                        public void setOptionalDate(Optional<Date> date) {
-                            task.setStartingDate(date);
-                            taskUpdateListener.onTaskUpdated(task);
-                            update(task, true);
-                        }
-                    });
-                }
-            });
-            taskDueBtn = (TextView) convertView.findViewById(R.id.task_due);
-            taskDueBtn.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    clearDatePicker.pickDate("Edit task due", task.getDueDate(), new ClearDatePicker.DatePickListener() {
-                        @Override
-                        public void setOptionalDate(Optional<Date> date) {
-                            task.setDueDate(date);
+                        public void setOptionalDate(Optional<Date> dateStart, Optional<Date> dateDue) {
+                            task.setStartingDate(dateStart);
+                            task.setDueDate(dateDue);
                             taskUpdateListener.onTaskUpdated(task);
                             update(task, true);
                         }
@@ -265,8 +251,7 @@ public class TaskItemAdapter extends ArrayAdapter<Task> {
             if (canShowStartingDate() && !canShowExtra(selected)) {
                 extra = extra.space().join("from " + DateUtils.optionalDateToString(task.getStartingDate()));
             }
-            taskStartBtn.setText("from " + DateUtils.optionalDateToString(task.getStartingDate()));
-            taskDueBtn.setText("due to " + DateUtils.optionalDateToString(task.getDueDate()));
+            timeConstraints.setText("[" + DateUtils.optionalDateToString(task.getStartingDate()) + " - " + DateUtils.optionalDateToString(task.getDueDate()) + "]");
             if (canShowDueDate() && !canShowExtra(selected)) {
                 String dueDate = dueDate();
                 if (TaskListService.TODAY_PREDICATE().apply(task)) {
@@ -323,10 +308,8 @@ public class TaskItemAdapter extends ArrayAdapter<Task> {
             int visibility = canShowExtra(selected) ? Button.VISIBLE : Button.GONE;
             extraPanel.setVisibility(visibility);
             contextSpinner.setVisibility(visibility);
-            taskStartBtn.setVisibility(visibility);
-            taskStartBtn.setClickable(canShowExtra(selected));
-            taskDueBtn.setVisibility(visibility);
-            taskDueBtn.setClickable(canShowExtra(selected));
+            timeConstraints.setVisibility(visibility);
+            timeConstraints.setClickable(canShowExtra(selected));
             this.text.setClickable(canShowExtra(selected));
         }
 
