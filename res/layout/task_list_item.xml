@@ -39,7 +39,8 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="right"
-                android:padding="5dip"
+                android:paddingLeft="5dip"
+                android:paddingRight="5dip"
                 android:text="Context"
                 android:textColor="#6666cc"
                 android:background="#303066"
@@ -49,7 +50,8 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="right"
-                android:padding="5dip"
+                android:paddingLeft="5dip"
+                android:paddingRight="5dip"
                 android:text="Start"
                 android:textColor="@color/white"
                 />
@@ -58,7 +60,6 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="right"
-                android:padding="5dip"
                 android:text="Due"
                 android:textColor="@color/white"
                 />
