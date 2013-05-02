@@ -1,6 +1,12 @@
 package net.fibulwinter.gtd.presentation;
 
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.text.style.BackgroundColorSpan;
@@ -10,18 +16,15 @@ import android.text.style.StyleSpan;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
-import android.widget.ImageButton;
-import android.widget.TextView;
+import android.widget.*;
 import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 import net.fibulwinter.gtd.R;
+import net.fibulwinter.gtd.domain.ContextRepository;
 import net.fibulwinter.gtd.domain.Task;
 import net.fibulwinter.gtd.domain.TaskStatus;
 import net.fibulwinter.gtd.infrastructure.DateUtils;
 import net.fibulwinter.gtd.service.TaskListService;
-
-import java.util.List;
 
 public class TaskItemAdapter extends ArrayAdapter<Task> {
     public static final int TODAY_FG_COLOR = Color.parseColor("#ff8000");
@@ -42,6 +45,7 @@ public class TaskItemAdapter extends ArrayAdapter<Task> {
         this.taskUpdateListener = taskUpdateListener;
         this.config = config;
         inflater = LayoutInflater.from(context);
+        clearDatePicker = new ClearDatePicker(context);
     }
 
     public void setHighlightedTask(Optional<Task> highlightedTask) {
@@ -66,26 +70,103 @@ public class TaskItemAdapter extends ArrayAdapter<Task> {
         } else {
             holder = (ViewHolder) convertView.getTag();
         }
-        holder.update(getItem(position));
+        holder.update(getItem(position), highlightedTask.isPresent() && highlightedTask.get() == holder.task);
         return convertView;
     }
+
+    private ClearDatePicker clearDatePicker;
 
     private class ViewHolder {
         private Task task;
 
         private final View convertView;
+        private ContextRepository contextRepository;
         private ImageButton doneStatus;
         private TextView text;
+        private TextView contextSpinner;
+        private TextView taskStartBtn;
+        private TextView taskDueBtn;
+        private LinearLayout extraPanel;
 
         ViewHolder(Task aTask, View convertView) {
             this.task = aTask;
             this.convertView = convertView;
+            this.contextRepository = contextRepository;
             doneStatus = (ImageButton) convertView.findViewById(R.id.task_list_item_status);
+            extraPanel = (LinearLayout) convertView.findViewById(R.id.extra_row);
             text = (TextView) convertView.findViewById(R.id.task_list_item_text);
+            text.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    onTitleClick(TaskItemAdapter.this.getContext(), view);
+                }
+            });
+            contextSpinner = (TextView) convertView.findViewById(R.id.task_context_spinner);
+            contextRepository = new ContextRepository();
+            contextSpinner.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    SpinnerDialog.show(TaskItemAdapter.this.getContext(), contextRepository.getAll(), task.getContext(), new SpinnerDialog.OnSelected<net.fibulwinter.gtd.domain.Context>() {
+                        @Override
+                        public void selected(net.fibulwinter.gtd.domain.Context selectedItem) {
+                            task.setContext(selectedItem);
+                            taskUpdateListener.onTaskUpdated(task);
+                            update(task, true);
+                        }
+                    });
+
+                }
+            });
+            taskStartBtn = (TextView) convertView.findViewById(R.id.task_start);
+            taskStartBtn.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    clearDatePicker.pickDate("Edit task start", task.getStartingDate(), new ClearDatePicker.DatePickListener() {
+                        @Override
+                        public void setOptionalDate(Optional<Date> date) {
+                            task.setStartingDate(date);
+                            taskUpdateListener.onTaskUpdated(task);
+                            update(task, true);
+                        }
+                    });
+                }
+            });
+            taskDueBtn = (TextView) convertView.findViewById(R.id.task_due);
+            taskDueBtn.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    clearDatePicker.pickDate("Edit task due", task.getDueDate(), new ClearDatePicker.DatePickListener() {
+                        @Override
+                        public void setOptionalDate(Optional<Date> date) {
+                            task.setDueDate(date);
+                            taskUpdateListener.onTaskUpdated(task);
+                            update(task, true);
+                        }
+                    });
+                }
+            });
             doneStatus.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    onDoneStatusUpdated();
+                    if (!config.isShowExtra()) {
+                        onDoneStatusUpdated();
+                    } else {
+                        List<TaskStatus> statuses = new ArrayList<TaskStatus>();
+                        statuses.add(TaskStatus.NextAction);
+                        statuses.add(TaskStatus.Project);
+                        statuses.add(TaskStatus.Completed);
+                        statuses.add(TaskStatus.Maybe);
+                        statuses.add(TaskStatus.Cancelled);
+                        SpinnerDialog.show(TaskItemAdapter.this.getContext(), statuses, task.getStatus(), new SpinnerDialog.OnSelected<TaskStatus>() {
+                            @Override
+                            public void selected(TaskStatus selectedItem) {
+                                task.setStatus(selectedItem);
+                                taskUpdateListener.onTaskUpdated(task);
+                                update(task, true);
+                            }
+                        });
+                    }
+
                 }
             });
             convertView.setOnClickListener(new View.OnClickListener() {
@@ -96,8 +177,42 @@ public class TaskItemAdapter extends ArrayAdapter<Task> {
             });
         }
 
+        public void onTitleClick(Context context, View view) {
+            // Set an EditText view to get user input
+            final EditText input = new EditText(context);
+            final String initialText = task.getText();
+            input.setText(initialText);
+            new AlertDialog.Builder(context)
+                    .setTitle("Edit task text")
+                    .setView(input)
+                    .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int whichButton) {
+                            if (!getInputText().isEmpty()) {
+                                task.setText(getInputText());
+                                taskUpdateListener.onTaskUpdated(task);
+                                update(task, true);
+                            } else if (initialText.isEmpty()) {
+                            }
+                        }
+
+                        private String getInputText() {
+                            return input.getText().toString().trim();
+                        }
+                    })
+                    .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int whichButton) {
+                            if (initialText.isEmpty() && input.getText().toString().trim().isEmpty()) {
+                            }
+                            // Do nothing.
+                        }
+                    }).show();
+        }
+
+
         private void onSelected() {
             taskUpdateListener.onTaskSelected(task);
+            update(task, true);
+//            convertView.requestLayout();
         }
 
         private void onDoneStatusUpdated() {
@@ -107,12 +222,17 @@ public class TaskItemAdapter extends ArrayAdapter<Task> {
                 task.setStatus(TaskStatus.NextAction);
             }
             taskUpdateListener.onTaskUpdated(task);
-            update(task);
+            update(task, false);
         }
 
-        void update(Task item) {
+        void update(Task item, boolean selected) {
             task = item;
-            SpannedText text = new SpannedText(item.getText(), new StyleSpan(Typeface.BOLD));
+//            if(selected){
+//                this.text.setTextSize(20);
+//            }else{
+//                this.text.setTextSize(20);
+//            }
+            SpannedText text = selected ? new SpannedText(item.getText(), Typeface.BOLD, new ForegroundColorSpan(TODAY_FG_COLOR)) : new SpannedText(item.getText(), Typeface.BOLD);
             if (task.getStatus() == TaskStatus.Cancelled) {
                 text = text.style(new StrikethroughSpan());
             }
@@ -136,16 +256,18 @@ public class TaskItemAdapter extends ArrayAdapter<Task> {
                 }
                 extra = extra.space().join(subTasks.size() + " subtasks");
             }
-            if (canShowContext()) {
+            if (canShowContext() && !canShowExtra(selected)) {
                 extra = extra.space().join(task.getContext().getName(),
                         new ForegroundColorSpan(CONTEXT_FG_COLOR),
                         new BackgroundColorSpan(CONTEXT_BG_COLOR)
                 );
             }
-            if (canShowStartingDate()) {
+            if (canShowStartingDate() && !canShowExtra(selected)) {
                 extra = extra.space().join("from " + DateUtils.optionalDateToString(task.getStartingDate()));
             }
-            if (canShowDueDate()) {
+            taskStartBtn.setText("from " + DateUtils.optionalDateToString(task.getStartingDate()));
+            taskDueBtn.setText("due to " + DateUtils.optionalDateToString(task.getDueDate()));
+            if (canShowDueDate() && !canShowExtra(selected)) {
                 String dueDate = dueDate();
                 if (TaskListService.TODAY_PREDICATE().apply(task)) {
                     extra = extra.space().join(dueDate,
@@ -161,7 +283,7 @@ public class TaskItemAdapter extends ArrayAdapter<Task> {
                     extra = extra.space().join(dueDate);
                 }
             }
-            if (!extra.isEmpty()) {
+            if (!extra.isEmpty() && !canShowExtra(selected)) {
                 text = text.join("\n").join(extra);
             }
             text.apply(this.text);
@@ -183,15 +305,29 @@ public class TaskItemAdapter extends ArrayAdapter<Task> {
             }
 
             doneStatus.setImageDrawable(getContext().getResources().getDrawable(image));
-            doneStatus.setClickable(config.isAllowChangeStatus() && (task.getStatus().isActive() || task.getStatus() == TaskStatus.Completed));
+            if (config.isShowExtra()) {
+                doneStatus.setClickable(selected);
+            } else {
+                doneStatus.setClickable(config.isAllowChangeStatus() && (task.getStatus().isActive() || task.getStatus() == TaskStatus.Completed));
+            }
             if (canShowLevel()) {
                 this.text.setPadding(task.getMasterTasks().size() * 24, 5, 5, 5);
+                this.extraPanel.setPadding(task.getMasterTasks().size() * 24, 5, 5, 5);
                 if (highlightedTask.isPresent() && highlightedTask.get().equals(task)) {
                     this.convertView.setBackgroundColor(getContext().getResources().getColor(android.R.color.secondary_text_dark));
                 } else {
                     this.convertView.setBackgroundColor(getContext().getResources().getColor(android.R.color.background_dark));
                 }
             }
+            contextSpinner.setText(task.getContext().getName());
+            int visibility = canShowExtra(selected) ? Button.VISIBLE : Button.GONE;
+            extraPanel.setVisibility(visibility);
+            contextSpinner.setVisibility(visibility);
+            taskStartBtn.setVisibility(visibility);
+            taskStartBtn.setClickable(canShowExtra(selected));
+            taskDueBtn.setVisibility(visibility);
+            taskDueBtn.setClickable(canShowExtra(selected));
+            this.text.setClickable(canShowExtra(selected));
         }
 
         private boolean canShowContext() {
@@ -220,6 +356,10 @@ public class TaskItemAdapter extends ArrayAdapter<Task> {
 
         private boolean canShowLevel() {
             return config.isShowLevel();
+        }
+
+        private boolean canShowExtra(boolean selected) {
+            return config.isShowExtra() && selected;
         }
 
         private String dueDate() {

@@ -10,8 +10,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentRight="true"
-            android:layout_alignParentTop="true"
-            android:layout_alignParentBottom="true"
+            android:layout_centerVertical="true"
             android:background="@android:color/background_dark"
             android:clickable="true"
             android:gravity="center"
@@ -27,4 +26,41 @@
             android:gravity="center_vertical"
             android:text="Text"
             />
+    <LinearLayout android:id="@+id/extra_row"
+                  android:layout_width="wrap_content"
+                  android:layout_height="wrap_content"
+                  android:orientation="horizontal"
+                  android:layout_below="@id/task_list_item_text"
+                  android:visibility="gone"
+                  android:layout_alignParentLeft="true"
+                  android:layout_alignParentBottom="true">
+        <TextView
+                android:id="@+id/task_context_spinner"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="right"
+                android:padding="5dip"
+                android:text="Context"
+                android:textColor="#6666cc"
+                android:background="#303066"
+                />
+        <TextView
+                android:id="@+id/task_start"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="right"
+                android:padding="5dip"
+                android:text="Start"
+                android:textColor="@color/white"
+                />
+        <TextView
+                android:id="@+id/task_due"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="right"
+                android:padding="5dip"
+                android:text="Due"
+                android:textColor="@color/white"
+                />
+    </LinearLayout>
 </RelativeLayout>

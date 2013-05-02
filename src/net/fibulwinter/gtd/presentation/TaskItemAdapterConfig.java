@@ -9,6 +9,7 @@ public class TaskItemAdapterConfig {
     private boolean allowChangeStatus = true;
     private boolean showLevel = false;
     private boolean showCompletedDate = false;
+    private boolean showExtra = false;
 
     public boolean isShowContext() {
         return showContext;
@@ -72,5 +73,13 @@ public class TaskItemAdapterConfig {
 
     public void setShowCompletedDate(boolean showCompletedDate) {
         this.showCompletedDate = showCompletedDate;
+    }
+
+    public boolean isShowExtra() {
+        return showExtra;
+    }
+
+    public void setShowExtra(boolean showExtra) {
+        this.showExtra = showExtra;
     }
 }

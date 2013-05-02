@@ -66,6 +66,7 @@ public class TaskEditActivity extends Activity {
         taskItemAdapterConfig.setShowStartingDate(true);
         taskItemAdapterConfig.setShowDueDate(true);
         taskItemAdapterConfig.setShowLevel(true);
+        taskItemAdapterConfig.setShowExtra(true);
         masterTasksAdapter = new TaskItemAdapter(this, taskUpdateListener, taskItemAdapterConfig);
         masterTaskList.setAdapter(masterTasksAdapter);
 
