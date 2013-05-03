@@ -1,5 +1,10 @@
 package net.fibulwinter.gtd.domain;
 
+import static com.google.common.collect.Maps.newHashMap;
+
+import java.util.Date;
+import java.util.Map;
+
 import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.database.Cursor;
@@ -7,11 +12,6 @@ import android.util.Log;
 import com.google.common.base.Optional;
 import com.google.common.base.Strings;
 import net.fibulwinter.gtd.infrastructure.TaskTableColumns;
-
-import java.util.Date;
-import java.util.Map;
-
-import static com.google.common.collect.Maps.newHashMap;
 
 public class TaskDAO {
     public static final String[] PROJECTION = new String[]{
@@ -97,7 +97,11 @@ public class TaskDAO {
     private Task cursor2LevelRecord(Cursor cursor) {
         long id = cursor.getLong(0);
         String text = cursor.getString(1);
-        TaskStatus status = TaskStatus.valueOf(cursor.getString(2));
+        String statusString = cursor.getString(2);
+        if ("Project".equals(statusString)) {
+            statusString = TaskStatus.NextAction.name();
+        }
+        TaskStatus status = TaskStatus.valueOf(statusString);
         long startDate = cursor.getLong(4);
         long dueDate = cursor.getLong(5);
         String context = cursor.getString(6);

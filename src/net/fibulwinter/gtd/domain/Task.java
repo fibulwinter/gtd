@@ -1,16 +1,14 @@
 package net.fibulwinter.gtd.domain;
 
-import com.google.common.base.Optional;
-import com.google.common.base.Predicate;
+import static com.google.common.collect.Lists.newArrayList;
 
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
-import static com.google.common.collect.Lists.newArrayList;
-
-import javax.annotation.Nullable;
+import com.google.common.base.Optional;
+import com.google.common.base.Predicate;
 
 public class Task {
     private long id;
@@ -25,7 +23,7 @@ public class Task {
     public static final Predicate<? super Task> IS_PROJECT_ROOT = new Predicate<Task>() {
         @Override
         public boolean apply(Task task) {
-            return task.getProjectRoot()==task;
+            return task.getProjectRoot() == task;
         }
     };
 
@@ -75,7 +73,10 @@ public class Task {
     }
 
     public boolean isProject() {
-        return status == TaskStatus.Project || !subTasks.isEmpty();
+        for (Task task : subTasks) {
+            if (task.getStatus().isActive()) return true;
+        }
+        return false;
     }
 
     public void setStatus(TaskStatus status) {

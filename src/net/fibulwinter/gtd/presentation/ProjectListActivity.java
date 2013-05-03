@@ -72,7 +72,7 @@ public class ProjectListActivity extends Activity {
     public void onNewTask(View view) {
         Uri uri = ContentUris.withAppendedId(TaskTableColumns.CONTENT_URI, -1);
         Intent intent = new Intent("edit", uri, this, TaskEditActivity.class);
-        intent.putExtra(TaskEditActivity.TYPE, TaskStatus.Project);
+        intent.putExtra(TaskEditActivity.TYPE, TaskStatus.NextAction);
         startActivity(intent);
     }
 

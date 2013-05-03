@@ -139,7 +139,6 @@ public class TaskItemAdapter extends ArrayAdapter<Task> {
                     } else {
                         List<TaskStatus> statuses = new ArrayList<TaskStatus>();
                         statuses.add(TaskStatus.NextAction);
-                        statuses.add(TaskStatus.Project);
                         statuses.add(TaskStatus.Completed);
                         statuses.add(TaskStatus.Maybe);
                         statuses.add(TaskStatus.Cancelled);
@@ -274,7 +273,6 @@ public class TaskItemAdapter extends ArrayAdapter<Task> {
             text.apply(this.text);
             int image = 0;
             switch (task.getStatus()) {
-                case Project:
                 case NextAction:
                     image = TaskListService.PROJECT_WITHOUT_ACTIONS_PREDICATE.apply(task) ? R.drawable.p_no_action : R.drawable.a_not_done;
                     break;

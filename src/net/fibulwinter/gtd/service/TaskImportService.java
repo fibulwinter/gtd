@@ -64,7 +64,7 @@ public class TaskImportService {
                             statusString.equals("+") ? TaskStatus.Completed :
                                     statusString.equals("-") ? TaskStatus.Cancelled :
                                             statusString.equals("?") ? TaskStatus.Maybe :
-                                                    statusString.equals("P") ? TaskStatus.Project : null;
+                                                    statusString.equals("P") ? TaskStatus.NextAction : null;
             Context context = contextRepository.getByName(matcher.group(3)).get();
             Optional<Date> start = DateUtils.stringToOptionalDate(matcher.group(4));
             Optional<Date> due = DateUtils.stringToOptionalDate(matcher.group(5));
@@ -113,9 +113,6 @@ public class TaskImportService {
         switch (status) {
             case NextAction:
                 s = " ";
-                break;
-            case Project:
-                s = "P";
                 break;
             case Maybe:
                 s = "?";

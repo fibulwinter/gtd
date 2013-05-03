@@ -2,7 +2,6 @@ package net.fibulwinter.gtd.domain;
 
 public enum TaskStatus {
     NextAction(true),
-    Project(true),
     Maybe(false),
     Completed(false),
     Cancelled(false),;

@@ -62,9 +62,6 @@ public class TaskExportService {
             case NextAction:
                 s = " ";
                 break;
-            case Project:
-                s = "P";
-                break;
             case Maybe:
                 s = "?";
                 break;
