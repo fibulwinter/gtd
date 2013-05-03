@@ -23,7 +23,7 @@ public class ClearDatePicker {
         linearLayout.addView(extendedDatePickerStart.getView());
         linearLayout.addView(extendedDatePickerDue.getView());
         new AlertDialog.Builder(context)
-                .setTitle(title)
+//                .setTitle(title)
                 .setView(linearLayout)
                 .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int whichButton) {
