@@ -39,6 +39,7 @@ public class ProjectListActivity extends Activity {
         TaskUpdateListener taskUpdateListener = TaskUpdateListenerFactory.simple(this, taskRepository);
         taskListService = new TaskListService(taskRepository);
         TaskItemAdapterConfig config = new TaskItemAdapterConfig();
+        config.setAllowChangeStatus(false);
         config.setShowSubActions(true);
         taskItemAdapter = new TaskItemAdapter(this, taskUpdateListener, config);
         taskList.setAdapter(taskItemAdapter);

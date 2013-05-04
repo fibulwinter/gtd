@@ -34,7 +34,6 @@ public class MayBeListActivity extends Activity {
         TaskUpdateListener taskUpdateListener = TaskUpdateListenerFactory.simple(this, taskRepository);
         taskListService = new TaskListService(taskRepository);
         TaskItemAdapterConfig taskItemAdapterConfig = new TaskItemAdapterConfig();
-        taskItemAdapterConfig.setAllowChangeStatus(false);
         taskItemAdapter = new TaskItemAdapter(this, taskUpdateListener, taskItemAdapterConfig);
         taskList.setAdapter(taskItemAdapter);
     }

@@ -60,6 +60,13 @@ public class TaskItemAdapter extends ArrayAdapter<Task> {
         notifyDataSetChanged();
     }
 
+    private void replace(Task replaced, Task replacing) {
+        int position = getPosition(replaced);
+        remove(replaced);
+        insert(replacing, position);
+        notifyDataSetChanged();
+    }
+
     @Override
     public View getView(final int position, View convertView, ViewGroup parent) {
         ViewHolder holder;
@@ -80,7 +87,6 @@ public class TaskItemAdapter extends ArrayAdapter<Task> {
         private Task task;
 
         private final View convertView;
-        private ContextRepository contextRepository;
         private ImageButton doneStatus;
         private TextView text;
         private TextView contextSpinner;
@@ -90,7 +96,6 @@ public class TaskItemAdapter extends ArrayAdapter<Task> {
         ViewHolder(Task aTask, View convertView) {
             this.task = aTask;
             this.convertView = convertView;
-            this.contextRepository = contextRepository;
             doneStatus = (ImageButton) convertView.findViewById(R.id.task_list_item_status);
             extraPanel = (LinearLayout) convertView.findViewById(R.id.extra_row);
             text = (TextView) convertView.findViewById(R.id.task_list_item_text);
@@ -101,8 +106,9 @@ public class TaskItemAdapter extends ArrayAdapter<Task> {
                 }
             });
             contextSpinner = (TextView) convertView.findViewById(R.id.task_context_spinner);
-            contextRepository = new ContextRepository();
             contextSpinner.setOnClickListener(new View.OnClickListener() {
+                private ContextRepository contextRepository = new ContextRepository();
+
                 @Override
                 public void onClick(View view) {
                     SpinnerDialog.show(TaskItemAdapter.this.getContext(), contextRepository.getAll(), task.getContext(), new SpinnerDialog.OnSelected<net.fibulwinter.gtd.domain.Context>() {
@@ -135,7 +141,91 @@ public class TaskItemAdapter extends ArrayAdapter<Task> {
                 @Override
                 public void onClick(View v) {
                     if (!config.isShowExtra()) {
-                        onDoneStatusUpdated();
+                        List<StatusTransition> transitions = new ArrayList<StatusTransition>();
+                        if (task.getStatus() == TaskStatus.NextAction) {
+                            transitions.add(new StatusTransition("Done!") {
+                                @Override
+                                public void doTransition(Task task) {
+                                    task.complete();
+                                    updateAfterTransition(task);
+                                }
+                            });
+                            transitions.add(new StatusTransition("Sub action") {
+                                @Override
+                                public void doTransition(final Task task) {
+                                    Context context = ViewHolder.this.convertView.getContext();
+                                    final EditText input = new EditText(context);
+                                    input.setText("");
+                                    new AlertDialog.Builder(context)
+                                            .setTitle("Enter sub action")
+                                            .setView(input)
+                                            .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+                                                public void onClick(DialogInterface dialog, int whichButton) {
+                                                    String inputText = input.getText().toString().trim();
+                                                    if (!inputText.isEmpty()) {
+                                                        Task subTask = new Task(inputText);
+                                                        subTask.setMaster(task);
+                                                        updateAfterTransition(subTask);
+                                                    }
+                                                }
+
+                                            })
+                                            .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                                                public void onClick(DialogInterface dialog, int whichButton) {
+                                                }
+                                            }).show();
+                                }
+                            });
+                            transitions.add(new StatusTransition("Do it later") {
+                                @Override
+                                public void doTransition(final Task task) {
+                                    clearDatePicker.pickDate("Time constraints", task.getStartingDate(), task.getDueDate(), new ClearDatePicker.DatePickListener() {
+                                        @Override
+                                        public void setOptionalDate(Optional<Date> dateStart, Optional<Date> dateDue) {
+                                            task.setStartingDate(dateStart);
+                                            task.setDueDate(dateDue);
+                                            taskUpdateListener.onTaskUpdated(task);
+                                            update(task, true);
+                                        }
+                                    });
+
+                                }
+                            });
+                        } else {
+                            transitions.add(new StatusTransition("Let's do it!") {
+                                @Override
+                                public void doTransition(Task task) {
+                                    task.setStatus(TaskStatus.NextAction);
+                                    updateAfterTransition(task);
+                                }
+                            });
+                        }
+                        if (task.getStatus() != TaskStatus.Maybe) {
+                            transitions.add(new StatusTransition("May be later...") {
+                                @Override
+                                public void doTransition(Task task) {
+                                    task.setStatus(TaskStatus.Maybe);
+                                    updateAfterTransition(task);
+                                }
+                            });
+                        }
+                        if (task.getStatus() != TaskStatus.Cancelled) {
+                            transitions.add(new StatusTransition("Never. Cancel it!") {
+                                @Override
+                                public void doTransition(Task task) {
+                                    task.cancel();
+                                    updateAfterTransition(task);
+                                }
+                            });
+                        }
+
+                        SpinnerDialog.show(TaskItemAdapter.this.getContext(), transitions, null, new SpinnerDialog.OnSelected<StatusTransition>() {
+                            @Override
+                            public void selected(StatusTransition selectedItem) {
+                                selectedItem.doTransition(task);
+                            }
+                        });
+//                        onDoneStatusUpdated();
                     } else {
                         List<TaskStatus> statuses = new ArrayList<TaskStatus>();
                         statuses.add(TaskStatus.NextAction);
@@ -160,6 +250,15 @@ public class TaskItemAdapter extends ArrayAdapter<Task> {
                     onSelected();
                 }
             });
+        }
+
+        private void updateAfterTransition(Task newTask) {
+            Task oldTask = task;
+            taskUpdateListener.onTaskUpdated(newTask);
+            update(newTask, true);
+            if (newTask != oldTask) {
+                replace(oldTask, task);
+            }
         }
 
         public void onTitleClick(Context context, View view) {
@@ -197,26 +296,10 @@ public class TaskItemAdapter extends ArrayAdapter<Task> {
         private void onSelected() {
             taskUpdateListener.onTaskSelected(task);
             update(task, true);
-//            convertView.requestLayout();
-        }
-
-        private void onDoneStatusUpdated() {
-            if (task.getStatus().isActive()) {
-                task.complete();
-            } else {
-                task.setStatus(TaskStatus.NextAction);
-            }
-            taskUpdateListener.onTaskUpdated(task);
-            update(task, false);
         }
 
         void update(Task item, boolean selected) {
             task = item;
-//            if(selected){
-//                this.text.setTextSize(20);
-//            }else{
-//                this.text.setTextSize(20);
-//            }
             SpannedText text = selected ? new SpannedText(item.getText(), Typeface.BOLD, new ForegroundColorSpan(TODAY_FG_COLOR)) : new SpannedText(item.getText(), Typeface.BOLD);
             if (task.getStatus() == TaskStatus.Cancelled) {
                 text = text.style(new StrikethroughSpan());
@@ -291,7 +374,7 @@ public class TaskItemAdapter extends ArrayAdapter<Task> {
             if (config.isShowExtra()) {
                 doneStatus.setClickable(selected);
             } else {
-                doneStatus.setClickable(config.isAllowChangeStatus() && (task.getStatus().isActive() || task.getStatus() == TaskStatus.Completed));
+                doneStatus.setClickable(config.isAllowChangeStatus());
             }
             if (canShowLevel()) {
                 this.text.setPadding(task.getMasterTasks().size() * 24, 5, 5, 5);
