@@ -37,12 +37,7 @@ public class DoneListActivity extends Activity {
         taskRepository = new TaskRepository(new TaskDAO(getContentResolver(), contextRepository), new TaskExportService(), new TaskImportService(contextRepository));
         TaskUpdateListener taskUpdateListener = TaskUpdateListenerFactory.simple(this, taskRepository);
         taskListService = new TaskListService(taskRepository);
-        TaskItemAdapterConfig taskItemAdapterConfig = new TaskItemAdapterConfig();
-        taskItemAdapterConfig.setAllowChangeStatus(false);
-        taskItemAdapterConfig.setShowStartingDate(false);
-        taskItemAdapterConfig.setShowCompletedDate(true);
-        taskItemAdapterConfig.setShowContext(false);
-        taskItemAdapter = new TaskItemAdapter(this, taskUpdateListener, taskItemAdapterConfig);
+        taskItemAdapter = new TaskItemAdapter(this, taskUpdateListener, TaskItemAdapterConfig.logList());
         taskList.setAdapter(taskItemAdapter);
     }
 

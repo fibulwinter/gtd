@@ -1,5 +1,8 @@
 package net.fibulwinter.gtd.presentation;
 
+import static net.fibulwinter.gtd.presentation.TaskItemAdapterConfig.editProjectView;
+import static net.fibulwinter.gtd.presentation.TaskItemAdapterConfig.projectView;
+
 import java.util.Date;
 import java.util.List;
 
@@ -60,14 +63,7 @@ public class TaskEditActivity extends Activity {
         contextSpinner = (Spinner) findViewById(R.id.task_context_spinner);
         startingDatePicker = (Button) findViewById(R.id.startingDatePicker);
         dueDatePicker = (Button) findViewById(R.id.dueDatePicker);
-        TaskItemAdapterConfig taskItemAdapterConfig = new TaskItemAdapterConfig();
-        taskItemAdapterConfig.setShowMasterProject(false);
-        taskItemAdapterConfig.setShowSubActions(false);
-        taskItemAdapterConfig.setShowStartingDate(true);
-        taskItemAdapterConfig.setShowDueDate(true);
-        taskItemAdapterConfig.setShowLevel(true);
-        taskItemAdapterConfig.setShowExtra(true);
-        masterTasksAdapter = new TaskItemAdapter(this, taskUpdateListener, taskItemAdapterConfig);
+        masterTasksAdapter = new TaskItemAdapter(this, taskUpdateListener, projectView(), editProjectView());
         masterTaskList.setAdapter(masterTasksAdapter);
 
         ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this,

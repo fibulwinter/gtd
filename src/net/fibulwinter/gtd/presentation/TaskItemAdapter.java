@@ -1,5 +1,8 @@
 package net.fibulwinter.gtd.presentation;
 
+import static com.google.common.collect.FluentIterable.from;
+import static com.google.common.collect.Iterables.getOnlyElement;
+
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -27,25 +30,29 @@ import net.fibulwinter.gtd.infrastructure.DateUtils;
 import net.fibulwinter.gtd.service.TaskListService;
 
 public class TaskItemAdapter extends ArrayAdapter<Task> {
-    public static final int TODAY_FG_COLOR = Color.parseColor("#ff8000");
-    public static final int TODAY_BG_COLOR = Color.parseColor("#663000");
-    public static final int OVERDUE_FG_COLOR = Color.parseColor("#ff0000");
-    public static final int OVERDUE_BG_COLOR = Color.parseColor("#660000");
     public static final int CONTEXT_FG_COLOR = Color.parseColor("#6666cc");
     public static final int CONTEXT_BG_COLOR = Color.parseColor("#303066");
 
     private LayoutInflater inflater;
     private final TaskUpdateListener taskUpdateListener;
     private final TaskItemAdapterConfig config;
+    private TaskItemAdapterConfig selectedConfig;
     private Optional<Task> highlightedTask = Optional.absent();
+    private TimeConstraints timeConstraints;
 
 
     public TaskItemAdapter(Context context, TaskUpdateListener taskUpdateListener, TaskItemAdapterConfig config) {
+        this(context, taskUpdateListener, config, config);
+    }
+
+    public TaskItemAdapter(Context context, TaskUpdateListener taskUpdateListener, TaskItemAdapterConfig config, TaskItemAdapterConfig selectedConfig) {
         super(context, R.layout.task_list_item, Lists.<Task>newArrayList());
         this.taskUpdateListener = taskUpdateListener;
         this.config = config;
+        this.selectedConfig = selectedConfig;
         inflater = LayoutInflater.from(context);
         clearDatePicker = new ClearDatePicker(context);
+        timeConstraints = new TimeConstraints(context);
     }
 
     public void setHighlightedTask(Optional<Task> highlightedTask) {
@@ -85,6 +92,7 @@ public class TaskItemAdapter extends ArrayAdapter<Task> {
 
     private class ViewHolder {
         private Task task;
+        private boolean selected;
 
         private final View convertView;
         private ImageButton doneStatus;
@@ -140,7 +148,21 @@ public class TaskItemAdapter extends ArrayAdapter<Task> {
             doneStatus.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    if (!config.isShowExtra()) {
+                    if (selectedConfig.isEditMode()) {
+                        List<TaskStatus> statuses = new ArrayList<TaskStatus>();
+                        statuses.add(TaskStatus.NextAction);
+                        statuses.add(TaskStatus.Completed);
+                        statuses.add(TaskStatus.Maybe);
+                        statuses.add(TaskStatus.Cancelled);
+                        SpinnerDialog.show(TaskItemAdapter.this.getContext(), statuses, task.getStatus(), new SpinnerDialog.OnSelected<TaskStatus>() {
+                            @Override
+                            public void selected(TaskStatus selectedItem) {
+                                task.setStatus(selectedItem);
+                                taskUpdateListener.onTaskUpdated(task);
+                                update(task, true);
+                            }
+                        });
+                    } else {
                         List<StatusTransition> transitions = new ArrayList<StatusTransition>();
                         if (task.getStatus() == TaskStatus.NextAction) {
                             transitions.add(new StatusTransition("Done!") {
@@ -165,6 +187,7 @@ public class TaskItemAdapter extends ArrayAdapter<Task> {
                                                     if (!inputText.isEmpty()) {
                                                         Task subTask = new Task(inputText);
                                                         subTask.setMaster(task);
+                                                        highlightedTask = Optional.of(subTask);
                                                         updateAfterTransition(subTask);
                                                     }
                                                 }
@@ -226,20 +249,6 @@ public class TaskItemAdapter extends ArrayAdapter<Task> {
                             }
                         });
 //                        onDoneStatusUpdated();
-                    } else {
-                        List<TaskStatus> statuses = new ArrayList<TaskStatus>();
-                        statuses.add(TaskStatus.NextAction);
-                        statuses.add(TaskStatus.Completed);
-                        statuses.add(TaskStatus.Maybe);
-                        statuses.add(TaskStatus.Cancelled);
-                        SpinnerDialog.show(TaskItemAdapter.this.getContext(), statuses, task.getStatus(), new SpinnerDialog.OnSelected<TaskStatus>() {
-                            @Override
-                            public void selected(TaskStatus selectedItem) {
-                                task.setStatus(selectedItem);
-                                taskUpdateListener.onTaskUpdated(task);
-                                update(task, true);
-                            }
-                        });
                     }
 
                 }
@@ -298,13 +307,65 @@ public class TaskItemAdapter extends ArrayAdapter<Task> {
             update(task, true);
         }
 
-        void update(Task item, boolean selected) {
+        void update(Task item, boolean selectedItem) {
             task = item;
-            SpannedText text = selected ? new SpannedText(item.getText(), Typeface.BOLD, new ForegroundColorSpan(TODAY_FG_COLOR)) : new SpannedText(item.getText(), Typeface.BOLD);
+            this.selected = selectedItem;
+
+            configureText(item);
+
+            configureStatus();
+            if (canShowLevel()) {
+                this.text.setPadding(task.getMasterTasks().size() * 24, 5, 5, 5);
+                this.extraPanel.setPadding(task.getMasterTasks().size() * 24, 5, 5, 5);
+                if (highlightedTask.isPresent() && highlightedTask.get().equals(task)) {//todo is selected?
+                    this.convertView.setBackgroundColor(getContext().getResources().getColor(android.R.color.secondary_text_dark));
+                } else {
+                    this.convertView.setBackgroundColor(getContext().getResources().getColor(android.R.color.background_dark));
+                }
+            }
+            configureEditors();
+        }
+
+        private void configureText(Task item) {
+            SpannedText text = getTitle(item);
+
+            SpannedText extra = getDetails();
+            if (!extra.isEmpty() && !isEditMode()) {
+                text = text.join("\n").join(extra);
+            }
+            text.apply(this.text);
+        }
+
+        private void configureStatus() {
+            doneStatus.setImageDrawable(getContext().getResources().getDrawable(selectStatusImage()));
+            if (config.isEditMode()) {
+                doneStatus.setClickable(selected);
+            } else {
+                doneStatus.setClickable(config.isAllowChangeStatus());
+            }
+        }
+
+        private void configureEditors() {
+            boolean showEditors = isEditMode();
+            int visibility = showEditors ? Button.VISIBLE : Button.GONE;
+            timeConstraints.setText("[" + DateUtils.optionalDateToString(task.getStartingDate()) + " - " + DateUtils.optionalDateToString(task.getDueDate()) + "]");
+            contextSpinner.setText(task.getContext().getName());
+            extraPanel.setVisibility(visibility);
+            contextSpinner.setVisibility(visibility);
+            timeConstraints.setVisibility(visibility);
+            timeConstraints.setClickable(showEditors);
+            this.text.setClickable(showEditors);
+        }
+
+        private SpannedText getTitle(Task item) {
+            SpannedText text = selected ? new SpannedText(item.getText(), Typeface.BOLD, new ForegroundColorSpan(TimeConstraints.TODAY_FG_COLOR)) : new SpannedText(item.getText(), Typeface.BOLD);
             if (task.getStatus() == TaskStatus.Cancelled) {
                 text = text.style(new StrikethroughSpan());
             }
+            return text;
+        }
 
+        private SpannedText getDetails() {
             SpannedText extra = new SpannedText("");
 
             if (canShowCompletedDate()) {
@@ -315,45 +376,50 @@ public class TaskItemAdapter extends ArrayAdapter<Task> {
                         new StyleSpan(Typeface.ITALIC));
             }
             if (canShowSubActions()) {
-                List<Task> subTasks = task.getSubTasks();
-                if (TaskListService.PROJECT_WITHOUT_ACTIONS_PREDICATE.apply(task)) {
-                    extra = extra.space().join("No Next Action",
-                            new ForegroundColorSpan(TODAY_FG_COLOR),
-                            new BackgroundColorSpan(TODAY_BG_COLOR)
-                    );
+                List<Task> subTasks = from(task.getSubTasks()).filter(TaskListService.ACTIVE_PREDICATE).toImmutableList();
+                if (subTasks.size() == 1) {
+                    extra = extra.space().join("blocked by " + getOnlyElement(subTasks).getText(),
+                            new StyleSpan(Typeface.ITALIC));
+                } else if (subTasks.size() > 1) {
+                    extra = extra.space().join("blocked by " + subTasks.size() + " subtasks",
+                            new StyleSpan(Typeface.ITALIC));
                 }
-                extra = extra.space().join(subTasks.size() + " subtasks");
             }
-            if (canShowContext() && !canShowExtra(selected)) {
+            if (canShowContext()) {
                 extra = extra.space().join(task.getContext().getName(),
                         new ForegroundColorSpan(CONTEXT_FG_COLOR),
                         new BackgroundColorSpan(CONTEXT_BG_COLOR)
                 );
             }
-            if (canShowStartingDate() && !canShowExtra(selected)) {
-                extra = extra.space().join("from " + DateUtils.optionalDateToString(task.getStartingDate()));
+            if (canShowFutureStartingDate()) {
+                extra = extra.space().join(startingDate(),
+                        new ForegroundColorSpan(TimeConstraints.NOT_STARTED_FG_COLOR),
+                        new BackgroundColorSpan(TimeConstraints.NOT_STARTED_BG_COLOR)
+                );
             }
-            timeConstraints.setText("[" + DateUtils.optionalDateToString(task.getStartingDate()) + " - " + DateUtils.optionalDateToString(task.getDueDate()) + "]");
-            if (canShowDueDate() && !canShowExtra(selected)) {
+            if (canShowDueDate()) {
                 String dueDate = dueDate();
                 if (TaskListService.TODAY_PREDICATE().apply(task)) {
                     extra = extra.space().join(dueDate,
-                            new ForegroundColorSpan(TODAY_FG_COLOR),
-                            new BackgroundColorSpan(TODAY_BG_COLOR)
+                            new ForegroundColorSpan(TimeConstraints.TODAY_FG_COLOR),
+                            new BackgroundColorSpan(TimeConstraints.TODAY_BG_COLOR)
                     );
                 } else if (TaskListService.OVERDUE_PREDICATE().apply(task)) {
                     extra = extra.space().join(dueDate,
-                            new ForegroundColorSpan(OVERDUE_FG_COLOR),
-                            new BackgroundColorSpan(OVERDUE_BG_COLOR)
+                            new ForegroundColorSpan(TimeConstraints.OVERDUE_FG_COLOR),
+                            new BackgroundColorSpan(TimeConstraints.OVERDUE_BG_COLOR)
                     );
                 } else {
                     extra = extra.space().join(dueDate);
                 }
             }
-            if (!extra.isEmpty() && !canShowExtra(selected)) {
-                text = text.join("\n").join(extra);
+            if (canShowTimeConstraints()) {
+                extra = extra.space().join("[" + DateUtils.optionalDateToString(task.getStartingDate()) + " - " + DateUtils.optionalDateToString(task.getDueDate()) + "]");
             }
-            text.apply(this.text);
+            return extra;
+        }
+
+        private int selectStatusImage() {
             int image = 0;
             switch (task.getStatus()) {
                 case NextAction:
@@ -369,67 +435,68 @@ public class TaskItemAdapter extends ArrayAdapter<Task> {
                     image = R.drawable.a_cancelled;
                     break;
             }
+            return image;
+        }
 
-            doneStatus.setImageDrawable(getContext().getResources().getDrawable(image));
-            if (config.isShowExtra()) {
-                doneStatus.setClickable(selected);
-            } else {
-                doneStatus.setClickable(config.isAllowChangeStatus());
-            }
-            if (canShowLevel()) {
-                this.text.setPadding(task.getMasterTasks().size() * 24, 5, 5, 5);
-                this.extraPanel.setPadding(task.getMasterTasks().size() * 24, 5, 5, 5);
-                if (highlightedTask.isPresent() && highlightedTask.get().equals(task)) {
-                    this.convertView.setBackgroundColor(getContext().getResources().getColor(android.R.color.secondary_text_dark));
-                } else {
-                    this.convertView.setBackgroundColor(getContext().getResources().getColor(android.R.color.background_dark));
-                }
-            }
-            contextSpinner.setText(task.getContext().getName());
-            int visibility = canShowExtra(selected) ? Button.VISIBLE : Button.GONE;
-            extraPanel.setVisibility(visibility);
-            contextSpinner.setVisibility(visibility);
-            timeConstraints.setVisibility(visibility);
-            timeConstraints.setClickable(canShowExtra(selected));
-            this.text.setClickable(canShowExtra(selected));
+        private TaskItemAdapterConfig getActualConfig() {
+            return selected ? selectedConfig : config;
         }
 
         private boolean canShowContext() {
-            return config.isShowContext() && !task.getContext().isDefault();
+            return getActualConfig().isShowContext() && !task.getContext().isDefault();
         }
 
         private boolean canShowMasterProject() {
-            return config.isShowMasterProject() && task.getMasterTask().isPresent();
+            return getActualConfig().isShowMasterProject() && task.getMasterTask().isPresent();
         }
 
         private boolean canShowSubActions() {
-            return config.isShowSubActions() && task.isProject();
+            return getActualConfig().isShowSubActions() && task.isProject();
         }
 
-        private boolean canShowStartingDate() {
-            return config.isShowStartingDate() && task.getStartingDate().isPresent();
+        private boolean canShowFutureStartingDate() {
+            return getActualConfig().isShowFutureStartingDate() && task.getStartingDate().isPresent() && task.getStartingDate().get().after(new Date());
+        }
+
+        private boolean canShowTimeConstraints() {
+            return getActualConfig().isShowTimeConstraints();
         }
 
         private boolean canShowCompletedDate() {
-            return config.isShowCompletedDate() && task.getCompleteDate().isPresent();
+            return getActualConfig().isShowCompletedDate() && task.getCompleteDate().isPresent();
         }
 
         private boolean canShowDueDate() {
-            return config.isShowDueDate() && task.getDueDate().isPresent() && task.getStatus().isActive();
+            return getActualConfig().isShowDueDate() && task.getDueDate().isPresent() && task.getStatus().isActive();
         }
 
         private boolean canShowLevel() {
-            return config.isShowLevel();
+            return getActualConfig().isShowLevel();
         }
 
-        private boolean canShowExtra(boolean selected) {
-            return config.isShowExtra() && selected;
+        private boolean isEditMode() {
+            return getActualConfig().isEditMode() && selected;
+        }
+
+        private String startingDate() {
+            long days = DateUtils.daysBefore(task.getStartingDate().get());
+            if (days > 0) {
+                return "starting in " + days + " days";
+            } else if (days == 0) {
+                return "starting tomorrow";
+            } else if (days == -1) {
+                return "started today";
+            } else {
+                return "started " + DateUtils.optionalDateToString(task.getStartingDate());
+            }
         }
 
         private String dueDate() {
             long days = DateUtils.daysBefore(task.getDueDate().get());
-            if (days > 0) {
+            if (days > 1) {
                 return "in " + days + " days";
+            } else if (days == 1) {
+                return "tomorrow";
             } else if (days == 0) {
                 return "today";
             } else {

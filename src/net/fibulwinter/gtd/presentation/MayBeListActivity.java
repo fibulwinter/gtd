@@ -33,8 +33,7 @@ public class MayBeListActivity extends Activity {
         TaskRepository taskRepository = new TaskRepository(new TaskDAO(getContentResolver(), contextRepository), new TaskExportService(), new TaskImportService(contextRepository));
         TaskUpdateListener taskUpdateListener = TaskUpdateListenerFactory.simple(this, taskRepository);
         taskListService = new TaskListService(taskRepository);
-        TaskItemAdapterConfig taskItemAdapterConfig = new TaskItemAdapterConfig();
-        taskItemAdapter = new TaskItemAdapter(this, taskUpdateListener, taskItemAdapterConfig);
+        taskItemAdapter = new TaskItemAdapter(this, taskUpdateListener, TaskItemAdapterConfig.list());
         taskList.setAdapter(taskItemAdapter);
     }
 

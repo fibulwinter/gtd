@@ -1,16 +1,16 @@
 package net.fibulwinter.gtd.service;
 
+import static com.google.common.base.Predicates.and;
+import static com.google.common.base.Predicates.not;
+import static com.google.common.collect.FluentIterable.from;
+
+import java.util.Date;
+
 import com.google.common.base.Predicate;
 import net.fibulwinter.gtd.domain.Task;
 import net.fibulwinter.gtd.domain.TaskRepository;
 import net.fibulwinter.gtd.domain.TaskStatus;
 import net.fibulwinter.gtd.infrastructure.DateUtils;
-
-import java.util.Date;
-
-import static com.google.common.base.Predicates.and;
-import static com.google.common.base.Predicates.not;
-import static com.google.common.collect.FluentIterable.from;
 
 public class TaskListService {
     private static Predicate<Task> CAN_START_PREDICATE() {
@@ -54,7 +54,7 @@ public class TaskListService {
 
     ;
 
-    private static final Predicate<Task> ACTIVE_PREDICATE = new Predicate<Task>() {
+    public static final Predicate<Task> ACTIVE_PREDICATE = new Predicate<Task>() {
         @Override
         public boolean apply(Task task) {
             return task.getStatus().isActive();
@@ -143,6 +143,6 @@ public class TaskListService {
     }
 
     public Iterable<Task> getProjects() {
-        return from(taskRepository.getAll()).filter(and(ACTIVE_PREDICATE, PROJECT_PREDICATE));
+        return from(taskRepository.getAll()).filter(and(ACTIVE_PREDICATE, PROJECT_PREDICATE, CAN_START_PREDICATE()));
     }
 }

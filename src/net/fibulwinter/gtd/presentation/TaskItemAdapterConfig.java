@@ -4,82 +4,100 @@ public class TaskItemAdapterConfig {
     private boolean showContext = true;
     private boolean showMasterProject = true;
     private boolean showSubActions = false;
-    private boolean showStartingDate = false;
+    private boolean showFutureStartingDate = true;
     private boolean showDueDate = true;
+    private boolean showTimeConstraints = false;
     private boolean allowChangeStatus = true;
     private boolean showLevel = false;
     private boolean showCompletedDate = false;
-    private boolean showExtra = false;
+    private boolean editMode = false;
+
+    public static TaskItemAdapterConfig list() {
+        return new TaskItemAdapterConfig();
+    }
+
+    public static TaskItemAdapterConfig blockedList() {
+        TaskItemAdapterConfig config = new TaskItemAdapterConfig();
+        config.showSubActions = true;
+        return config;
+    }
+
+    public static TaskItemAdapterConfig logList() {
+        TaskItemAdapterConfig config = new TaskItemAdapterConfig();
+        config.showContext = false;
+        config.showFutureStartingDate = false;
+        config.showDueDate = false;
+        config.allowChangeStatus = false;
+        config.showCompletedDate = true;
+        return config;
+    }
+
+    public static TaskItemAdapterConfig projectView() {
+        TaskItemAdapterConfig config = new TaskItemAdapterConfig();
+        config.showMasterProject = false;
+        config.showFutureStartingDate = false;
+        config.showDueDate = false;
+        config.showTimeConstraints = true;
+        config.showLevel = true;
+        return config;
+    }
+
+    public static TaskItemAdapterConfig editProjectView() {
+        TaskItemAdapterConfig config = new TaskItemAdapterConfig();
+        config.showContext = false;
+        config.showMasterProject = false;
+        config.showFutureStartingDate = false;
+        config.showDueDate = false;
+        config.showTimeConstraints = false;
+        config.editMode = true;
+        config.showLevel = true;
+        return config;
+    }
+
+    private TaskItemAdapterConfig() {
+    }
+
+    public boolean isShowTimeConstraints() {
+        return showTimeConstraints;
+    }
 
     public boolean isShowContext() {
         return showContext;
-    }
-
-    public void setShowContext(boolean showContext) {
-        this.showContext = showContext;
     }
 
     public boolean isShowMasterProject() {
         return showMasterProject;
     }
 
-    public void setShowMasterProject(boolean showMasterProject) {
-        this.showMasterProject = showMasterProject;
-    }
-
     public boolean isShowSubActions() {
         return showSubActions;
     }
 
-    public void setShowSubActions(boolean showSubActions) {
-        this.showSubActions = showSubActions;
-    }
-
-    public boolean isShowStartingDate() {
-        return showStartingDate;
-    }
-
-    public void setShowStartingDate(boolean showStartingDate) {
-        this.showStartingDate = showStartingDate;
+    public boolean isShowFutureStartingDate() {
+        return showFutureStartingDate;
     }
 
     public boolean isShowDueDate() {
         return showDueDate;
     }
 
-    public void setShowDueDate(boolean showDueDate) {
-        this.showDueDate = showDueDate;
-    }
-
     public boolean isAllowChangeStatus() {
         return allowChangeStatus;
-    }
-
-    public void setAllowChangeStatus(boolean allowChangeStatus) {
-        this.allowChangeStatus = allowChangeStatus;
     }
 
     public boolean isShowLevel() {
         return showLevel;
     }
 
-    public void setShowLevel(boolean showLevel) {
-        this.showLevel = showLevel;
-    }
-
     public boolean isShowCompletedDate() {
         return showCompletedDate;
     }
 
-    public void setShowCompletedDate(boolean showCompletedDate) {
-        this.showCompletedDate = showCompletedDate;
+    public boolean isEditMode() {
+        return editMode;
     }
 
-    public boolean isShowExtra() {
-        return showExtra;
-    }
-
-    public void setShowExtra(boolean showExtra) {
-        this.showExtra = showExtra;
+    public void setShowContext(boolean showContext) {
+        this.showContext = showContext;
     }
 }

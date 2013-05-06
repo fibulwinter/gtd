@@ -48,7 +48,7 @@ public class NextActionListActivity extends Activity {
         TaskRepository taskRepository = new TaskRepository(new TaskDAO(getContentResolver(), contextRepository), new TaskExportService(), new TaskImportService(contextRepository));
         TaskUpdateListener taskUpdateListener = TaskUpdateListenerFactory.simple(this, taskRepository);
         taskListService = new TaskListService(taskRepository);
-        taskItemAdapterConfig = new TaskItemAdapterConfig();
+        taskItemAdapterConfig = TaskItemAdapterConfig.list();
         taskItemAdapter = new TaskItemAdapter(this, taskUpdateListener, taskItemAdapterConfig);
         taskList.setAdapter(taskItemAdapter);
 
