@@ -42,6 +42,11 @@ public class TaskEditActivity extends Activity {
         public void onTaskUpdated(Task updatedTask) {
             taskRepository.save(updatedTask);
         }
+
+        @Override
+        public void onTaskDeleted(Task deletedTask) {
+            delete(deletedTask);
+        }
     };
     private ClearDatePicker clearDatePicker;
     private TaskItemAdapter masterTasksAdapter;
@@ -182,7 +187,7 @@ public class TaskEditActivity extends Activity {
                 .setPositiveButton("Yes, delete", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
-                        delete();
+                        delete(task);
                     }
                 })
                 .setNegativeButton("No, keep it", new DialogInterface.OnClickListener() {
@@ -192,9 +197,9 @@ public class TaskEditActivity extends Activity {
                 }).show();
     }
 
-    private void delete() {
-        Optional<Task> masterTask = task.getMasterTask();
-        taskRepository.delete(task);
+    private void delete(Task taskToDelete) {
+        Optional<Task> masterTask = taskToDelete.getMasterTask();
+        taskRepository.delete(taskToDelete);
         if (masterTask.isPresent()) {
             task = taskRepository.getById(masterTask.get().getId()).get();
             updateToTask();

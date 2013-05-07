@@ -74,9 +74,18 @@ public abstract class StatusTransitionsFactory {
                     justUpdate(task);
                 }
             });
+        } else {
+            transitions.add(new StatusTransition("Delete it forever") {
+                @Override
+                public void doTransition(Task task) {
+                    justDelete(task);
+                }
+            });
         }
         return transitions;
     }
+
+    protected abstract void justDelete(Task task);
 
     protected abstract void addedSubtask(Task masterTask, Task subTask);
     /*

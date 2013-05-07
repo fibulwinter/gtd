@@ -23,6 +23,11 @@ public class TaskUpdateListenerFactory {
             public void onTaskUpdated(Task updatedTask) {
                 taskRepository.save(updatedTask);
             }
+
+            @Override
+            public void onTaskDeleted(Task deletedTask) {
+                taskRepository.delete(deletedTask);
+            }
         };
     }
 }
