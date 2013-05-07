@@ -3,7 +3,6 @@ package net.fibulwinter.gtd.presentation;
 import static com.google.common.collect.FluentIterable.from;
 import static com.google.common.collect.Iterables.getOnlyElement;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import android.content.Context;
@@ -42,7 +41,8 @@ public class TaskItemAdapter extends ArrayAdapter<Task> {
         this(context, taskUpdateListener, config, config);
     }
 
-    public TaskItemAdapter(Context context, TaskUpdateListener taskUpdateListener, TaskItemAdapterConfig config, TaskItemAdapterConfig selectedConfig) {
+    public TaskItemAdapter(Context context, TaskUpdateListener taskUpdateListener, TaskItemAdapterConfig config,
+                           TaskItemAdapterConfig selectedConfig) {
         super(context, R.layout.task_list_item, Lists.<Task>newArrayList());
         this.taskUpdateListener = taskUpdateListener;
         this.config = config;
@@ -68,6 +68,12 @@ public class TaskItemAdapter extends ArrayAdapter<Task> {
         int position = getPosition(replaced);
         remove(replaced);
         insert(replacing, position);
+        notifyDataSetChanged();
+    }
+
+    private void addAfter(Task origin, Task next) {
+        int position = getPosition(origin);
+        insert(next, position + 1);
         notifyDataSetChanged();
     }
 
@@ -139,92 +145,32 @@ public class TaskItemAdapter extends ArrayAdapter<Task> {
             doneStatus.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    if (selectedConfig.isEditMode()) {
-                        List<TaskStatus> statuses = new ArrayList<TaskStatus>();
-                        statuses.add(TaskStatus.NextAction);
-                        statuses.add(TaskStatus.Completed);
-                        statuses.add(TaskStatus.Maybe);
-                        statuses.add(TaskStatus.Cancelled);
-                        SpinnerDialog.show(TaskItemAdapter.this.getContext(), statuses, task.getStatus(), new SpinnerDialog.OnSelected<TaskStatus>() {
-                            @Override
-                            public void selected(TaskStatus selectedItem) {
-                                task.setStatus(selectedItem);
-                                updateTask();
+                    StatusTransitionsFactory statusTransitionsFactory = new StatusTransitionsFactory(editDialogFactory) {
+                        @Override
+                        protected void addedSubtask(Task masterTask, Task subTask) {
+                            highlightedTask = Optional.of(subTask);
+                            taskUpdateListener.onTaskUpdated(subTask);
+                            if (canShowLevel()) {
+                                addAfter(masterTask, subTask);
+                            } else {
+                                update(subTask, true);
+                                replace(masterTask, subTask);
                             }
-                        });
-                    } else {
-                        List<StatusTransition> transitions = new ArrayList<StatusTransition>();
-                        if (task.getStatus() == TaskStatus.NextAction) {
-                            transitions.add(new StatusTransition("Done!") {
-                                @Override
-                                public void doTransition(Task task) {
-                                    task.complete();
-                                    updateAfterTransition(task);
-                                }
-                            });
-                            transitions.add(new StatusTransition("Sub action") {
-                                @Override
-                                public void doTransition(final Task task) {
-                                    editDialogFactory.showTitleDialog("", "Enter sub action", new EditDialogFactory.TitleEdited() {
-                                        @Override
-                                        public void onValidText(String title) {
-                                            Task subTask = new Task(title);
-                                            subTask.setMaster(task);
-                                            highlightedTask = Optional.of(subTask);
-                                            updateAfterTransition(subTask);
-                                        }
-
-                                    });
-                                }
-                            });
-                            transitions.add(new StatusTransition("Do it later") {
-                                @Override
-                                public void doTransition(final Task task) {
-                                    editDialogFactory.showTimeDialog(task, new Runnable() {
-                                        @Override
-                                        public void run() {
-                                            updateTask();
-                                        }
-                                    });
-                                }
-                            });
-                        } else {
-                            transitions.add(new StatusTransition("Let's do it!") {
-                                @Override
-                                public void doTransition(Task task) {
-                                    task.setStatus(TaskStatus.NextAction);
-                                    updateAfterTransition(task);
-                                }
-                            });
-                        }
-                        if (task.getStatus() != TaskStatus.Maybe) {
-                            transitions.add(new StatusTransition("May be later...") {
-                                @Override
-                                public void doTransition(Task task) {
-                                    task.setStatus(TaskStatus.Maybe);
-                                    updateAfterTransition(task);
-                                }
-                            });
-                        }
-                        if (task.getStatus() != TaskStatus.Cancelled) {
-                            transitions.add(new StatusTransition("Never. Cancel it!") {
-                                @Override
-                                public void doTransition(Task task) {
-                                    task.cancel();
-                                    updateAfterTransition(task);
-                                }
-                            });
                         }
 
-                        SpinnerDialog.show(TaskItemAdapter.this.getContext(), transitions, null, new SpinnerDialog.OnSelected<StatusTransition>() {
-                            @Override
-                            public void selected(StatusTransition selectedItem) {
-                                selectedItem.doTransition(task);
-                            }
-                        });
-//                        onDoneStatusUpdated();
-                    }
+                        @Override
+                        protected void justUpdate(Task task) {
+                            taskUpdateListener.onTaskUpdated(task);
+                            update(task, true);
+                        }
 
+                    };
+                    SpinnerDialog.show(TaskItemAdapter.this.getContext(), statusTransitionsFactory.getTransitions(task), null, new SpinnerDialog.OnSelected<StatusTransition>() {
+                        @Override
+                        public void selected(StatusTransition selectedItem) {
+                            selectedItem.doTransition(task);
+                        }
+                    });
                 }
             });
             convertView.setOnClickListener(new View.OnClickListener() {
@@ -238,15 +184,6 @@ public class TaskItemAdapter extends ArrayAdapter<Task> {
         private void updateTask() {
             taskUpdateListener.onTaskUpdated(task);
             update(task, true);
-        }
-
-        private void updateAfterTransition(Task newTask) {
-            Task oldTask = task;
-            taskUpdateListener.onTaskUpdated(newTask);
-            update(newTask, true);
-            if (newTask != oldTask) {
-                replace(oldTask, task);
-            }
         }
 
         public void onTitleClick(Context context, View view) {

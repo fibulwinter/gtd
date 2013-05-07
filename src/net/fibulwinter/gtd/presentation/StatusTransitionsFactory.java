@@ -1,8 +1,19 @@
 package net.fibulwinter.gtd.presentation;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import net.fibulwinter.gtd.domain.Task;
+import net.fibulwinter.gtd.domain.TaskStatus;
+
 public abstract class StatusTransitionsFactory {
-/*
-    public List<StatusTransition> getTransitions(Task task){
+    private EditDialogFactory editDialogFactory;
+
+    protected StatusTransitionsFactory(EditDialogFactory editDialogFactory) {
+        this.editDialogFactory = editDialogFactory;
+    }
+
+    public List<StatusTransition> getTransitions(Task task) {
         List<StatusTransition> transitions = new ArrayList<StatusTransition>();
         if (task.getStatus() == TaskStatus.NextAction) {
             transitions.add(new StatusTransition("Done!") {
@@ -15,37 +26,24 @@ public abstract class StatusTransitionsFactory {
             transitions.add(new StatusTransition("Sub action") {
                 @Override
                 public void doTransition(final Task task) {
-                    Context context = ViewHolder.this.convertView.getContext();
-                    final EditText input = new EditText(context);
-                    input.setText("");
-                    new AlertDialog.Builder(context)
-                            .setTitle("Enter sub action")
-                            .setView(input)
-                            .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
-                                public void onClick(DialogInterface dialog, int whichButton) {
-                                    String inputText = input.getText().toString().trim();
-                                    if (!inputText.isEmpty()) {
-                                        Task subTask = new Task(inputText);
-                                        subTask.setMaster(task);
-                                        highlightedTask = Optional.of(subTask);
-                                        updateAfterTransition(subTask);
-                                    }
-                                }
+                    editDialogFactory.showTitleDialog("", "Enter sub action", new EditDialogFactory.TitleEdited() {
+                        @Override
+                        public void onValidText(String title) {
+                            Task subTask = new Task(title);
+                            subTask.setMaster(task);
+                            addedSubtask(task, subTask);
+                        }
 
-                            })
-                            .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-                                public void onClick(DialogInterface dialog, int whichButton) {
-                                }
-                            }).show();
+                    });
                 }
             });
             transitions.add(new StatusTransition("Do it later") {
                 @Override
                 public void doTransition(final Task task) {
-                    timeConstraintsUtils.showDialog(task, new Runnable() {
+                    editDialogFactory.showTimeDialog(task, new Runnable() {
                         @Override
                         public void run() {
-                            updateTask();
+                            justUpdate(task);
                         }
                     });
                 }
@@ -55,7 +53,7 @@ public abstract class StatusTransitionsFactory {
                 @Override
                 public void doTransition(Task task) {
                     task.setStatus(TaskStatus.NextAction);
-                    updateAfterTransition(task);
+                    justUpdate(task);
                 }
             });
         }
@@ -64,7 +62,7 @@ public abstract class StatusTransitionsFactory {
                 @Override
                 public void doTransition(Task task) {
                     task.setStatus(TaskStatus.Maybe);
-                    updateAfterTransition(task);
+                    justUpdate(task);
                 }
             });
         }
@@ -73,13 +71,19 @@ public abstract class StatusTransitionsFactory {
                 @Override
                 public void doTransition(Task task) {
                     task.cancel();
-                    updateAfterTransition(task);
+                    justUpdate(task);
                 }
             });
         }
         return transitions;
     }
 
+    protected abstract void addedSubtask(Task masterTask, Task subTask);
+    /*
+        highlightedTask = Optional.of(subTask);
+        updateAfterTransition(subTask);
+    */
+
     protected abstract void justUpdate(Task task);
-*/
+//        updateAfterTransition(task);
 }
