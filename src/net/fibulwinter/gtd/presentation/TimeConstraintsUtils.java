@@ -2,7 +2,6 @@ package net.fibulwinter.gtd.presentation;
 
 import java.util.Date;
 
-import android.content.Context;
 import android.graphics.Color;
 import android.text.style.BackgroundColorSpan;
 import android.text.style.ForegroundColorSpan;
@@ -18,25 +17,6 @@ public class TimeConstraintsUtils {
     public static final int OVERDUE_BG_COLOR = Color.parseColor("#660000");
     public static final int NOT_STARTED_FG_COLOR = Color.parseColor("#888888");
     public static final int NOT_STARTED_BG_COLOR = Color.parseColor("#444444");
-
-    private ClearDatePicker clearDatePicker;
-
-
-    public TimeConstraintsUtils(Context context) {
-        clearDatePicker = new ClearDatePicker(context);
-    }
-
-    public void showDialog(final Task task, final Runnable runnable) {
-        clearDatePicker.pickDate("Time constraints", task.getStartingDate(), task.getDueDate(), new ClearDatePicker.DatePickListener() {
-            @Override
-            public void setOptionalDate(Optional<Date> dateStart, Optional<Date> dateDue) {
-                task.setStartingDate(dateStart);
-                task.setDueDate(dateDue);
-                runnable.run();
-            }
-        });
-
-    }
 
     public SpannedText getNonEmptyConstraintsText(Task task) {
         SpannedText spannedText = new SpannedText("");

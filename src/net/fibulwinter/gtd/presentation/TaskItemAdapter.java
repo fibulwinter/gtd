@@ -6,9 +6,7 @@ import static com.google.common.collect.Iterables.getOnlyElement;
 import java.util.ArrayList;
 import java.util.List;
 
-import android.app.AlertDialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.text.style.*;
@@ -37,6 +35,7 @@ public class TaskItemAdapter extends ArrayAdapter<Task> {
     private TaskItemAdapterConfig selectedConfig;
     private Optional<Task> highlightedTask = Optional.absent();
     private TimeConstraintsUtils timeConstraintsUtils;
+    private EditDialogFactory editDialogFactory;
 
 
     public TaskItemAdapter(Context context, TaskUpdateListener taskUpdateListener, TaskItemAdapterConfig config) {
@@ -49,7 +48,8 @@ public class TaskItemAdapter extends ArrayAdapter<Task> {
         this.config = config;
         this.selectedConfig = selectedConfig;
         inflater = LayoutInflater.from(context);
-        timeConstraintsUtils = new TimeConstraintsUtils(context);
+        timeConstraintsUtils = new TimeConstraintsUtils();
+        editDialogFactory = new EditDialogFactory(context);
     }
 
     public void setHighlightedTask(Optional<Task> highlightedTask) {
@@ -128,7 +128,12 @@ public class TaskItemAdapter extends ArrayAdapter<Task> {
             timeConstraints.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    showTimeConstraintsDialog(task);
+                    editDialogFactory.showTimeDialog(task, new Runnable() {
+                        @Override
+                        public void run() {
+                            updateTask();
+                        }
+                    });
                 }
             });
             doneStatus.setOnClickListener(new View.OnClickListener() {
@@ -160,34 +165,27 @@ public class TaskItemAdapter extends ArrayAdapter<Task> {
                             transitions.add(new StatusTransition("Sub action") {
                                 @Override
                                 public void doTransition(final Task task) {
-                                    Context context = ViewHolder.this.convertView.getContext();
-                                    final EditText input = new EditText(context);
-                                    input.setText("");
-                                    new AlertDialog.Builder(context)
-                                            .setTitle("Enter sub action")
-                                            .setView(input)
-                                            .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
-                                                public void onClick(DialogInterface dialog, int whichButton) {
-                                                    String inputText = input.getText().toString().trim();
-                                                    if (!inputText.isEmpty()) {
-                                                        Task subTask = new Task(inputText);
-                                                        subTask.setMaster(task);
-                                                        highlightedTask = Optional.of(subTask);
-                                                        updateAfterTransition(subTask);
-                                                    }
-                                                }
+                                    editDialogFactory.showTitleDialog("", "Enter sub action", new EditDialogFactory.TitleEdited() {
+                                        @Override
+                                        public void onValidText(String title) {
+                                            Task subTask = new Task(title);
+                                            subTask.setMaster(task);
+                                            highlightedTask = Optional.of(subTask);
+                                            updateAfterTransition(subTask);
+                                        }
 
-                                            })
-                                            .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-                                                public void onClick(DialogInterface dialog, int whichButton) {
-                                                }
-                                            }).show();
+                                    });
                                 }
                             });
                             transitions.add(new StatusTransition("Do it later") {
                                 @Override
                                 public void doTransition(final Task task) {
-                                    showTimeConstraintsDialog(task);
+                                    editDialogFactory.showTimeDialog(task, new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            updateTask();
+                                        }
+                                    });
                                 }
                             });
                         } else {
@@ -237,15 +235,6 @@ public class TaskItemAdapter extends ArrayAdapter<Task> {
             });
         }
 
-        private void showTimeConstraintsDialog(final Task task) {
-            timeConstraintsUtils.showDialog(task, new Runnable() {
-                @Override
-                public void run() {
-                    updateTask();
-                }
-            });
-        }
-
         private void updateTask() {
             taskUpdateListener.onTaskUpdated(task);
             update(task, true);
@@ -261,33 +250,14 @@ public class TaskItemAdapter extends ArrayAdapter<Task> {
         }
 
         public void onTitleClick(Context context, View view) {
-            // Set an EditText view to get user input
-            final EditText input = new EditText(context);
-            final String initialText = task.getText();
-            input.setText(initialText);
-            new AlertDialog.Builder(context)
-                    .setTitle("Edit task text")
-                    .setView(input)
-                    .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
-                        public void onClick(DialogInterface dialog, int whichButton) {
-                            if (!getInputText().isEmpty()) {
-                                task.setText(getInputText());
-                                updateTask();
-                            } else if (initialText.isEmpty()) {
-                            }
-                        }
+            editDialogFactory.showTitleDialog(task.getText(), "Edit task text", new EditDialogFactory.TitleEdited() {
+                @Override
+                public void onValidText(String title) {
+                    task.setText(title);
+                    updateTask();
+                }
 
-                        private String getInputText() {
-                            return input.getText().toString().trim();
-                        }
-                    })
-                    .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-                        public void onClick(DialogInterface dialog, int whichButton) {
-                            if (initialText.isEmpty() && input.getText().toString().trim().isEmpty()) {
-                            }
-                            // Do nothing.
-                        }
-                    }).show();
+            });
         }
 
 
