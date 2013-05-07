@@ -1,12 +1,12 @@
 package net.fibulwinter.gtd.presentation;
 
-import android.text.Spannable;
-import android.text.Spanned;
-import android.widget.TextView;
+import static com.google.common.collect.Lists.newArrayList;
 
 import java.util.List;
 
-import static com.google.common.collect.Lists.newArrayList;
+import android.text.Spannable;
+import android.text.Spanned;
+import android.widget.TextView;
 
 public class SpannedText {
     private static class Style {
@@ -24,6 +24,10 @@ public class SpannedText {
     private String string;
     private List<Style> styles = newArrayList();
 
+
+    public SpannedText() {
+        this("");
+    }
 
     public SpannedText(String string, Object... styles) {
         this.string = string;

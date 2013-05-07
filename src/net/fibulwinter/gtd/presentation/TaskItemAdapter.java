@@ -4,7 +4,6 @@ import static com.google.common.collect.FluentIterable.from;
 import static com.google.common.collect.Iterables.getOnlyElement;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 import android.app.AlertDialog;
@@ -38,7 +37,7 @@ public class TaskItemAdapter extends ArrayAdapter<Task> {
     private final TaskItemAdapterConfig config;
     private TaskItemAdapterConfig selectedConfig;
     private Optional<Task> highlightedTask = Optional.absent();
-    private TimeConstraints timeConstraints;
+    private TimeConstraintsUtils timeConstraintsUtils;
 
 
     public TaskItemAdapter(Context context, TaskUpdateListener taskUpdateListener, TaskItemAdapterConfig config) {
@@ -51,8 +50,7 @@ public class TaskItemAdapter extends ArrayAdapter<Task> {
         this.config = config;
         this.selectedConfig = selectedConfig;
         inflater = LayoutInflater.from(context);
-        clearDatePicker = new ClearDatePicker(context);
-        timeConstraints = new TimeConstraints(context);
+        timeConstraintsUtils = new TimeConstraintsUtils(context);
     }
 
     public void setHighlightedTask(Optional<Task> highlightedTask) {
@@ -88,8 +86,6 @@ public class TaskItemAdapter extends ArrayAdapter<Task> {
         return convertView;
     }
 
-    private ClearDatePicker clearDatePicker;
-
     private class ViewHolder {
         private Task task;
         private boolean selected;
@@ -123,8 +119,7 @@ public class TaskItemAdapter extends ArrayAdapter<Task> {
                         @Override
                         public void selected(net.fibulwinter.gtd.domain.Context selectedItem) {
                             task.setContext(selectedItem);
-                            taskUpdateListener.onTaskUpdated(task);
-                            update(task, true);
+                            updateTask();
                         }
                     });
 
@@ -134,15 +129,7 @@ public class TaskItemAdapter extends ArrayAdapter<Task> {
             timeConstraints.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    clearDatePicker.pickDate("Time constraints", task.getStartingDate(), task.getDueDate(), new ClearDatePicker.DatePickListener() {
-                        @Override
-                        public void setOptionalDate(Optional<Date> dateStart, Optional<Date> dateDue) {
-                            task.setStartingDate(dateStart);
-                            task.setDueDate(dateDue);
-                            taskUpdateListener.onTaskUpdated(task);
-                            update(task, true);
-                        }
-                    });
+                    showTimeConstraintsDialog(task);
                 }
             });
             doneStatus.setOnClickListener(new View.OnClickListener() {
@@ -158,8 +145,7 @@ public class TaskItemAdapter extends ArrayAdapter<Task> {
                             @Override
                             public void selected(TaskStatus selectedItem) {
                                 task.setStatus(selectedItem);
-                                taskUpdateListener.onTaskUpdated(task);
-                                update(task, true);
+                                updateTask();
                             }
                         });
                     } else {
@@ -202,16 +188,7 @@ public class TaskItemAdapter extends ArrayAdapter<Task> {
                             transitions.add(new StatusTransition("Do it later") {
                                 @Override
                                 public void doTransition(final Task task) {
-                                    clearDatePicker.pickDate("Time constraints", task.getStartingDate(), task.getDueDate(), new ClearDatePicker.DatePickListener() {
-                                        @Override
-                                        public void setOptionalDate(Optional<Date> dateStart, Optional<Date> dateDue) {
-                                            task.setStartingDate(dateStart);
-                                            task.setDueDate(dateDue);
-                                            taskUpdateListener.onTaskUpdated(task);
-                                            update(task, true);
-                                        }
-                                    });
-
+                                    showTimeConstraintsDialog(task);
                                 }
                             });
                         } else {
@@ -261,6 +238,20 @@ public class TaskItemAdapter extends ArrayAdapter<Task> {
             });
         }
 
+        private void showTimeConstraintsDialog(final Task task) {
+            timeConstraintsUtils.showDialog(task, new Runnable() {
+                @Override
+                public void run() {
+                    updateTask();
+                }
+            });
+        }
+
+        private void updateTask() {
+            taskUpdateListener.onTaskUpdated(task);
+            update(task, true);
+        }
+
         private void updateAfterTransition(Task newTask) {
             Task oldTask = task;
             taskUpdateListener.onTaskUpdated(newTask);
@@ -282,8 +273,7 @@ public class TaskItemAdapter extends ArrayAdapter<Task> {
                         public void onClick(DialogInterface dialog, int whichButton) {
                             if (!getInputText().isEmpty()) {
                                 task.setText(getInputText());
-                                taskUpdateListener.onTaskUpdated(task);
-                                update(task, true);
+                                updateTask();
                             } else if (initialText.isEmpty()) {
                             }
                         }
@@ -348,7 +338,7 @@ public class TaskItemAdapter extends ArrayAdapter<Task> {
         private void configureEditors() {
             boolean showEditors = isEditMode();
             int visibility = showEditors ? Button.VISIBLE : Button.GONE;
-            timeConstraints.setText("[" + DateUtils.optionalDateToString(task.getStartingDate()) + " - " + DateUtils.optionalDateToString(task.getDueDate()) + "]");
+            timeConstraintsUtils.getNonEmptyConstraintsText(task).apply(timeConstraints);
             contextSpinner.setText(task.getContext().getName());
             extraPanel.setVisibility(visibility);
             contextSpinner.setVisibility(visibility);
@@ -358,7 +348,7 @@ public class TaskItemAdapter extends ArrayAdapter<Task> {
         }
 
         private SpannedText getTitle(Task item) {
-            SpannedText text = selected ? new SpannedText(item.getText(), Typeface.BOLD, new ForegroundColorSpan(TimeConstraints.TODAY_FG_COLOR)) : new SpannedText(item.getText(), Typeface.BOLD);
+            SpannedText text = selected ? new SpannedText(item.getText(), Typeface.BOLD, new ForegroundColorSpan(TimeConstraintsUtils.TODAY_FG_COLOR)) : new SpannedText(item.getText(), Typeface.BOLD);
             if (task.getStatus() == TaskStatus.Cancelled) {
                 text = text.style(new StrikethroughSpan());
             }
@@ -392,29 +382,14 @@ public class TaskItemAdapter extends ArrayAdapter<Task> {
                 );
             }
             if (canShowFutureStartingDate()) {
-                extra = extra.space().join(startingDate(),
-                        new ForegroundColorSpan(TimeConstraints.NOT_STARTED_FG_COLOR),
-                        new BackgroundColorSpan(TimeConstraints.NOT_STARTED_BG_COLOR)
-                );
+                extra = extra.join(timeConstraintsUtils.addFutureStartWarning(task));
             }
             if (canShowDueDate()) {
-                String dueDate = dueDate();
-                if (TaskListService.TODAY_PREDICATE().apply(task)) {
-                    extra = extra.space().join(dueDate,
-                            new ForegroundColorSpan(TimeConstraints.TODAY_FG_COLOR),
-                            new BackgroundColorSpan(TimeConstraints.TODAY_BG_COLOR)
-                    );
-                } else if (TaskListService.OVERDUE_PREDICATE().apply(task)) {
-                    extra = extra.space().join(dueDate,
-                            new ForegroundColorSpan(TimeConstraints.OVERDUE_FG_COLOR),
-                            new BackgroundColorSpan(TimeConstraints.OVERDUE_BG_COLOR)
-                    );
-                } else {
-                    extra = extra.space().join(dueDate);
-                }
+                extra = extra.join(timeConstraintsUtils.addDueDateWarning(task));
             }
             if (canShowTimeConstraints()) {
-                extra = extra.space().join("[" + DateUtils.optionalDateToString(task.getStartingDate()) + " - " + DateUtils.optionalDateToString(task.getDueDate()) + "]");
+                extra = extra.space().join(timeConstraintsUtils.addFutureStartWarning(task))
+                        .join(" - " + DateUtils.optionalDateToString(task.getDueDate()) + "]");
             }
             return extra;
         }
@@ -455,7 +430,7 @@ public class TaskItemAdapter extends ArrayAdapter<Task> {
         }
 
         private boolean canShowFutureStartingDate() {
-            return getActualConfig().isShowFutureStartingDate() && task.getStartingDate().isPresent() && task.getStartingDate().get().after(new Date());
+            return getActualConfig().isShowFutureStartingDate();
         }
 
         private boolean canShowTimeConstraints() {
@@ -467,7 +442,7 @@ public class TaskItemAdapter extends ArrayAdapter<Task> {
         }
 
         private boolean canShowDueDate() {
-            return getActualConfig().isShowDueDate() && task.getDueDate().isPresent() && task.getStatus().isActive();
+            return getActualConfig().isShowDueDate();
         }
 
         private boolean canShowLevel() {
@@ -477,32 +452,5 @@ public class TaskItemAdapter extends ArrayAdapter<Task> {
         private boolean isEditMode() {
             return getActualConfig().isEditMode() && selected;
         }
-
-        private String startingDate() {
-            long days = DateUtils.daysBefore(task.getStartingDate().get());
-            if (days > 0) {
-                return "starting in " + days + " days";
-            } else if (days == 0) {
-                return "starting tomorrow";
-            } else if (days == -1) {
-                return "started today";
-            } else {
-                return "started " + DateUtils.optionalDateToString(task.getStartingDate());
-            }
-        }
-
-        private String dueDate() {
-            long days = DateUtils.daysBefore(task.getDueDate().get());
-            if (days > 1) {
-                return "in " + days + " days";
-            } else if (days == 1) {
-                return "tomorrow";
-            } else if (days == 0) {
-                return "today";
-            } else {
-                return "due to " + DateUtils.optionalDateToString(task.getDueDate());
-            }
-        }
     }
-
 }

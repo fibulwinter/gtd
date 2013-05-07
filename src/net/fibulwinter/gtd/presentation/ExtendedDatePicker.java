@@ -10,6 +10,7 @@ import android.view.Gravity;
 import android.view.View;
 import android.widget.*;
 import com.google.common.base.Optional;
+import net.fibulwinter.gtd.infrastructure.DateUtils;
 
 public class ExtendedDatePicker {
 
@@ -57,7 +58,7 @@ public class ExtendedDatePicker {
     }
 
     private String diffMessage(GregorianCalendar calendar) {
-        int d = dayDiff(calendar);
+        int d = DateUtils.dayDiff(calendar);
         if (d == 0) {
             return "today";
         } else if (d == 1) {
@@ -70,25 +71,6 @@ public class ExtendedDatePicker {
             return (-d) + " days before today";
         }
 
-    }
-
-    private int dayDiff(Calendar end) {
-        Calendar start = new GregorianCalendar();
-        start.set(Calendar.HOUR, 0);
-        start.set(Calendar.MINUTE, 0);
-        start.set(Calendar.SECOND, 0);
-        start.set(Calendar.MILLISECOND, 0);
-        int diffDays = (int) ((end.getTime().getTime() - start.getTime().getTime()) / (1000 * 24 * 60 * 60));
-        start.add(Calendar.DAY_OF_MONTH, diffDays);
-        while (start.before(end)) {
-            start.add(Calendar.DAY_OF_MONTH, 1);
-            diffDays++;
-        }
-        while (start.after(end)) {
-            start.add(Calendar.DAY_OF_MONTH, -1);
-            diffDays--;
-        }
-        return diffDays;
     }
 
     public View getView() {
