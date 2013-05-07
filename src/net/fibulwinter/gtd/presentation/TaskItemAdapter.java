@@ -11,10 +11,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.graphics.Color;
 import android.graphics.Typeface;
-import android.text.style.BackgroundColorSpan;
-import android.text.style.ForegroundColorSpan;
-import android.text.style.StrikethroughSpan;
-import android.text.style.StyleSpan;
+import android.text.style.*;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -31,6 +28,8 @@ import net.fibulwinter.gtd.service.TaskListService;
 public class TaskItemAdapter extends ArrayAdapter<Task> {
     public static final int CONTEXT_FG_COLOR = Color.parseColor("#6666cc");
     public static final int CONTEXT_BG_COLOR = Color.parseColor("#303066");
+    public static final int SELECT_FG_COLOR = Color.parseColor("#00ff00");
+    public static final int SELECT_BG_COLOR = Color.parseColor("#004400");
 
     private LayoutInflater inflater;
     private final TaskUpdateListener taskUpdateListener;
@@ -308,7 +307,7 @@ public class TaskItemAdapter extends ArrayAdapter<Task> {
                 this.text.setPadding(task.getMasterTasks().size() * 24, 5, 5, 5);
                 this.extraPanel.setPadding(task.getMasterTasks().size() * 24, 5, 5, 5);
                 if (highlightedTask.isPresent() && highlightedTask.get().equals(task)) {//todo is selected?
-                    this.convertView.setBackgroundColor(getContext().getResources().getColor(android.R.color.secondary_text_dark));
+                    this.convertView.setBackgroundColor(getContext().getResources().getColor(android.R.color.widget_edittext_dark));
                 } else {
                     this.convertView.setBackgroundColor(getContext().getResources().getColor(android.R.color.background_dark));
                 }
@@ -348,7 +347,9 @@ public class TaskItemAdapter extends ArrayAdapter<Task> {
         }
 
         private SpannedText getTitle(Task item) {
-            SpannedText text = selected ? new SpannedText(item.getText(), Typeface.BOLD, new ForegroundColorSpan(TimeConstraintsUtils.TODAY_FG_COLOR)) : new SpannedText(item.getText(), Typeface.BOLD);
+            SpannedText text = selected ? new SpannedText(item.getText(), new StyleSpan(Typeface.BOLD),
+                    new RelativeSizeSpan(1.5f)) :
+                    new SpannedText(item.getText(), new StyleSpan(Typeface.BOLD));
             if (task.getStatus() == TaskStatus.Cancelled) {
                 text = text.style(new StrikethroughSpan());
             }
