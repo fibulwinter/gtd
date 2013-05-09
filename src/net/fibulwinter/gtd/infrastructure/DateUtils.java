@@ -75,6 +75,15 @@ public class DateUtils {
         return calendar.getTime();
     }
 
+    public static Calendar asCalendar(Date date) {
+        GregorianCalendar calendar = new GregorianCalendar();
+        calendar.setTime(date);
+        calendar.set(Calendar.HOUR, 0);
+        calendar.set(Calendar.MINUTE, 0);
+        calendar.set(Calendar.SECOND, 0);
+        return calendar;
+    }
+
     public static int dayDiff(Calendar end) {
         long timeEnd = new Date(end.get(Calendar.YEAR), end.get(Calendar.MONTH), end.get(Calendar.DATE)).getTime();
         Calendar start = new GregorianCalendar();

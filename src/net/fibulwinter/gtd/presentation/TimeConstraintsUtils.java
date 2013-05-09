@@ -15,8 +15,10 @@ public class TimeConstraintsUtils {
     public static final int TODAY_BG_COLOR = Color.parseColor("#663000");
     public static final int OVERDUE_FG_COLOR = Color.parseColor("#ff0000");
     public static final int OVERDUE_BG_COLOR = Color.parseColor("#660000");
-    public static final int NOT_STARTED_FG_COLOR = Color.parseColor("#888888");
+    public static final int NOT_STARTED_FG_COLOR = Color.parseColor("#999999");
     public static final int NOT_STARTED_BG_COLOR = Color.parseColor("#444444");
+    public static final int STARTED_TODAY_FG_COLOR = Color.parseColor("#00cc00");
+    public static final int STARTED_TODAY_BG_COLOR = Color.parseColor("#006600");
 
     public SpannedText getNonEmptyConstraintsText(Task task) {
         SpannedText spannedText = new SpannedText("");
@@ -32,21 +34,30 @@ public class TimeConstraintsUtils {
     private SpannedText addStartWarning(Task task, boolean onlyIfInFuture) {
         Optional<Date> startingDate = task.getStartingDate();
         boolean inFuture = inFuture(startingDate);
-        if (!inFuture && onlyIfInFuture) {
+        boolean startedToday = startedToday(startingDate);
+        if (!(startedToday || inFuture) && onlyIfInFuture) {
             return new SpannedText();
         }
         String text = startingDate(task);
         if (inFuture) {
-            return new SpannedText(text,
+            return new SpannedText().space().join(text,
                     new ForegroundColorSpan(TimeConstraintsUtils.NOT_STARTED_FG_COLOR),
                     new BackgroundColorSpan(TimeConstraintsUtils.NOT_STARTED_BG_COLOR));
+        } else if (startedToday) {
+            return new SpannedText().space().join(text,
+                    new ForegroundColorSpan(TimeConstraintsUtils.STARTED_TODAY_FG_COLOR),
+                    new BackgroundColorSpan(TimeConstraintsUtils.STARTED_TODAY_BG_COLOR));
         } else {
-            return new SpannedText(text);
+            return new SpannedText().space().join(text);
         }
     }
 
     private boolean inFuture(Optional<Date> startingDate) {
         return startingDate.isPresent() && startingDate.get().after(new Date());
+    }
+
+    private boolean startedToday(Optional<Date> startingDate) {
+        return startingDate.isPresent() && DateUtils.dayDiff(DateUtils.asCalendar(startingDate.get())) == 0;
     }
 
     private String startingDate(Task task) {
