@@ -1,5 +1,9 @@
 package net.fibulwinter.gtd.presentation;
 
+import static com.google.common.collect.FluentIterable.from;
+
+import java.util.List;
+
 import android.content.Context;
 import android.graphics.Color;
 import android.util.AttributeSet;
@@ -8,6 +12,10 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import com.google.common.base.Predicate;
+import com.google.common.collect.Iterables;
+import net.fibulwinter.gtd.domain.Task;
+import net.fibulwinter.gtd.service.TaskListService;
 
 public class TimeFilterControl extends LinearLayout {
 
@@ -75,5 +83,29 @@ public class TimeFilterControl extends LinearLayout {
     private void setCounter(int counter, TextView textView) {
         textView.setText(String.valueOf(counter));
         textView.setVisibility(counter > 0 ? VISIBLE : INVISIBLE);
+    }
+
+    public void updateOn(TaskListService taskListService) {
+        int todaySize = Iterables.size(taskListService.getTodayActions());
+        int overdueSize = Iterables.size(taskListService.getOverdueActions());
+        int startedTodayCounter = Iterables.size(taskListService.getStartedTodayActions());
+        int notStartedCounter = Iterables.size(taskListService.getNotStartedActions());
+
+        setTodayCounter(todaySize);
+        setOverdueCounter(overdueSize);
+        setStartedTodayCounter(startedTodayCounter);
+        setNotStartedCounter(notStartedCounter);
+
+    }
+
+    public void updateOn(List<Task> taskList) {
+        setTodayCounter(count(taskList, TaskListService.TODAY_PREDICATE()));
+        setOverdueCounter(count(taskList, TaskListService.OVERDUE_PREDICATE()));
+        setStartedTodayCounter(count(taskList, TaskListService.STARTED_TODAY_PREDICATE()));
+        setNotStartedCounter(count(taskList, TaskListService.NOT_STARTED_PREDICATE()));
+    }
+
+    private int count(List<Task> taskList, Predicate<Task> predicate) {
+        return Iterables.size(from(taskList).filter(predicate));
     }
 }

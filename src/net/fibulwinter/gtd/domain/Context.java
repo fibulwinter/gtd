@@ -5,7 +5,7 @@ import net.fibulwinter.gtd.service.TaskListService;
 public class Context {
 
     public static final Context DEFAULT = new Context("@Anywhere");
-    public static final Context ANY = new Context("<Any>", true) {
+    public static final Context ANY = new Context("<Any context>", true) {
         @Override
         public boolean match(Task task) {
             return TaskListService.CAN_START_PREDICATE().apply(task);

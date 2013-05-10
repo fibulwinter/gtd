@@ -1,65 +1,28 @@
 package net.fibulwinter.gtd.presentation;
 
-import static com.google.common.collect.Lists.newArrayList;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-
-import android.app.Activity;
-import android.content.ContentUris;
-import android.content.Intent;
-import android.net.Uri;
-import android.os.Bundle;
-import android.view.View;
-import android.widget.ListView;
 import net.fibulwinter.gtd.R;
-import net.fibulwinter.gtd.domain.*;
-import net.fibulwinter.gtd.infrastructure.TaskTableColumns;
-import net.fibulwinter.gtd.service.TaskExportService;
-import net.fibulwinter.gtd.service.TaskImportService;
-import net.fibulwinter.gtd.service.TaskListService;
+import net.fibulwinter.gtd.domain.Task;
+import net.fibulwinter.gtd.domain.TaskStatus;
 
-public class MayBeListActivity extends Activity {
-    private TaskListService taskListService;
-    private TaskItemAdapter taskItemAdapter;
-
+public class MayBeListActivity extends SimpleListActivity {
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.may_be_list);
-        ListView taskList = (ListView) findViewById(R.id.taskList);
-        ContextRepository contextRepository = new ContextRepository();
-        TaskRepository taskRepository = new TaskRepository(new TaskDAO(getContentResolver(), contextRepository), new TaskExportService(), new TaskImportService(contextRepository));
-        TaskUpdateListener taskUpdateListener = TaskUpdateListenerFactory.simple(this, taskRepository);
-        taskListService = new TaskListService(taskRepository);
-        taskItemAdapter = new TaskItemAdapter(this, taskUpdateListener, TaskItemAdapterConfig.list());
-        taskList.setAdapter(taskItemAdapter);
+    protected TaskItemAdapterConfig getConfig() {
+        return TaskItemAdapterConfig.list();
     }
 
     @Override
-    protected void onResume() {
-        super.onResume();
-        fillData();
+    protected Iterable<Task> loadActions() {
+        return taskListService.getMaybe();
     }
 
-    private void fillData() {
-        Iterable<Task> tasks = taskListService.getMaybe();
-        ArrayList<Task> tasksArrayList = newArrayList(tasks);
-        Collections.sort(tasksArrayList, new Comparator<Task>() {
-            @Override
-            public int compare(Task task, Task task1) {
-                return task.getText().compareTo(task1.getText());
-            }
-        });
-        taskItemAdapter.setData(tasksArrayList);
+    @Override
+    protected int newTaskText() {
+        return R.string.new_may_be;
     }
 
-    public void onNewTask(View view) {
-        Uri uri = ContentUris.withAppendedId(TaskTableColumns.CONTENT_URI, -1);
-        Intent intent = new Intent("edit", uri, this, TaskEditActivity.class);
-        intent.putExtra(TaskEditActivity.TYPE, TaskStatus.Maybe);
-        startActivity(intent);
+    @Override
+    protected TaskStatus getNewStatus() {
+        return TaskStatus.Maybe;
     }
 
 }

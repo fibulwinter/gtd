@@ -138,7 +138,7 @@ public class TaskListService {
     }
 
     public Iterable<Task> getMaybe() {
-        return from(taskRepository.getAll()).filter(and(MAYBE_PREDICATE, CAN_START_PREDICATE()));
+        return from(taskRepository.getAll()).filter(MAYBE_PREDICATE);
     }
 
     public Iterable<Task> getCompleted() {
@@ -170,6 +170,6 @@ public class TaskListService {
     }
 
     public Iterable<Task> getProjects() {
-        return from(taskRepository.getAll()).filter(and(ACTIVE_PREDICATE, PROJECT_PREDICATE, CAN_START_PREDICATE()));
+        return from(taskRepository.getAll()).filter(and(ACTIVE_PREDICATE, PROJECT_PREDICATE));
     }
 }

@@ -65,12 +65,12 @@ public class TimeConstraintsUtils {
         if (!startingDate.isPresent()) {
             return "anytime";
         }
-        long days = DateUtils.daysBefore(startingDate.get());
-        if (days > 0) {
+        long days = DateUtils.dayDiff(DateUtils.asCalendar(startingDate.get()));
+        if (days > 1) {
             return "starting in " + days + " days";
-        } else if (days == 0) {
+        } else if (days == 1) {
             return "starting tomorrow";
-        } else if (days == -1) {
+        } else if (days == 0) {
             return "started today";
         } else {
             return "started " + DateUtils.optionalDateToString(startingDate);
