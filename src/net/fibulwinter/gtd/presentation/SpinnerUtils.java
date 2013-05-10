@@ -17,6 +17,7 @@ public class SpinnerUtils {
                 return;
             }
         }
+        contextSpinner.setSelection(0);
     }
 
     public static interface ContextSpinnerListener {
@@ -37,10 +38,6 @@ public class SpinnerUtils {
         }
         for (Context context : contextRepository.getAll()) {
             contextArrayAdapter.add(context);
-        }
-        if (!onlySingle) {
-            contextArrayAdapter.add(Context.TODAY);
-            contextArrayAdapter.add(Context.OVERDUE);
         }
         contextArrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         contextSpinner.setAdapter(contextArrayAdapter);

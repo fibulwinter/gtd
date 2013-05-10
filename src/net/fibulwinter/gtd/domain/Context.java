@@ -8,7 +8,19 @@ public class Context {
     public static final Context ANY = new Context("<Any>", true) {
         @Override
         public boolean match(Task task) {
-            return true;
+            return TaskListService.CAN_START_PREDICATE().apply(task);
+        }
+    };
+    public static final Context NOT_STARTED = new Context("<Not started>", true) {
+        @Override
+        public boolean match(Task task) {
+            return TaskListService.NOT_STARTED_PREDICATE().apply(task);
+        }
+    };
+    public static final Context STARTED_TODAY = new Context("<Started today>", true) {
+        @Override
+        public boolean match(Task task) {
+            return TaskListService.STARTED_TODAY_PREDICATE().apply(task);
         }
     };
     public static final Context TODAY = new Context("<Today>", true) {
@@ -49,7 +61,7 @@ public class Context {
     }
 
     public boolean match(Task task) {
-        return this.equals(task.getContext());
+        return TaskListService.CAN_START_PREDICATE().apply(task) && this.equals(task.getContext());
     }
 
     @Override

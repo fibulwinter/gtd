@@ -15,7 +15,6 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.ListView;
 import android.widget.Spinner;
-import android.widget.TextView;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
 import net.fibulwinter.gtd.R;
@@ -28,8 +27,7 @@ import net.fibulwinter.gtd.service.TaskListService;
 public class NextActionListActivity extends Activity {
 
     private TaskListService taskListService;
-    private TextView todayCounter;
-    private TextView overdueCounter;
+    private TimeFilterControl timeFilterControl;
     private Spinner contextSpinner;
     private TaskItemAdapter taskItemAdapter;
     private Context context = Context.ANY;
@@ -40,9 +38,8 @@ public class NextActionListActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.next_action_list);
         ListView taskList = (ListView) findViewById(R.id.taskList);
-        todayCounter = (TextView) findViewById(R.id.dueTodayCounter);
-        overdueCounter = (TextView) findViewById(R.id.overdueCounter);
         contextSpinner = (Spinner) findViewById(R.id.context_spinner);
+        timeFilterControl = (TimeFilterControl) findViewById(R.id.timeFilter);
 
         ContextRepository contextRepository = new ContextRepository();
         TaskRepository taskRepository = new TaskRepository(new TaskDAO(getContentResolver(), contextRepository), new TaskExportService(), new TaskImportService(contextRepository));
@@ -52,13 +49,15 @@ public class NextActionListActivity extends Activity {
         taskItemAdapter = new TaskItemAdapter(this, taskUpdateListener, taskItemAdapterConfig);
         taskList.setAdapter(taskItemAdapter);
 
-        SpinnerUtils.setupContextSpinner(this, contextRepository, contextSpinner, new SpinnerUtils.ContextSpinnerListener() {
+        SpinnerUtils.ContextSpinnerListener contextSpinnerListener = new SpinnerUtils.ContextSpinnerListener() {
             @Override
             public void onSelectedContext(Context context) {
                 NextActionListActivity.this.context = context;
                 fillData();
             }
-        });
+        };
+        SpinnerUtils.setupContextSpinner(this, contextRepository, contextSpinner, contextSpinnerListener);
+        timeFilterControl.setListener(contextSpinnerListener);
 
     }
 
@@ -86,21 +85,14 @@ public class NextActionListActivity extends Activity {
         taskItemAdapterConfig.setShowContext(context.isSpecial());
         taskItemAdapter.setData(taskArrayList);
         int todaySize = Iterables.size(taskListService.getTodayActions());
-        todayCounter.setVisibility(todaySize > 0 ? View.VISIBLE : View.GONE);
-        todayCounter.setText("" + todaySize + " action(s) need to be done today");
         int overdueSize = Iterables.size(taskListService.getOverdueActions());
-        overdueCounter.setVisibility(overdueSize > 0 ? View.VISIBLE : View.GONE);
-        overdueCounter.setText("" + overdueSize + " action(s) are overdue");
-    }
+        int startedTodayCounter = Iterables.size(taskListService.getStartedTodayActions());
+        int notStartedCounter = Iterables.size(taskListService.getNotStartedActions());
 
-    public void onOverdueCounter(View view) {
-        context = Context.OVERDUE;
-        fillData();
-    }
-
-    public void onDueTodayCounter(View view) {
-        context = Context.TODAY;
-        fillData();
+        timeFilterControl.setTodayCounter(todaySize);
+        timeFilterControl.setOverdueCounter(overdueSize);
+        timeFilterControl.setStartedTodayCounter(startedTodayCounter);
+        timeFilterControl.setNotStartedCounter(notStartedCounter);
     }
 
     public void onNewTask(View view) {

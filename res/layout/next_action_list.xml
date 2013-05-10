@@ -4,26 +4,11 @@
               android:layout_width="fill_parent"
               android:layout_height="fill_parent"
         >
-    <RelativeLayout android:layout_width="fill_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal">
-        <TextView android:id="@+id/dueTodayCounter"
-                  android:layout_width="wrap_content"
-                  android:layout_height="wrap_content"
-                  android:layout_alignParentLeft="true"
-                  android:layout_alignParentTop="true"
-                  android:textColor="@color/orange"
-                  android:clickable="true"
-                  android:onClick="onDueTodayCounter"/>
-        <TextView android:id="@+id/overdueCounter"
-                  android:layout_width="wrap_content"
-                  android:layout_height="wrap_content"
-                  android:layout_alignParentRight="true"
-                  android:layout_alignParentTop="true"
-                  android:textColor="@color/red"
-                  android:clickable="true"
-                  android:onClick="onOverdueCounter"/>
-    </RelativeLayout>
+    <net.fibulwinter.gtd.presentation.TimeFilterControl
+            android:id="@+id/timeFilter"
+            android:layout_width="fill_parent"
+            android:layout_height="30dip"
+            />
     <RelativeLayout
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"

@@ -6,6 +6,7 @@ import static com.google.common.collect.FluentIterable.from;
 
 import java.util.Date;
 
+import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
 import net.fibulwinter.gtd.domain.Task;
 import net.fibulwinter.gtd.domain.TaskRepository;
@@ -13,14 +14,13 @@ import net.fibulwinter.gtd.domain.TaskStatus;
 import net.fibulwinter.gtd.infrastructure.DateUtils;
 
 public class TaskListService {
-    private static Predicate<Task> CAN_START_PREDICATE() {
+    public static Predicate<Task> CAN_START_PREDICATE() {
         return new Predicate<Task>() {
 
-            private Date now;
+            private Date now = new Date();
 
             @Override
             public boolean apply(Task task) {
-                now = new Date();
                 return !task.getStartingDate().isPresent() || task.getStartingDate().get().before(now);
             }
         };
@@ -28,12 +28,31 @@ public class TaskListService {
 
     public static Predicate<Task> OVERDUE_PREDICATE() {
         return new Predicate<Task>() {
-            private Date now;
+            private Date now = new Date();
 
             @Override
             public boolean apply(Task task) {
-                now = new Date();
                 return task.getStatus().isActive() && task.getDueDate().isPresent() && task.getDueDate().get().before(now);
+            }
+        };
+    }
+
+    public static Predicate<Task> STARTED_TODAY_PREDICATE() {
+        return new Predicate<Task>() {
+            @Override
+            public boolean apply(Task task) {
+                Optional<Date> startingDate = task.getStartingDate();
+                return startingDate.isPresent() && DateUtils.dayDiff(DateUtils.asCalendar(startingDate.get())) == 0;
+            }
+        };
+    }
+
+    public static Predicate<Task> NOT_STARTED_PREDICATE() {
+        return new Predicate<Task>() {
+            @Override
+            public boolean apply(Task task) {
+                Optional<Date> startingDate = task.getStartingDate();
+                return startingDate.isPresent() && DateUtils.dayDiff(DateUtils.asCalendar(startingDate.get())) > 0;
             }
         };
     }
@@ -115,7 +134,7 @@ public class TaskListService {
     }
 
     public Iterable<Task> getNextActions() {
-        return from(taskRepository.getAll()).filter(and(ACTIVE_PREDICATE, CAN_START_PREDICATE(), not(PROJECT_PREDICATE)));
+        return from(taskRepository.getAll()).filter(and(ACTIVE_PREDICATE, not(PROJECT_PREDICATE)));
     }
 
     public Iterable<Task> getMaybe() {
@@ -132,6 +151,14 @@ public class TaskListService {
 
     public Iterable<Task> getOverdueActions() {
         return from(taskRepository.getAll()).filter(OVERDUE_PREDICATE());
+    }
+
+    public Iterable<Task> getNotStartedActions() {
+        return from(taskRepository.getAll()).filter(NOT_STARTED_PREDICATE());
+    }
+
+    public Iterable<Task> getStartedTodayActions() {
+        return from(taskRepository.getAll()).filter(STARTED_TODAY_PREDICATE());
     }
 
     public Iterable<Task> getTodayActions() {
