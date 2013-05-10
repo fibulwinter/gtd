@@ -278,16 +278,6 @@ public class TaskItemAdapter extends ArrayAdapter<Task> {
                 extra = extra.space().join("to ").join(task.getMasterTask().get().getText(),
                         new StyleSpan(Typeface.ITALIC));
             }
-            if (canShowSubActions()) {
-                List<Task> subTasks = from(task.getSubTasks()).filter(TaskListService.ACTIVE_PREDICATE).toImmutableList();
-                if (subTasks.size() == 1) {
-                    extra = extra.space().join("blocked by " + getOnlyElement(subTasks).getText(),
-                            new StyleSpan(Typeface.ITALIC));
-                } else if (subTasks.size() > 1) {
-                    extra = extra.space().join("blocked by " + subTasks.size() + " subtasks",
-                            new StyleSpan(Typeface.ITALIC));
-                }
-            }
             if (canShowContext()) {
                 extra = extra.space().join(task.getContext().getName(),
                         new ForegroundColorSpan(CONTEXT_FG_COLOR),
@@ -303,6 +293,22 @@ public class TaskItemAdapter extends ArrayAdapter<Task> {
             if (canShowTimeConstraints()) {
                 extra = extra.space().join(timeConstraintsUtils.addFutureStartWarning(task))
                         .join(" - " + DateUtils.optionalDateToString(task.getDueDate()) + "]");
+            }
+            if (canShowSubActions()) {
+                List<Task> subTasks = from(task.getSubTasks()).filter(TaskListService.ACTIVE_PREDICATE).toImmutableList();
+                if (subTasks.size() == 1) {
+                    if (!extra.isEmpty()) {
+                        extra = extra.join("\n");
+                    }
+                    extra = extra.space().join("blocked by " + getOnlyElement(subTasks).getText(),
+                            new StyleSpan(Typeface.ITALIC));
+                } else if (subTasks.size() > 1) {
+                    if (!extra.isEmpty()) {
+                        extra = extra.join("\n");
+                    }
+                    extra = extra.space().join("blocked by " + subTasks.size() + " subtasks",
+                            new StyleSpan(Typeface.ITALIC));
+                }
             }
             return extra;
         }
