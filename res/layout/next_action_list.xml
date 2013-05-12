@@ -4,11 +4,6 @@
               android:layout_width="fill_parent"
               android:layout_height="fill_parent"
         >
-    <net.fibulwinter.gtd.presentation.TimeFilterControl
-            android:id="@+id/timeFilter"
-            android:layout_width="fill_parent"
-            android:layout_height="30dip"
-            />
     <RelativeLayout
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
@@ -21,14 +16,21 @@
                 android:text="@string/new_task"
                 android:onClick="onNewTask"
                 />
-        <Spinner
-                android:id="@+id/context_spinner"
+        <net.fibulwinter.gtd.presentation.TimeFilterControl
+                android:id="@+id/timeFilter"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_height="35dip"
+                android:layout_centerVertical="true"
                 android:layout_alignParentLeft="true"
                 android:layout_toLeftOf="@id/new_task"
                 />
     </RelativeLayout>
+    <Spinner
+            android:id="@+id/context_spinner"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:visibility="gone"
+            />
     <ListView
             android:id="@+id/taskList"
             android:layout_width="fill_parent"

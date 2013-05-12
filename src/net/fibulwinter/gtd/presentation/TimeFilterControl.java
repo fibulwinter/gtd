@@ -14,11 +14,13 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
+import net.fibulwinter.gtd.domain.ContextRepository;
 import net.fibulwinter.gtd.domain.Task;
 import net.fibulwinter.gtd.service.TaskListService;
 
 public class TimeFilterControl extends LinearLayout {
 
+    public static final LayoutParams LAYOUT_PARAMS_MAIN = new LayoutParams(ViewGroup.LayoutParams.FILL_PARENT, ViewGroup.LayoutParams.FILL_PARENT);
     public static final LayoutParams LAYOUT_PARAMS = new LayoutParams(ViewGroup.LayoutParams.FILL_PARENT, ViewGroup.LayoutParams.FILL_PARENT);
     private final TextView textViewNotStarted;
     private final TextView textViewStartedToday;
@@ -26,39 +28,128 @@ public class TimeFilterControl extends LinearLayout {
     private final TextView textViewOverDue;
     private SpinnerUtils.ContextSpinnerListener listener;
     private final TextView textViewAll;
+    private final ContextRepository contextRepository;
+    private net.fibulwinter.gtd.domain.Context currentContext = net.fibulwinter.gtd.domain.Context.ANY;
+    private net.fibulwinter.gtd.domain.Context currentTimeContext = null;
 
     public TimeFilterControl(Context context, AttributeSet attrs) {
         super(context, attrs);
         setOrientation(LinearLayout.HORIZONTAL);
+        contextRepository = new ContextRepository();
+        LAYOUT_PARAMS_MAIN.weight = 0.8f;
         LAYOUT_PARAMS.weight = 1;
-        textViewAll = createButton(context, "All", Color.WHITE, Color.BLACK, net.fibulwinter.gtd.domain.Context.ANY);
-        textViewAll.setVisibility(VISIBLE);
-        textViewNotStarted = createButton(context, "0", TimeConstraintsUtils.NOT_STARTED_FG_COLOR, TimeConstraintsUtils.NOT_STARTED_BG_COLOR, net.fibulwinter.gtd.domain.Context.NOT_STARTED);
-        textViewStartedToday = createButton(context, "0", TimeConstraintsUtils.STARTED_TODAY_FG_COLOR, TimeConstraintsUtils.STARTED_TODAY_BG_COLOR, net.fibulwinter.gtd.domain.Context.STARTED_TODAY);
-        textViewDueTomorrow = createButton(context, "0", TimeConstraintsUtils.TODAY_FG_COLOR, TimeConstraintsUtils.TODAY_BG_COLOR, net.fibulwinter.gtd.domain.Context.TODAY);
-        textViewOverDue = createButton(context, "0", TimeConstraintsUtils.OVERDUE_FG_COLOR, TimeConstraintsUtils.OVERDUE_BG_COLOR, net.fibulwinter.gtd.domain.Context.OVERDUE);
+        textViewAll = createContextButton(context);
+        textViewNotStarted = createButton(context, "0", TimeConstraintsUtils.NOT_STARTED_FG_COLOR, TimeConstraintsUtils.NOT_STARTED_BG_COLOR, net.fibulwinter.gtd.domain.Context.NOT_STARTED, LAYOUT_PARAMS);
+        textViewStartedToday = createButton(context, "0", TimeConstraintsUtils.STARTED_TODAY_FG_COLOR, TimeConstraintsUtils.STARTED_TODAY_BG_COLOR, net.fibulwinter.gtd.domain.Context.STARTED_TODAY, LAYOUT_PARAMS);
+        textViewDueTomorrow = createButton(context, "0", TimeConstraintsUtils.TODAY_FG_COLOR, TimeConstraintsUtils.TODAY_BG_COLOR, net.fibulwinter.gtd.domain.Context.TODAY, LAYOUT_PARAMS);
+        textViewOverDue = createButton(context, "0", TimeConstraintsUtils.OVERDUE_FG_COLOR, TimeConstraintsUtils.OVERDUE_BG_COLOR, net.fibulwinter.gtd.domain.Context.OVERDUE, LAYOUT_PARAMS);
     }
 
-    private TextView createButton(Context context, String text, int textColor, int backgroundColor, final net.fibulwinter.gtd.domain.Context taskContext) {
-        TextView textView = new TextView(context);
-        textView.setText(text);
-        textView.setTextColor(textColor);
-        textView.setBackgroundColor(backgroundColor);
-        textView.setLayoutParams(LAYOUT_PARAMS);
+    private TextView createContextButton(final Context context) {
+        final TextView textView = new TextView(context);
+        textView.setText(currentContext.getName());
+        textView.setTextColor(TaskItemAdapter.CONTEXT_FG_COLOR);
+        textView.setBackgroundColor(TaskItemAdapter.CONTEXT_BG_COLOR);
         textView.setClickable(true);
         textView.setGravity(Gravity.CENTER);
-        textView.setVisibility(INVISIBLE);
-        addView(textView, LAYOUT_PARAMS);
+        textView.setVisibility(VISIBLE);
         textView.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View view) {
                 if (listener != null) {
-                    listener.onSelectedContext(taskContext);
+                    if (currentContext == net.fibulwinter.gtd.domain.Context.ANY) {
+                        if (currentTimeContext == null) {
+                            SpinnerDialog.show(context, contextRepository.getAll(), currentContext, new SpinnerDialog.OnSelected<net.fibulwinter.gtd.domain.Context>() {
+                                @Override
+                                public void selected(net.fibulwinter.gtd.domain.Context selectedItem) {
+                                    currentContext = selectedItem;
+                                    currentTimeContext = null;
+                                    textView.setText(currentContext.getName());
+                                    updateColors();
+                                    listener.onSelectedContext(currentContext);
+                                }
+                            });
+                        } else {
+                            currentTimeContext = null;
+                            textView.setText(currentContext.getName());
+                            updateColors();
+                            listener.onSelectedContext(currentContext);
+                        }
+
+                    } else {
+                        if (currentTimeContext == null) {
+                            currentContext = net.fibulwinter.gtd.domain.Context.ANY;
+                            currentTimeContext = null;
+                            textView.setText(currentContext.getName());
+                            updateColors();
+                            listener.onSelectedContext(currentContext);
+                        } else {
+                            currentTimeContext = null;
+                            textView.setText(currentContext.getName());
+                            updateColors();
+                            listener.onSelectedContext(currentContext);
+                        }
+                    }
                 }
             }
         });
+        addView(textView, LAYOUT_PARAMS_MAIN);
         return textView;
     }
+
+    private TextView createButton(final Context context, String text, final int textColor, final int backgroundColor, final net.fibulwinter.gtd.domain.Context taskContext, LayoutParams layoutParams) {
+        final TextView textView = new TextView(context);
+        textView.setText(text);
+        textView.setTextColor(textColor);
+        textView.setBackgroundColor(backgroundColor);
+        textView.setClickable(true);
+        textView.setGravity(Gravity.CENTER);
+        textView.setVisibility(INVISIBLE);
+        textView.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (listener != null) {
+                    if (currentTimeContext == taskContext) {
+                        currentTimeContext = null;
+                        updateColors();
+                        listener.onSelectedContext(currentContext);
+                    } else {
+                        currentTimeContext = taskContext;
+                        updateColors();
+                        listener.onSelectedContext(currentTimeContext);
+                    }
+                }
+            }
+        });
+        addView(textView, LAYOUT_PARAMS);
+        return textView;
+    }
+
+    private void updateColors() {
+        if (currentTimeContext == null && currentContext != net.fibulwinter.gtd.domain.Context.ANY) {
+            textViewAll.setTextColor(Color.WHITE);
+            textViewAll.setBackgroundColor(TaskItemAdapter.CONTEXT_FG_COLOR2);
+        } else {
+            textViewAll.setTextColor(TaskItemAdapter.CONTEXT_FG_COLOR);
+            textViewAll.setBackgroundColor(TaskItemAdapter.CONTEXT_BG_COLOR);
+        }
+        updateColors(textViewNotStarted, net.fibulwinter.gtd.domain.Context.NOT_STARTED, TimeConstraintsUtils.NOT_STARTED_FG_COLOR, TimeConstraintsUtils.NOT_STARTED_BG_COLOR);
+        updateColors(textViewStartedToday, net.fibulwinter.gtd.domain.Context.STARTED_TODAY, TimeConstraintsUtils.STARTED_TODAY_FG_COLOR, TimeConstraintsUtils.STARTED_TODAY_BG_COLOR);
+        updateColors(textViewDueTomorrow, net.fibulwinter.gtd.domain.Context.TODAY, TimeConstraintsUtils.TODAY_FG_COLOR, TimeConstraintsUtils.TODAY_BG_COLOR);
+        updateColors(textViewOverDue, net.fibulwinter.gtd.domain.Context.OVERDUE, TimeConstraintsUtils.OVERDUE_FG_COLOR, TimeConstraintsUtils.OVERDUE_BG_COLOR);
+
+    }
+
+    private void updateColors(TextView textView, net.fibulwinter.gtd.domain.Context context, int fg, int bg) {
+        if (currentTimeContext == context) {
+            textView.setTextColor(bg);
+            textView.setBackgroundColor(fg);
+        } else {
+            textView.setTextColor(fg);
+            textView.setBackgroundColor(bg);
+        }
+    }
+
 
     public void setTodayCounter(int todayCounter) {
         setCounter(todayCounter, textViewDueTomorrow);
@@ -82,20 +173,7 @@ public class TimeFilterControl extends LinearLayout {
 
     private void setCounter(int counter, TextView textView) {
         textView.setText(String.valueOf(counter));
-        textView.setVisibility(counter > 0 ? VISIBLE : INVISIBLE);
-    }
-
-    public void updateOn(TaskListService taskListService) {
-        int todaySize = Iterables.size(taskListService.getTodayActions());
-        int overdueSize = Iterables.size(taskListService.getOverdueActions());
-        int startedTodayCounter = Iterables.size(taskListService.getStartedTodayActions());
-        int notStartedCounter = Iterables.size(taskListService.getNotStartedActions());
-
-        setTodayCounter(todaySize);
-        setOverdueCounter(overdueSize);
-        setStartedTodayCounter(startedTodayCounter);
-        setNotStartedCounter(notStartedCounter);
-
+        textView.setVisibility(counter > 0 ? VISIBLE : GONE);
     }
 
     public void updateOn(List<Task> taskList) {

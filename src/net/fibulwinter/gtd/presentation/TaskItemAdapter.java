@@ -23,6 +23,7 @@ import net.fibulwinter.gtd.infrastructure.DateUtils;
 import net.fibulwinter.gtd.service.TaskListService;
 
 public class TaskItemAdapter extends ArrayAdapter<Task> {
+    public static final int CONTEXT_FG_COLOR2 = Color.parseColor("#3333ff");
     public static final int CONTEXT_FG_COLOR = Color.parseColor("#6666cc");
     public static final int CONTEXT_BG_COLOR = Color.parseColor("#303066");
     public static final int SELECT_FG_COLOR = Color.parseColor("#00ff00");
