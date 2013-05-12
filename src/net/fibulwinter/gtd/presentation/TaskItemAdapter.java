@@ -157,18 +157,21 @@ public class TaskItemAdapter extends ArrayAdapter<Task> {
                                 update(subTask, true);
                                 replace(masterTask, subTask);
                             }
+                            notifyDataSetChanged();
                         }
 
                         @Override
                         protected void justUpdate(Task task) {
                             taskUpdateListener.onTaskUpdated(task);
                             update(task, true);
+                            notifyDataSetChanged();
                         }
 
                         @Override
                         protected void justDelete(Task task) {
                             remove(task);
                             taskUpdateListener.onTaskDeleted(task);
+                            notifyDataSetChanged();
                         }
                     };
                     SpinnerDialog.show(TaskItemAdapter.this.getContext(), statusTransitionsFactory.getTransitions(task), null, new SpinnerDialog.OnSelected<StatusTransition>() {
