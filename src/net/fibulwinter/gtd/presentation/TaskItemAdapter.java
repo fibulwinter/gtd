@@ -330,7 +330,7 @@ public class TaskItemAdapter extends ArrayAdapter<Task> {
                     image = R.drawable.a_done;
                     break;
                 case Cancelled:
-                    image = R.drawable.a_cancelled;
+                    image = task.isInherentlyCancelled() ? R.drawable.a_cancelled_i : R.drawable.a_cancelled;
                     break;
             }
             return image;

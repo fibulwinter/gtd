@@ -56,6 +56,10 @@ public class Task {
                 : TaskStatus.Cancelled;
     }
 
+    public boolean isInherentlyCancelled() {
+        return getStatus() != status;
+    }
+
     public void complete() {
         setStatus(TaskStatus.Completed);
     }

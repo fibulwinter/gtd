@@ -48,7 +48,7 @@ public abstract class StatusTransitionsFactory {
                     });
                 }
             });
-        } else {
+        } else if (!task.isInherentlyCancelled()) {
             transitions.add(new StatusTransition("Let's do it!") {
                 @Override
                 public void doTransition(Task task) {
@@ -57,7 +57,7 @@ public abstract class StatusTransitionsFactory {
                 }
             });
         }
-        if (task.getStatus() != TaskStatus.Maybe) {
+        if (!task.isInherentlyCancelled() && task.getStatus() != TaskStatus.Maybe) {
             transitions.add(new StatusTransition("May be later...") {
                 @Override
                 public void doTransition(Task task) {
