@@ -4,8 +4,6 @@ import static com.google.common.base.Predicates.and;
 import static com.google.common.base.Predicates.not;
 import static com.google.common.collect.FluentIterable.from;
 
-import java.util.Date;
-
 import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
 import net.fibulwinter.gtd.domain.Task;
@@ -13,18 +11,6 @@ import net.fibulwinter.gtd.domain.TaskRepository;
 import net.fibulwinter.gtd.domain.TaskStatus;
 
 public class TaskListService {
-    public static Predicate<Task> CAN_START_PREDICATE() {
-        return new Predicate<Task>() {
-
-            private Date now = new Date();
-
-            @Override
-            public boolean apply(Task task) {
-                return !task.getStartingDate().isPresent() || task.getStartingDate().get().before(now);
-            }
-        };
-    }
-
     public static final Predicate<Task> ACTIVE_PREDICATE = new Predicate<Task>() {
         @Override
         public boolean apply(Task task) {

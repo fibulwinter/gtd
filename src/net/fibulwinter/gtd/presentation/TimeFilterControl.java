@@ -36,6 +36,16 @@ public class TimeFilterControl extends LinearLayout {
     private final net.fibulwinter.gtd.domain.Context startedTodayContext;
     private final net.fibulwinter.gtd.domain.Context dueTomorrowContext;
     private final net.fibulwinter.gtd.domain.Context overdueContext;
+    private Predicate<Task> filterPredicate = new Predicate<Task>() {
+        @Override
+        public boolean apply(Task task) {
+            if (currentTimeContext != null) {
+                return currentTimeContext.match(task);
+            } else {
+                return !temporalPredicates.notStarted().apply(task) && currentContext.match(task);
+            }
+        }
+    };
 
     public TimeFilterControl(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -205,11 +215,12 @@ public class TimeFilterControl extends LinearLayout {
         textView.setVisibility(counter > 0 ? VISIBLE : GONE);
     }
 
-    public void updateOn(List<Task> taskList) {
+    public Iterable<Task> updateOn(List<Task> taskList) {
         setTodayCounter(count(taskList, temporalPredicates.dueTomorrow()));
         setOverdueCounter(count(taskList, temporalPredicates.overdue()));
         setStartedTodayCounter(count(taskList, temporalPredicates.startedToday()));
         setNotStartedCounter(count(taskList, temporalPredicates.notStarted()));
+        return from(taskList).filter(filterPredicate);
     }
 
     private int count(List<Task> taskList, Predicate<Task> predicate) {

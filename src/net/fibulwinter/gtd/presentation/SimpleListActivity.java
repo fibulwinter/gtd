@@ -1,6 +1,5 @@
 package net.fibulwinter.gtd.presentation;
 
-import static com.google.common.collect.FluentIterable.from;
 import static com.google.common.collect.Lists.newArrayList;
 
 import java.util.ArrayList;
@@ -15,8 +14,6 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ListView;
-import android.widget.Spinner;
-import com.google.common.base.Predicate;
 import net.fibulwinter.gtd.R;
 import net.fibulwinter.gtd.domain.*;
 import net.fibulwinter.gtd.infrastructure.TaskTableColumns;
@@ -28,9 +25,7 @@ public abstract class SimpleListActivity extends Activity {
 
     protected TaskListService taskListService;
     private TimeFilterControl timeFilterControl;
-    private Spinner contextSpinner;
     private TaskItemAdapter taskItemAdapter;
-    private Context context = Context.ANY;
     private TaskItemAdapterConfig taskItemAdapterConfig;
 
     @Override
@@ -38,7 +33,6 @@ public abstract class SimpleListActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.next_action_list);
         ListView taskList = (ListView) findViewById(R.id.taskList);
-        contextSpinner = (Spinner) findViewById(R.id.context_spinner);
         timeFilterControl = (TimeFilterControl) findViewById(R.id.timeFilter);
 
         ContextRepository contextRepository = new ContextRepository();
@@ -48,15 +42,12 @@ public abstract class SimpleListActivity extends Activity {
         taskItemAdapter = new TaskItemAdapter(this, taskUpdateListener, taskItemAdapterConfig);
         taskList.setAdapter(taskItemAdapter);
 
-        SpinnerUtils.ContextSpinnerListener contextSpinnerListener = new SpinnerUtils.ContextSpinnerListener() {
+        timeFilterControl.setListener(new SpinnerUtils.ContextSpinnerListener() {
             @Override
             public void onSelectedContext(Context context) {
-                SimpleListActivity.this.context = context;
                 fillData();
             }
-        };
-        SpinnerUtils.setupContextSpinner(this, contextRepository, contextSpinner, contextSpinnerListener);
-        timeFilterControl.setListener(contextSpinnerListener);
+        });
         Button button = (Button) findViewById(R.id.new_task);
         button.setText(getResources().getString(newTaskText()));
 
@@ -73,15 +64,8 @@ public abstract class SimpleListActivity extends Activity {
     }
 
     private void fillData() {
-        SpinnerUtils.setSelection(contextSpinner, context);
         ArrayList<Task> taskList = newArrayList(loadActions());
-        timeFilterControl.updateOn(taskList);
-        Iterable<Task> tasks = from(taskList).filter(new Predicate<Task>() {
-            @Override
-            public boolean apply(Task task) {
-                return context.match(task);
-            }
-        });
+        Iterable<Task> tasks = timeFilterControl.updateOn(taskList);
         ArrayList<Task> taskArrayList = newArrayList(tasks);
         Collections.sort(taskArrayList, new Comparator<Task>() {
             @Override
@@ -89,7 +73,8 @@ public abstract class SimpleListActivity extends Activity {
                 return task.getText().compareTo(task1.getText());
             }
         });
-        taskItemAdapterConfig.setShowContext(context.isSpecial());
+        //todo
+//        taskItemAdapterConfig.setShowContext(context.isSpecial());
         taskItemAdapter.setData(taskArrayList);
 //        timeFilterControl.updateOn(taskListService);
     }

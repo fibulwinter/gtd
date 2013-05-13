@@ -1,14 +1,11 @@
 package net.fibulwinter.gtd.domain;
 
-import net.fibulwinter.gtd.service.TaskListService;
-
 public class Context {
-
     public static final Context DEFAULT = new Context("@Anywhere");
     public static final Context ANY = new Context("<Any context>", true) {
         @Override
         public boolean match(Task task) {
-            return TaskListService.CAN_START_PREDICATE().apply(task);
+            return true;
         }
     };
 
@@ -37,7 +34,7 @@ public class Context {
     }
 
     public boolean match(Task task) {
-        return TaskListService.CAN_START_PREDICATE().apply(task) && this.equals(task.getContext());
+        return this.equals(task.getContext());
     }
 
     @Override
