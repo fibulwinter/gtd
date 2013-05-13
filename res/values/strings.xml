@@ -10,6 +10,7 @@
     <string name="new_sub_task">New sub action</string>
     <string name="export_tasks">Export</string>
     <string name="import_tasks">Import</string>
+    <string name="archive_tasks">Archive</string>
     <string name="are_you_sure_to_import_title">All tasks would be replaced by imported ones</string>
     <string name="are_you_sure_to_import">Are you sure to do this?</string>
     <string name="ok_to_import">Yes, import and replace</string>

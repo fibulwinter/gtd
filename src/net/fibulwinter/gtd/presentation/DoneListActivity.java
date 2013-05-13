@@ -10,10 +10,13 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.ListView;
+import android.widget.Toast;
+import com.google.common.base.Joiner;
 import net.fibulwinter.gtd.R;
 import net.fibulwinter.gtd.domain.ContextRepository;
 import net.fibulwinter.gtd.domain.Task;
@@ -84,6 +87,18 @@ public class DoneListActivity extends Activity {
                 })
                 .setNegativeButton(R.string.cancel_to_import, null)
                 .show();
+    }
+
+    public void onArchive(View view) {
+        Intent i = new Intent(Intent.ACTION_SEND);
+        i.setType("message/rfc822");
+        i.putExtra(Intent.EXTRA_SUBJECT, "Archive log");
+        i.putExtra(Intent.EXTRA_TEXT, Joiner.on("\n").join(taskListService.getCompleted()));
+        try {
+            startActivity(Intent.createChooser(i, "Send mail..."));
+        } catch (android.content.ActivityNotFoundException ex) {
+            Toast.makeText(this, "There are no email clients installed.", Toast.LENGTH_SHORT).show();
+        }
     }
 
     private void doImport() {

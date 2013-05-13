@@ -38,7 +38,7 @@ public class TaskExportService {
         }
     }
 
-    private void export(List<Task> tasks, PrintStream out) {
+    public void export(List<Task> tasks, PrintStream out) {
         for (Task task : tasks) {
             export(task, out);
         }

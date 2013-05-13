@@ -21,6 +21,13 @@
                 android:text="@string/import_tasks"
                 android:onClick="onImport"
                 />
+        <Button android:id="@+id/archive"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="right"
+                android:text="@string/archive_tasks"
+                android:onClick="onArchive"
+                />
     </LinearLayout>
     <ListView
             android:id="@+id/taskList"
