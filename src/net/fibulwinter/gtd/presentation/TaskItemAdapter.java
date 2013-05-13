@@ -3,6 +3,7 @@ package net.fibulwinter.gtd.presentation;
 import static com.google.common.collect.FluentIterable.from;
 import static com.google.common.collect.Iterables.getOnlyElement;
 
+import java.util.Date;
 import java.util.List;
 
 import android.content.Context;
@@ -42,6 +43,7 @@ public class TaskItemAdapter extends ArrayAdapter<Task> {
     public TaskItemAdapter(Context context, TaskUpdateListener taskUpdateListener, TaskItemAdapterConfig config) {
         this(context, taskUpdateListener, config, config);
     }
+
 
     public TaskItemAdapter(Context context, TaskUpdateListener taskUpdateListener, TaskItemAdapterConfig config,
                            TaskItemAdapterConfig selectedConfig) {
@@ -103,6 +105,7 @@ public class TaskItemAdapter extends ArrayAdapter<Task> {
         private TextView contextSpinner;
         private TextView timeConstraints;
         private LinearLayout extraPanel;
+        private TextView header;
 
         ViewHolder(Task aTask, View convertView) {
             this.task = aTask;
@@ -116,6 +119,7 @@ public class TaskItemAdapter extends ArrayAdapter<Task> {
                     onTitleClick(TaskItemAdapter.this.getContext(), view);
                 }
             });
+            header = (TextView) convertView.findViewById(R.id.task_list_item_header);
             contextSpinner = (TextView) convertView.findViewById(R.id.task_context_spinner);
             contextSpinner.setOnClickListener(new View.OnClickListener() {
                 private ContextRepository contextRepository = new ContextRepository();
@@ -216,6 +220,25 @@ public class TaskItemAdapter extends ArrayAdapter<Task> {
         void update(Task item, boolean selectedItem) {
             task = item;
             this.selected = selectedItem;
+
+            int position = getPosition(item);
+
+            TemporalLogic temporalLogic = new TemporalLogic();
+            Optional<Date> completeDateN = item.getCompleteDate();
+            boolean haveHeader = completeDateN.isPresent();
+            if (position > 0) {
+                Optional<Date> completeDateP = getItem(position - 1).getCompleteDate();
+                haveHeader = completeDateN.isPresent() && completeDateP.isPresent();
+                if (haveHeader) {
+                    haveHeader = temporalLogic.relativeDays(completeDateN.get()) != temporalLogic.relativeDays(completeDateP.get());
+                }
+            }
+            if (!haveHeader) {
+                header.setVisibility(View.GONE);
+            } else {
+                header.setVisibility(View.VISIBLE);
+                header.setText(DateMarshaller.optionalDateToString(Optional.of(temporalLogic.getCalendar(item.getCompleteDate().get()).getTime())));
+            }
 
             configureText(item);
 

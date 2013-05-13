@@ -5,10 +5,24 @@
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content">
 
+    <TextView
+            android:id="@+id/task_list_item_header"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentRight="true"
+            android:textColor="@color/white"
+            android:textStyle="bold"
+            android:drawableBottom="@color/white"
+            android:gravity="right"
+            android:text="Header"
+            />
     <ImageButton
             android:id="@+id/task_list_item_status"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_below="@id/task_list_item_header"
             android:layout_alignParentRight="true"
             android:layout_centerVertical="true"
             android:background="@android:color/background_dark"
@@ -20,7 +34,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_alignParentLeft="true"
-            android:layout_alignParentTop="true"
+            android:layout_below="@id/task_list_item_header"
             android:layout_toLeftOf="@id/task_list_item_status"
             android:textColor="@color/white"
             android:gravity="center_vertical"
