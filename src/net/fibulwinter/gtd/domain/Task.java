@@ -106,6 +106,9 @@ public class Task {
     }
 
     public void setMaster(Task masterTask) {
+        if (this.masterTask.isPresent()) {
+            this.masterTask.get().subTasks.remove(this);
+        }
         this.masterTask = Optional.of(masterTask);
         masterTask.subTasks.add(this);
     }
