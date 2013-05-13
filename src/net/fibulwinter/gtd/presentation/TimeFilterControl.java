@@ -26,21 +26,21 @@ public class TimeFilterControl extends LinearLayout {
     private final TextView textViewStartedToday;
     private final TextView textViewDueTomorrow;
     private final TextView textViewOverDue;
-    private SpinnerUtils.ContextSpinnerListener listener;
+    private Runnable listener;
     private final TextView textViewAll;
     private final ContextRepository contextRepository;
     private net.fibulwinter.gtd.domain.Context currentContext = net.fibulwinter.gtd.domain.Context.ANY;
-    private net.fibulwinter.gtd.domain.Context currentTimeContext = null;
+    private Predicate<Task> currentTimeContext = null;
     private TemporalPredicates temporalPredicates = new TemporalPredicates();
-    private final net.fibulwinter.gtd.domain.Context notStartedContext;
-    private final net.fibulwinter.gtd.domain.Context startedTodayContext;
-    private final net.fibulwinter.gtd.domain.Context dueTomorrowContext;
-    private final net.fibulwinter.gtd.domain.Context overdueContext;
+    private final Predicate<Task> notStartedContext;
+    private final Predicate<Task> startedTodayContext;
+    private final Predicate<Task> dueTomorrowContext;
+    private final Predicate<Task> overdueContext;
     private Predicate<Task> filterPredicate = new Predicate<Task>() {
         @Override
         public boolean apply(Task task) {
             if (currentTimeContext != null) {
-                return currentTimeContext.match(task);
+                return currentTimeContext.apply(task);
             } else {
                 return !temporalPredicates.notStarted().apply(task) && currentContext.match(task);
             }
@@ -54,30 +54,10 @@ public class TimeFilterControl extends LinearLayout {
         LAYOUT_PARAMS_MAIN.weight = 0.8f;
         LAYOUT_PARAMS.weight = 1;
         textViewAll = createContextButton(context);
-        notStartedContext = new net.fibulwinter.gtd.domain.Context("Not started") {
-            @Override
-            public boolean match(Task task) {
-                return temporalPredicates.notStarted().apply(task);
-            }
-        };
-        startedTodayContext = new net.fibulwinter.gtd.domain.Context("Started today") {
-            @Override
-            public boolean match(Task task) {
-                return temporalPredicates.startedToday().apply(task);
-            }
-        };
-        dueTomorrowContext = new net.fibulwinter.gtd.domain.Context("Due tomorrow") {
-            @Override
-            public boolean match(Task task) {
-                return temporalPredicates.dueTomorrow().apply(task);
-            }
-        };
-        overdueContext = new net.fibulwinter.gtd.domain.Context("Over due") {
-            @Override
-            public boolean match(Task task) {
-                return temporalPredicates.overdue().apply(task);
-            }
-        };
+        notStartedContext = temporalPredicates.notStarted();
+        startedTodayContext = temporalPredicates.startedToday();
+        dueTomorrowContext = temporalPredicates.dueTomorrow();
+        overdueContext = temporalPredicates.overdue();
         textViewNotStarted = createButton(context, "0", TimeConstraintsUtils.NOT_STARTED_FG_COLOR, TimeConstraintsUtils.NOT_STARTED_BG_COLOR, notStartedContext, LAYOUT_PARAMS);
         textViewStartedToday = createButton(context, "0", TimeConstraintsUtils.STARTED_TODAY_FG_COLOR, TimeConstraintsUtils.STARTED_TODAY_BG_COLOR, startedTodayContext, LAYOUT_PARAMS);
         textViewDueTomorrow = createButton(context, "0", TimeConstraintsUtils.TODAY_FG_COLOR, TimeConstraintsUtils.TODAY_BG_COLOR, dueTomorrowContext, LAYOUT_PARAMS);
@@ -105,14 +85,14 @@ public class TimeFilterControl extends LinearLayout {
                                     currentTimeContext = null;
                                     textView.setText(currentContext.getName());
                                     updateColors();
-                                    listener.onSelectedContext(currentContext);
+                                    listener.run();
                                 }
                             });
                         } else {
                             currentTimeContext = null;
                             textView.setText(currentContext.getName());
                             updateColors();
-                            listener.onSelectedContext(currentContext);
+                            listener.run();
                         }
 
                     } else {
@@ -121,12 +101,12 @@ public class TimeFilterControl extends LinearLayout {
                             currentTimeContext = null;
                             textView.setText(currentContext.getName());
                             updateColors();
-                            listener.onSelectedContext(currentContext);
+                            listener.run();
                         } else {
                             currentTimeContext = null;
                             textView.setText(currentContext.getName());
                             updateColors();
-                            listener.onSelectedContext(currentContext);
+                            listener.run();
                         }
                     }
                 }
@@ -136,7 +116,7 @@ public class TimeFilterControl extends LinearLayout {
         return textView;
     }
 
-    private TextView createButton(final Context context, String text, final int textColor, final int backgroundColor, final net.fibulwinter.gtd.domain.Context taskContext, LayoutParams layoutParams) {
+    private TextView createButton(final Context context, String text, final int textColor, final int backgroundColor, final Predicate<Task> taskContext, LayoutParams layoutParams) {
         final TextView textView = new TextView(context);
         textView.setText(text);
         textView.setTextColor(textColor);
@@ -151,11 +131,11 @@ public class TimeFilterControl extends LinearLayout {
                     if (currentTimeContext == taskContext) {
                         currentTimeContext = null;
                         updateColors();
-                        listener.onSelectedContext(currentContext);
+                        listener.run();
                     } else {
                         currentTimeContext = taskContext;
                         updateColors();
-                        listener.onSelectedContext(currentTimeContext);
+                        listener.run();
                     }
                 }
             }
@@ -179,8 +159,8 @@ public class TimeFilterControl extends LinearLayout {
 
     }
 
-    private void updateColors(TextView textView, net.fibulwinter.gtd.domain.Context context, int fg, int bg) {
-        if (currentTimeContext == context) {
+    private void updateColors(TextView textView, Predicate<Task> taskPredicate, int fg, int bg) {
+        if (currentTimeContext == taskPredicate) {
             textView.setTextColor(bg);
             textView.setBackgroundColor(fg);
         } else {
@@ -206,7 +186,7 @@ public class TimeFilterControl extends LinearLayout {
         setCounter(notStartedCounter, textViewNotStarted);
     }
 
-    public void setListener(SpinnerUtils.ContextSpinnerListener listener) {
+    public void setListener(Runnable listener) {
         this.listener = listener;
     }
 

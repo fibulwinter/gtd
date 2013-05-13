@@ -42,9 +42,9 @@ public abstract class SimpleListActivity extends Activity {
         taskItemAdapter = new TaskItemAdapter(this, taskUpdateListener, taskItemAdapterConfig);
         taskList.setAdapter(taskItemAdapter);
 
-        timeFilterControl.setListener(new SpinnerUtils.ContextSpinnerListener() {
+        timeFilterControl.setListener(new Runnable() {
             @Override
-            public void onSelectedContext(Context context) {
+            public void run() {
                 fillData();
             }
         });
@@ -65,16 +65,13 @@ public abstract class SimpleListActivity extends Activity {
 
     private void fillData() {
         ArrayList<Task> taskList = newArrayList(loadActions());
-        Iterable<Task> tasks = timeFilterControl.updateOn(taskList);
-        ArrayList<Task> taskArrayList = newArrayList(tasks);
+        ArrayList<Task> taskArrayList = newArrayList(timeFilterControl.updateOn(taskList));
         Collections.sort(taskArrayList, new Comparator<Task>() {
             @Override
             public int compare(Task task, Task task1) {
                 return task.getText().compareTo(task1.getText());
             }
         });
-        //todo
-//        taskItemAdapterConfig.setShowContext(context.isSpecial());
         taskItemAdapter.setData(taskArrayList);
 //        timeFilterControl.updateOn(taskListService);
     }
