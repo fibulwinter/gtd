@@ -45,6 +45,7 @@ public abstract class SimpleListActivity extends Activity {
         timeFilterControl = (TimeFilterControl) findViewById(R.id.timeFilter);
         searchButton = (ImageButton) findViewById(R.id.searchButton);
         searchText = (EditText) findViewById(R.id.searchText);
+        searchText.setLines(1);
         searchText.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
