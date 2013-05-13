@@ -33,7 +33,7 @@
             <net.fibulwinter.gtd.presentation.TimeFilterControl
                     android:id="@+id/timeFilter"
                     android:layout_width="fill_parent"
-                    android:layout_height="fill_parent"
+                    android:layout_height="42dip"
                     />
             <EditText android:id="@+id/searchText"
                       android:layout_width="fill_parent"
