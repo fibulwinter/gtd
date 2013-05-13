@@ -72,4 +72,8 @@ public class TaskListService {
     public void delete(Task task) {
         taskRepository.delete(task);
     }
+
+    public Iterable<Task> getAll() {
+        return taskRepository.getAll();
+    }
 }

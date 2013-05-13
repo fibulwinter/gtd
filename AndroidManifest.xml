@@ -22,5 +22,6 @@
         <activity android:name=".presentation.ProjectListActivity"/>
         <activity android:name=".presentation.MayBeListActivity"/>
         <activity android:name=".presentation.DoneListActivity"/>
+        <activity android:name=".presentation.SearchListActivity"/>
     </application>
 </manifest>

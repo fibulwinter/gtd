@@ -22,6 +22,12 @@ public class TaskItemAdapterConfig {
         return config;
     }
 
+    public static TaskItemAdapterConfig searchList() {
+        TaskItemAdapterConfig config = new TaskItemAdapterConfig();
+        config.allowChangeStatus = false;
+        return config;
+    }
+
     public static TaskItemAdapterConfig logList() {
         TaskItemAdapterConfig config = new TaskItemAdapterConfig();
         config.showContext = false;
