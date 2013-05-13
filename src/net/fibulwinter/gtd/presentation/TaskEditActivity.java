@@ -6,15 +6,15 @@ import static net.fibulwinter.gtd.presentation.TaskItemAdapterConfig.projectView
 import java.util.List;
 
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.content.ContentUris;
-import android.content.DialogInterface;
 import android.os.Bundle;
-import android.widget.EditText;
 import android.widget.ListView;
 import com.google.common.base.Optional;
 import net.fibulwinter.gtd.R;
-import net.fibulwinter.gtd.domain.*;
+import net.fibulwinter.gtd.domain.ContextRepository;
+import net.fibulwinter.gtd.domain.Task;
+import net.fibulwinter.gtd.domain.TaskDAO;
+import net.fibulwinter.gtd.domain.TaskRepository;
 import net.fibulwinter.gtd.service.TaskExportService;
 import net.fibulwinter.gtd.service.TaskImportService;
 import net.fibulwinter.gtd.service.TaskListService;
@@ -60,66 +60,14 @@ public class TaskEditActivity extends Activity {
 
         ContextRepository contextRepository = new ContextRepository();
         taskListService = new TaskListService(new TaskRepository(new TaskDAO(getContentResolver(), contextRepository), new TaskExportService(), new TaskImportService(contextRepository)));
-        boolean isNew = id == -1;
-        if (isNew) {
-            task = new Task("");
-            if (getIntent().hasExtra(TYPE)) {
-                task.setStatus((TaskStatus) getIntent().getExtras().get(TYPE));
-            }
-        } else {
-            task = taskListService.getById(id).get();
-        }
+        task = taskListService.getById(id).get();
         updateToTask();
-        if (isNew) {
-            onTitleClick();
-        }
     }
 
     private void updateToTask() {
         List<Task> masterTasks = task.getProjectRoot().getProjectView();
         masterTasksAdapter.setData(masterTasks);
         masterTasksAdapter.setHighlightedTask(Optional.of(task));
-    }
-
-    public void onTitleClick() {
-        // Set an EditText view to get user input
-        final EditText input = new EditText(this);
-        final String initialText = task.getText();
-        input.setText(initialText);
-        new AlertDialog.Builder(this)
-                .setTitle("Edit task text")
-                .setView(input)
-                .setCancelable(false)
-                .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int whichButton) {
-                        if (!getInputText().isEmpty()) {
-                            task.setText(getInputText());
-                            saveAndUpdate();
-                        } else if (initialText.isEmpty()) {
-                            finish();
-                        }
-                    }
-
-                    private String getInputText() {
-                        return input.getText().toString().trim();
-                    }
-                })
-                .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int whichButton) {
-                        if (initialText.isEmpty() && input.getText().toString().trim().isEmpty()) {
-                            finish();
-                        }
-                        // Do nothing.
-                    }
-                }).show();
-    }
-
-
-    private void saveAndUpdate() {
-        if (!task.getText().isEmpty()) {
-            taskListService.save(task);
-        }
-        updateToTask();
     }
 
     private void delete(Task taskToDelete) {

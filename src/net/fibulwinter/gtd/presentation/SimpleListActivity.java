@@ -9,9 +9,6 @@ import java.util.Comparator;
 import java.util.List;
 
 import android.app.Activity;
-import android.content.ContentUris;
-import android.content.Intent;
-import android.net.Uri;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -19,10 +16,10 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ListView;
+import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
 import net.fibulwinter.gtd.R;
 import net.fibulwinter.gtd.domain.*;
-import net.fibulwinter.gtd.infrastructure.TaskTableColumns;
 import net.fibulwinter.gtd.service.TaskExportService;
 import net.fibulwinter.gtd.service.TaskImportService;
 import net.fibulwinter.gtd.service.TaskListService;
@@ -111,10 +108,16 @@ public abstract class SimpleListActivity extends Activity {
     protected abstract Iterable<Task> loadActions();
 
     public void onNewTask(View view) {
-        Uri uri = ContentUris.withAppendedId(TaskTableColumns.CONTENT_URI, -1);
-        Intent intent = new Intent("edit", uri, this, TaskEditActivity.class);
-        intent.putExtra(TaskEditActivity.TYPE, getNewStatus());
-        startActivity(intent);
+        new EditDialogFactory(this).showTitleDialog("", "Enter new task title", new EditDialogFactory.TitleEdited() {
+            @Override
+            public void onValidText(String title) {
+                Task task = new Task(title);
+                task.setStatus(getNewStatus());
+                taskListService.save(task);
+                fillData();
+                taskItemAdapter.setHighlightedTask(Optional.of(task));
+            }
+        });
     }
 
     public void onSearch(View view) {

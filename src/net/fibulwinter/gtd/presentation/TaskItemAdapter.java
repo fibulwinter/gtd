@@ -91,7 +91,7 @@ public class TaskItemAdapter extends ArrayAdapter<Task> {
         } else {
             holder = (ViewHolder) convertView.getTag();
         }
-        holder.update(getItem(position), highlightedTask.isPresent() && highlightedTask.get() == holder.task);
+        holder.update(getItem(position), highlightedTask.isPresent() && highlightedTask.get().equals(holder.task));
         return convertView;
     }
 
@@ -225,19 +225,21 @@ public class TaskItemAdapter extends ArrayAdapter<Task> {
 
             TemporalLogic temporalLogic = new TemporalLogic();
             Optional<Date> completeDateN = item.getCompleteDate();
-            boolean haveHeader = completeDateN.isPresent();
-            if (position > 0) {
-                Optional<Date> completeDateP = getItem(position - 1).getCompleteDate();
-                haveHeader = completeDateN.isPresent() && completeDateP.isPresent();
-                if (haveHeader) {
-                    haveHeader = temporalLogic.relativeDays(completeDateN.get()) != temporalLogic.relativeDays(completeDateP.get());
+            if (config.isShowCompletedDate()) {
+                boolean haveHeader = completeDateN.isPresent();
+                if (position > 0) {
+                    Optional<Date> completeDateP = getItem(position - 1).getCompleteDate();
+                    haveHeader = completeDateN.isPresent() && completeDateP.isPresent();
+                    if (haveHeader) {
+                        haveHeader = temporalLogic.relativeDays(completeDateN.get()) != temporalLogic.relativeDays(completeDateP.get());
+                    }
                 }
-            }
-            if (!haveHeader) {
-                header.setVisibility(View.GONE);
-            } else {
-                header.setVisibility(View.VISIBLE);
-                header.setText(DateMarshaller.optionalDateToString(Optional.of(temporalLogic.getCalendar(item.getCompleteDate().get()).getTime())));
+                if (!haveHeader) {
+                    header.setVisibility(View.GONE);
+                } else {
+                    header.setVisibility(View.VISIBLE);
+                    header.setText(DateMarshaller.optionalDateToString(Optional.of(temporalLogic.getCalendar(item.getCompleteDate().get()).getTime())));
+                }
             }
 
             configureText(item);
