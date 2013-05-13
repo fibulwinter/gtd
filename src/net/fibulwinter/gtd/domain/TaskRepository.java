@@ -20,6 +20,23 @@ public class TaskRepository {
         this.taskImportService = taskImportService;
     }
 
+    public Iterable<Task> getAll() {
+        return getIdMap().values();
+    }
+
+    public Optional<Task> getById(long id) {
+        Map<Long, Task> idMap = getIdMap();
+        return idMap.containsKey(id) ? Optional.of(idMap.get(id)) : Optional.<Task>absent();
+    }
+
+    public void save(Task task) {
+        taskDAO.save(task);
+    }
+
+    public void delete(Task task) {
+        taskDAO.delete(task);
+    }
+
     public String exportTasks() {
         return taskExportService.export(getAll());
     }
@@ -39,14 +56,6 @@ public class TaskRepository {
         return count;
     }
 
-    public void save(Task task) {
-        taskDAO.save(task);
-    }
-
-    public Iterable<Task> getAll() {
-        return getIdMap().values();
-    }
-
     private Map<Long, Task> getIdMap() {
         Map<Task, Long> allTasks = taskDAO.getAll();
         Map<Long, Task> tasksById = newHashMap();
@@ -59,15 +68,5 @@ public class TaskRepository {
             }
         }
         return tasksById;
-    }
-
-    public Optional<Task> getById(long id) {
-        Map<Long, Task> idMap = getIdMap();
-        return idMap.containsKey(id) ? Optional.of(idMap.get(id)) : Optional.<Task>absent();
-    }
-
-    public void delete(Task task) {
-        taskDAO.delete(task);
-
     }
 }

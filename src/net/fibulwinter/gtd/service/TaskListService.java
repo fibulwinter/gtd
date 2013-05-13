@@ -80,13 +80,6 @@ public class TaskListService {
         }
     };
 
-    private static final Predicate<Task> NEXT_ACTION_PREDICATE = new Predicate<Task>() {
-        @Override
-        public boolean apply(Task task) {
-            return !task.isProject() && task.getStatus() == TaskStatus.NextAction;
-        }
-    };
-
     private static final Predicate<Task> MAYBE_PREDICATE = new Predicate<Task>() {
         @Override
         public boolean apply(Task task) {
@@ -101,29 +94,10 @@ public class TaskListService {
         }
     };
 
-    public static final Predicate<Task> PROJECT_WITHOUT_ACTIONS_PREDICATE = new Predicate<Task>() {
-        @Override
-        public boolean apply(Task task) {
-            return task.isProject() && task.getStatus().isActive() && (from(task.getSubTasks()).allMatch(new Predicate<Task>() {
-                @Override
-                public boolean apply(Task task) {
-                    return !task.getStatus().isActive();
-                }
-            }));
-        }
-    };
-
     private static final Predicate<Task> PROJECT_PREDICATE = new Predicate<Task>() {
         @Override
         public boolean apply(Task task) {
             return task.isProject();
-        }
-    };
-
-    private static final Predicate<Task> TOP_PROJECT_PREDICATE = new Predicate<Task>() {
-        @Override
-        public boolean apply(Task task) {
-            return task.isProject() && !task.getMasterTask().isPresent();
         }
     };
 
@@ -145,31 +119,19 @@ public class TaskListService {
         return from(taskRepository.getAll()).filter(COMPLETED_PREDICATE);
     }
 
-    public Iterable<Task> getProjectsWithoutNextAction() {
-        return from(taskRepository.getAll()).filter(PROJECT_WITHOUT_ACTIONS_PREDICATE);
-    }
-
-    public Iterable<Task> getOverdueActions() {
-        return from(taskRepository.getAll()).filter(OVERDUE_PREDICATE());
-    }
-
-    public Iterable<Task> getNotStartedActions() {
-        return from(taskRepository.getAll()).filter(NOT_STARTED_PREDICATE());
-    }
-
-    public Iterable<Task> getStartedTodayActions() {
-        return from(taskRepository.getAll()).filter(STARTED_TODAY_PREDICATE());
-    }
-
-    public Iterable<Task> getTodayActions() {
-        return from(taskRepository.getAll()).filter(TODAY_PREDICATE());
-    }
-
-    public Iterable<Task> getTopProjects() {
-        return from(taskRepository.getAll()).filter(and(ACTIVE_PREDICATE, TOP_PROJECT_PREDICATE));
-    }
-
     public Iterable<Task> getProjects() {
         return from(taskRepository.getAll()).filter(and(ACTIVE_PREDICATE, PROJECT_PREDICATE));
+    }
+
+    public Optional<Task> getById(long id) {
+        return taskRepository.getById(id);
+    }
+
+    public void save(Task task) {
+        taskRepository.save(task);
+    }
+
+    public void delete(Task task) {
+        taskRepository.delete(task);
     }
 }

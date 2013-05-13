@@ -17,12 +17,13 @@ import net.fibulwinter.gtd.R;
 import net.fibulwinter.gtd.domain.*;
 import net.fibulwinter.gtd.service.TaskExportService;
 import net.fibulwinter.gtd.service.TaskImportService;
+import net.fibulwinter.gtd.service.TaskListService;
 
 public class TaskEditActivity extends Activity {
 
     public static final String TYPE = "type";
 
-    private TaskRepository taskRepository;
+    private TaskListService taskListService;
     private Task task;
     private TaskUpdateListener taskUpdateListener = new TaskUpdateListener() {
         @Override
@@ -33,7 +34,7 @@ public class TaskEditActivity extends Activity {
 
         @Override
         public void onTaskUpdated(Task updatedTask) {
-            taskRepository.save(updatedTask);
+            taskListService.save(updatedTask);
         }
 
         @Override
@@ -58,7 +59,7 @@ public class TaskEditActivity extends Activity {
         masterTaskList.setAdapter(masterTasksAdapter);
 
         ContextRepository contextRepository = new ContextRepository();
-        taskRepository = new TaskRepository(new TaskDAO(getContentResolver(), contextRepository), new TaskExportService(), new TaskImportService(contextRepository));
+        taskListService = new TaskListService(new TaskRepository(new TaskDAO(getContentResolver(), contextRepository), new TaskExportService(), new TaskImportService(contextRepository)));
         boolean isNew = id == -1;
         if (isNew) {
             task = new Task("");
@@ -66,7 +67,7 @@ public class TaskEditActivity extends Activity {
                 task.setStatus((TaskStatus) getIntent().getExtras().get(TYPE));
             }
         } else {
-            task = taskRepository.getById(id).get();
+            task = taskListService.getById(id).get();
         }
         updateToTask();
         if (isNew) {
@@ -115,16 +116,16 @@ public class TaskEditActivity extends Activity {
 
     private void saveAndUpdate() {
         if (!task.getText().isEmpty()) {
-            taskRepository.save(task);
+            taskListService.save(task);
         }
         updateToTask();
     }
 
     private void delete(Task taskToDelete) {
         Optional<Task> masterTask = taskToDelete.getMasterTask();
-        taskRepository.delete(taskToDelete);
+        taskListService.delete(taskToDelete);
         if (masterTask.isPresent()) {
-            task = taskRepository.getById(masterTask.get().getId()).get();
+            task = taskListService.getById(masterTask.get().getId()).get();
             updateToTask();
         } else {
             finish();

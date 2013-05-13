@@ -35,8 +35,8 @@ public class DoneListActivity extends Activity {
         ListView taskList = (ListView) findViewById(R.id.taskList);
         ContextRepository contextRepository = new ContextRepository();
         taskRepository = new TaskRepository(new TaskDAO(getContentResolver(), contextRepository), new TaskExportService(), new TaskImportService(contextRepository));
-        TaskUpdateListener taskUpdateListener = TaskUpdateListenerFactory.simple(this, taskRepository);
         taskListService = new TaskListService(taskRepository);
+        TaskUpdateListener taskUpdateListener = TaskUpdateListenerFactory.simple(this, taskListService);
         taskItemAdapter = new TaskItemAdapter(this, taskUpdateListener, TaskItemAdapterConfig.logList());
         taskList.setAdapter(taskItemAdapter);
     }

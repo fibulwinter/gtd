@@ -5,11 +5,11 @@ import android.content.ContentUris;
 import android.content.Intent;
 import android.net.Uri;
 import net.fibulwinter.gtd.domain.Task;
-import net.fibulwinter.gtd.domain.TaskRepository;
 import net.fibulwinter.gtd.infrastructure.TaskTableColumns;
+import net.fibulwinter.gtd.service.TaskListService;
 
 public class TaskUpdateListenerFactory {
-    public static TaskUpdateListener simple(final Activity callingActivity, final TaskRepository taskRepository) {
+    public static TaskUpdateListener simple(final Activity callingActivity, final TaskListService taskListService) {
         return new TaskUpdateListener() {
 
             @Override
@@ -21,12 +21,12 @@ public class TaskUpdateListenerFactory {
 
             @Override
             public void onTaskUpdated(Task updatedTask) {
-                taskRepository.save(updatedTask);
+                taskListService.save(updatedTask);
             }
 
             @Override
             public void onTaskDeleted(Task deletedTask) {
-                taskRepository.delete(deletedTask);
+                taskListService.delete(deletedTask);
             }
         };
     }

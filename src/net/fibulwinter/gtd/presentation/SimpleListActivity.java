@@ -42,9 +42,8 @@ public abstract class SimpleListActivity extends Activity {
         timeFilterControl = (TimeFilterControl) findViewById(R.id.timeFilter);
 
         ContextRepository contextRepository = new ContextRepository();
-        TaskRepository taskRepository = new TaskRepository(new TaskDAO(getContentResolver(), contextRepository), new TaskExportService(), new TaskImportService(contextRepository));
-        TaskUpdateListener taskUpdateListener = TaskUpdateListenerFactory.simple(this, taskRepository);
-        taskListService = new TaskListService(taskRepository);
+        taskListService = new TaskListService(new TaskRepository(new TaskDAO(getContentResolver(), contextRepository), new TaskExportService(), new TaskImportService(contextRepository)));
+        TaskUpdateListener taskUpdateListener = TaskUpdateListenerFactory.simple(this, taskListService);
         taskItemAdapterConfig = getConfig();
         taskItemAdapter = new TaskItemAdapter(this, taskUpdateListener, taskItemAdapterConfig);
         taskList.setAdapter(taskItemAdapter);

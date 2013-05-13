@@ -321,7 +321,7 @@ public class TaskItemAdapter extends ArrayAdapter<Task> {
             int image = 0;
             switch (task.getStatus()) {
                 case NextAction:
-                    image = TaskListService.PROJECT_WITHOUT_ACTIONS_PREDICATE.apply(task) ? R.drawable.p_no_action : R.drawable.a_not_done;
+                    image = R.drawable.a_not_done;
                     break;
                 case Maybe:
                     image = R.drawable.a_maybe;
