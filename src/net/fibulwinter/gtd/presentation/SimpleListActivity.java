@@ -98,7 +98,7 @@ public abstract class SimpleListActivity extends Activity {
         Collections.sort(taskArrayList, new Comparator<Task>() {
             @Override
             public int compare(Task task, Task task1) {
-                return task.getText().compareTo(task1.getText());
+                return task.getText().trim().toLowerCase().compareTo(task1.getText().trim().toLowerCase());
             }
         });
         taskItemAdapter.setData(taskArrayList);

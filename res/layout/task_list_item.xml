@@ -12,6 +12,7 @@
             android:layout_alignParentLeft="true"
             android:layout_alignParentTop="true"
             android:layout_alignParentRight="true"
+            android:visibility="gone"
             android:textColor="@color/white"
             android:textStyle="bold"
             android:drawableBottom="@color/white"
