@@ -1,6 +1,5 @@
 package net.fibulwinter.gtd.presentation;
 
-import net.fibulwinter.gtd.R;
 import net.fibulwinter.gtd.domain.Task;
 import net.fibulwinter.gtd.domain.TaskStatus;
 
@@ -14,11 +13,6 @@ public class NextActionListActivity extends SimpleListActivity {
     @Override
     protected Iterable<Task> loadActions() {
         return taskListService.getNextActions();
-    }
-
-    @Override
-    protected int newTaskText() {
-        return R.string.new_task;
     }
 
     @Override

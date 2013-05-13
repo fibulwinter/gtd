@@ -89,6 +89,7 @@ public class TaskEditActivity extends Activity {
         new AlertDialog.Builder(this)
                 .setTitle("Edit task text")
                 .setView(input)
+                .setCancelable(false)
                 .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int whichButton) {
                         if (!getInputText().isEmpty()) {

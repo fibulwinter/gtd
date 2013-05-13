@@ -2,6 +2,7 @@
 <resources>
     <string name="app_name">Zen GTD</string>
     <string name="new_task">New Action</string>
+    <string name="search">Search</string>
     <string name="new_project">New Project</string>
     <string name="new_may_be">New May be</string>
     <string name="edit_task">Project view</string>

@@ -40,6 +40,7 @@ public class EditDialogFactory {
         new AlertDialog.Builder(context)
                 .setTitle(title)
                 .setView(input)
+                .setCancelable(false)
                 .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int whichButton) {
                         String inputText = input.getText().toString().trim();
