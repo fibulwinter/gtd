@@ -19,7 +19,7 @@ import net.fibulwinter.gtd.domain.Context;
 import net.fibulwinter.gtd.domain.ContextRepository;
 import net.fibulwinter.gtd.domain.Task;
 import net.fibulwinter.gtd.domain.TaskStatus;
-import net.fibulwinter.gtd.infrastructure.DateUtils;
+import net.fibulwinter.gtd.infrastructure.DateMarshaller;
 
 public class TaskImportService {
 
@@ -32,7 +32,6 @@ public class TaskImportService {
     public List<Task> importTasks() {
         try {
             File externalStorageDirectory = Environment.getExternalStorageDirectory();
-//            File pictures = new File(externalStorageDirectory, "Pictures");
             File file = new File(externalStorageDirectory, "gtd.txt");
             BufferedReader bufferedReader = new BufferedReader(new FileReader(file));
             return importTasks(bufferedReader);
@@ -66,9 +65,9 @@ public class TaskImportService {
                                             statusString.equals("?") ? TaskStatus.Maybe :
                                                     statusString.equals("P") ? TaskStatus.NextAction : null;
             Context context = contextRepository.getByName(matcher.group(3)).get();
-            Optional<Date> start = DateUtils.stringToOptionalDate(matcher.group(4));
-            Optional<Date> due = DateUtils.stringToOptionalDate(matcher.group(5));
-            Optional<Date> completed = DateUtils.stringToOptionalDateTime(matcher.group(6));
+            Optional<Date> start = DateMarshaller.stringToOptionalDate(matcher.group(4));
+            Optional<Date> due = DateMarshaller.stringToOptionalDate(matcher.group(5));
+            Optional<Date> completed = DateMarshaller.stringToOptionalDateTime(matcher.group(6));
             String text = matcher.group(7);
 
             Task task = new Task(text);
@@ -86,44 +85,5 @@ public class TaskImportService {
             Log.e("GTD", "Can't match " + line);
             return null;
         }
-    }
-
-    /*
-        private void export(List<Task> tasks, PrintStream out) {
-            for(Task task:tasks){
-                export(task, out);
-            }
-        }
-
-        private void export(Task task, PrintStream out) {
-            out.println(
-                    Strings.repeat("    ", task.getMasterTasks().size())
-                    + status(task.getStatus())+" "
-                    + task.getContext().getName() + " "
-                    + DateUtils.optionalDateToString(task.getStartingDate()) + " "
-                    + DateUtils.optionalDateToString(task.getDueDate()) + " "
-                    + DateUtils.optionalDateTimeToString(task.getCompleteDate()) + " "
-                    + task.getText().replace('\n',' ')
-            );
-        }
-
-    */
-    private String status(TaskStatus status) {
-        String s = " ";
-        switch (status) {
-            case NextAction:
-                s = " ";
-                break;
-            case Maybe:
-                s = "?";
-                break;
-            case Completed:
-                s = "+";
-                break;
-            case Cancelled:
-                s = "-";
-                break;
-        }
-        return "[" + s + "]";
     }
 }

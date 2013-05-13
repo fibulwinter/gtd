@@ -19,7 +19,8 @@ import net.fibulwinter.gtd.R;
 import net.fibulwinter.gtd.domain.ContextRepository;
 import net.fibulwinter.gtd.domain.Task;
 import net.fibulwinter.gtd.domain.TaskStatus;
-import net.fibulwinter.gtd.infrastructure.DateUtils;
+import net.fibulwinter.gtd.infrastructure.DateMarshaller;
+import net.fibulwinter.gtd.infrastructure.TemporalLogic;
 import net.fibulwinter.gtd.service.TaskListService;
 
 public class TaskItemAdapter extends ArrayAdapter<Task> {
@@ -49,7 +50,7 @@ public class TaskItemAdapter extends ArrayAdapter<Task> {
         this.config = config;
         this.selectedConfig = selectedConfig;
         inflater = LayoutInflater.from(context);
-        timeConstraintsUtils = new TimeConstraintsUtils();
+        timeConstraintsUtils = new TimeConstraintsUtils(new TemporalLogic());
         editDialogFactory = new EditDialogFactory(context);
     }
 
@@ -276,7 +277,7 @@ public class TaskItemAdapter extends ArrayAdapter<Task> {
             SpannedText extra = new SpannedText("");
 
             if (canShowCompletedDate()) {
-                extra = extra.space().join("at " + DateUtils.dateTimeToString(task.getCompleteDate().get()));
+                extra = extra.space().join("at " + DateMarshaller.dateTimeToString(task.getCompleteDate().get()));
             }
             if (canShowMasterProject()) {
                 extra = extra.space().join("to ").join(task.getMasterTask().get().getText(),
@@ -296,7 +297,7 @@ public class TaskItemAdapter extends ArrayAdapter<Task> {
             }
             if (canShowTimeConstraints()) {
                 extra = extra.space().join(timeConstraintsUtils.addFutureStartWarning(task))
-                        .join(" - " + DateUtils.optionalDateToString(task.getDueDate()) + "]");
+                        .join(" - " + DateMarshaller.optionalDateToString(task.getDueDate()) + "]");
             }
             if (canShowSubActions()) {
                 List<Task> subTasks = from(task.getSubTasks()).filter(TaskListService.ACTIVE_PREDICATE).toImmutableList();

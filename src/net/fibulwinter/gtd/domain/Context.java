@@ -11,30 +11,6 @@ public class Context {
             return TaskListService.CAN_START_PREDICATE().apply(task);
         }
     };
-    public static final Context NOT_STARTED = new Context("<Not started>", true) {
-        @Override
-        public boolean match(Task task) {
-            return TaskListService.NOT_STARTED_PREDICATE().apply(task);
-        }
-    };
-    public static final Context STARTED_TODAY = new Context("<Started today>", true) {
-        @Override
-        public boolean match(Task task) {
-            return TaskListService.STARTED_TODAY_PREDICATE().apply(task);
-        }
-    };
-    public static final Context TODAY = new Context("<Today>", true) {
-        @Override
-        public boolean match(Task task) {
-            return TaskListService.TODAY_PREDICATE().apply(task);
-        }
-    };
-    public static final Context OVERDUE = new Context("<Overdue>", true) {
-        @Override
-        public boolean match(Task task) {
-            return TaskListService.OVERDUE_PREDICATE().apply(task);
-        }
-    };
 
     private final String name;
     private final boolean special;

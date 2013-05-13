@@ -10,7 +10,7 @@ import android.view.Gravity;
 import android.view.View;
 import android.widget.*;
 import com.google.common.base.Optional;
-import net.fibulwinter.gtd.infrastructure.DateUtils;
+import net.fibulwinter.gtd.infrastructure.TemporalLogic;
 
 public class ExtendedDatePicker {
 
@@ -18,11 +18,11 @@ public class ExtendedDatePicker {
     private final DatePicker datePicker;
     private final CheckBox checkBox;
     private final TextView textView;
+    private final TemporalLogic temporalLogic;
 
     public ExtendedDatePicker(Context context, Optional<Date> optionalDate, String text) {
-        Date date = optionalDate.or(new Date());
-        GregorianCalendar calendar = new GregorianCalendar();
-        calendar.setTime(date);
+        temporalLogic = new TemporalLogic();
+        Calendar calendar = temporalLogic.getCalendar(optionalDate.or(new Date()));
         // Set an EditText view to get user input
         linearLayout = new LinearLayout(context);
         linearLayout.setOrientation(LinearLayout.VERTICAL);
@@ -53,12 +53,12 @@ public class ExtendedDatePicker {
         linearLayout.addView(textView);
     }
 
-    private void updateStatus(GregorianCalendar calendar) {
+    private void updateStatus(Calendar calendar) {
         textView.setText(DateFormat.format("EEEE", calendar) + ", " + diffMessage(calendar));
     }
 
-    private String diffMessage(GregorianCalendar calendar) {
-        int d = DateUtils.dayDiff(calendar);
+    private String diffMessage(Calendar calendar) {
+        int d = temporalLogic.relativeDays(calendar.getTime());
         if (d == 0) {
             return "today";
         } else if (d == 1) {

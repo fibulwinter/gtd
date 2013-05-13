@@ -12,7 +12,7 @@ import android.os.Environment;
 import com.google.common.base.Strings;
 import net.fibulwinter.gtd.domain.Task;
 import net.fibulwinter.gtd.domain.TaskStatus;
-import net.fibulwinter.gtd.infrastructure.DateUtils;
+import net.fibulwinter.gtd.infrastructure.DateMarshaller;
 
 public class TaskExportService {
 
@@ -49,9 +49,9 @@ public class TaskExportService {
                 Strings.repeat("    ", task.getMasterTasks().size())
                         + status(task.getStatus()) + " "
                         + task.getContext().getName() + " "
-                        + DateUtils.optionalDateToString(task.getStartingDate()) + " "
-                        + DateUtils.optionalDateToString(task.getDueDate()) + " "
-                        + DateUtils.optionalDateTimeToString(task.getCompleteDate()) + " "
+                        + DateMarshaller.optionalDateToString(task.getStartingDate()) + " "
+                        + DateMarshaller.optionalDateToString(task.getDueDate()) + " "
+                        + DateMarshaller.optionalDateTimeToString(task.getCompleteDate()) + " "
                         + task.getText().replace('\n', ' ')
         );
     }

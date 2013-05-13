@@ -7,8 +7,9 @@ import android.text.style.BackgroundColorSpan;
 import android.text.style.ForegroundColorSpan;
 import com.google.common.base.Optional;
 import net.fibulwinter.gtd.domain.Task;
-import net.fibulwinter.gtd.infrastructure.DateUtils;
-import net.fibulwinter.gtd.service.TaskListService;
+import net.fibulwinter.gtd.infrastructure.DateMarshaller;
+import net.fibulwinter.gtd.infrastructure.TemporalLogic;
+import net.fibulwinter.gtd.service.TemporalPredicates;
 
 public class TimeConstraintsUtils {
     public static final int TODAY_FG_COLOR = Color.parseColor("#ff8000");
@@ -19,6 +20,13 @@ public class TimeConstraintsUtils {
     public static final int NOT_STARTED_BG_COLOR = Color.parseColor("#444444");
     public static final int STARTED_TODAY_FG_COLOR = Color.parseColor("#00cc00");
     public static final int STARTED_TODAY_BG_COLOR = Color.parseColor("#006600");
+    private TemporalLogic temporalLogic;
+    private TemporalPredicates temporalPredicates;
+
+    public TimeConstraintsUtils(TemporalLogic temporalLogic) {
+        this.temporalLogic = temporalLogic;
+        this.temporalPredicates = new TemporalPredicates(temporalLogic);
+    }
 
     public SpannedText getNonEmptyConstraintsText(Task task) {
         SpannedText spannedText = new SpannedText("");
@@ -53,11 +61,11 @@ public class TimeConstraintsUtils {
     }
 
     private boolean inFuture(Optional<Date> startingDate) {
-        return startingDate.isPresent() && startingDate.get().after(new Date());
+        return startingDate.isPresent() && temporalLogic.relativeDays(startingDate.get()) > 0;
     }
 
     private boolean startedToday(Optional<Date> startingDate) {
-        return startingDate.isPresent() && DateUtils.dayDiff(DateUtils.asCalendar(startingDate.get())) == 0;
+        return startingDate.isPresent() && temporalLogic.relativeDays(startingDate.get()) == 0;
     }
 
     private String startingDate(Task task) {
@@ -65,7 +73,7 @@ public class TimeConstraintsUtils {
         if (!startingDate.isPresent()) {
             return "anytime";
         }
-        long days = DateUtils.dayDiff(DateUtils.asCalendar(startingDate.get()));
+        long days = temporalLogic.relativeDays(startingDate.get());
         if (days > 1) {
             return "starting in " + days + " days";
         } else if (days == 1) {
@@ -73,19 +81,19 @@ public class TimeConstraintsUtils {
         } else if (days == 0) {
             return "started today";
         } else {
-            return "started " + DateUtils.optionalDateToString(startingDate);
+            return "started " + DateMarshaller.optionalDateToString(startingDate);
         }
     }
 
     public SpannedText addDueDateWarning(Task task) {
         if (task.getDueDate().isPresent() && task.getStatus().isActive()) {
             String dueDate = dueDate(task);
-            if (TaskListService.TODAY_PREDICATE().apply(task)) {
+            if (temporalPredicates.dueTomorrow().apply(task)) {
                 return new SpannedText().space().join(dueDate,
                         new ForegroundColorSpan(TimeConstraintsUtils.TODAY_FG_COLOR),
                         new BackgroundColorSpan(TimeConstraintsUtils.TODAY_BG_COLOR)
                 );
-            } else if (TaskListService.OVERDUE_PREDICATE().apply(task)) {
+            } else if (temporalPredicates.overdue().apply(task)) {
                 return new SpannedText().space().join(dueDate,
                         new ForegroundColorSpan(TimeConstraintsUtils.OVERDUE_FG_COLOR),
                         new BackgroundColorSpan(TimeConstraintsUtils.OVERDUE_BG_COLOR)
@@ -104,15 +112,15 @@ public class TimeConstraintsUtils {
         if (!dueDate.isPresent()) {
             return "anytime";
         }
-        long days = DateUtils.daysBefore(dueDate.get());
-        if (days > 1) {
+        long days = temporalLogic.relativeDays(dueDate.get());
+        if (days > 2) {
             return "in " + days + " days";
-        } else if (days == 1) {
+        } else if (days == 2) {
             return "tomorrow";
-        } else if (days == 0) {
+        } else if (days == 1) {
             return "today";
         } else {
-            return "due to " + DateUtils.optionalDateToString(dueDate);
+            return "due to " + DateMarshaller.optionalDateToString(dueDate);
         }
     }
 }

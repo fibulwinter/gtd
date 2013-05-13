@@ -16,7 +16,7 @@ import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
 import net.fibulwinter.gtd.domain.ContextRepository;
 import net.fibulwinter.gtd.domain.Task;
-import net.fibulwinter.gtd.service.TaskListService;
+import net.fibulwinter.gtd.service.TemporalPredicates;
 
 public class TimeFilterControl extends LinearLayout {
 
@@ -31,6 +31,11 @@ public class TimeFilterControl extends LinearLayout {
     private final ContextRepository contextRepository;
     private net.fibulwinter.gtd.domain.Context currentContext = net.fibulwinter.gtd.domain.Context.ANY;
     private net.fibulwinter.gtd.domain.Context currentTimeContext = null;
+    private TemporalPredicates temporalPredicates = new TemporalPredicates();
+    private final net.fibulwinter.gtd.domain.Context notStartedContext;
+    private final net.fibulwinter.gtd.domain.Context startedTodayContext;
+    private final net.fibulwinter.gtd.domain.Context dueTomorrowContext;
+    private final net.fibulwinter.gtd.domain.Context overdueContext;
 
     public TimeFilterControl(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -39,10 +44,34 @@ public class TimeFilterControl extends LinearLayout {
         LAYOUT_PARAMS_MAIN.weight = 0.8f;
         LAYOUT_PARAMS.weight = 1;
         textViewAll = createContextButton(context);
-        textViewNotStarted = createButton(context, "0", TimeConstraintsUtils.NOT_STARTED_FG_COLOR, TimeConstraintsUtils.NOT_STARTED_BG_COLOR, net.fibulwinter.gtd.domain.Context.NOT_STARTED, LAYOUT_PARAMS);
-        textViewStartedToday = createButton(context, "0", TimeConstraintsUtils.STARTED_TODAY_FG_COLOR, TimeConstraintsUtils.STARTED_TODAY_BG_COLOR, net.fibulwinter.gtd.domain.Context.STARTED_TODAY, LAYOUT_PARAMS);
-        textViewDueTomorrow = createButton(context, "0", TimeConstraintsUtils.TODAY_FG_COLOR, TimeConstraintsUtils.TODAY_BG_COLOR, net.fibulwinter.gtd.domain.Context.TODAY, LAYOUT_PARAMS);
-        textViewOverDue = createButton(context, "0", TimeConstraintsUtils.OVERDUE_FG_COLOR, TimeConstraintsUtils.OVERDUE_BG_COLOR, net.fibulwinter.gtd.domain.Context.OVERDUE, LAYOUT_PARAMS);
+        notStartedContext = new net.fibulwinter.gtd.domain.Context("Not started") {
+            @Override
+            public boolean match(Task task) {
+                return temporalPredicates.notStarted().apply(task);
+            }
+        };
+        startedTodayContext = new net.fibulwinter.gtd.domain.Context("Started today") {
+            @Override
+            public boolean match(Task task) {
+                return temporalPredicates.startedToday().apply(task);
+            }
+        };
+        dueTomorrowContext = new net.fibulwinter.gtd.domain.Context("Due tomorrow") {
+            @Override
+            public boolean match(Task task) {
+                return temporalPredicates.dueTomorrow().apply(task);
+            }
+        };
+        overdueContext = new net.fibulwinter.gtd.domain.Context("Over due") {
+            @Override
+            public boolean match(Task task) {
+                return temporalPredicates.overdue().apply(task);
+            }
+        };
+        textViewNotStarted = createButton(context, "0", TimeConstraintsUtils.NOT_STARTED_FG_COLOR, TimeConstraintsUtils.NOT_STARTED_BG_COLOR, notStartedContext, LAYOUT_PARAMS);
+        textViewStartedToday = createButton(context, "0", TimeConstraintsUtils.STARTED_TODAY_FG_COLOR, TimeConstraintsUtils.STARTED_TODAY_BG_COLOR, startedTodayContext, LAYOUT_PARAMS);
+        textViewDueTomorrow = createButton(context, "0", TimeConstraintsUtils.TODAY_FG_COLOR, TimeConstraintsUtils.TODAY_BG_COLOR, dueTomorrowContext, LAYOUT_PARAMS);
+        textViewOverDue = createButton(context, "0", TimeConstraintsUtils.OVERDUE_FG_COLOR, TimeConstraintsUtils.OVERDUE_BG_COLOR, overdueContext, LAYOUT_PARAMS);
     }
 
     private TextView createContextButton(final Context context) {
@@ -133,10 +162,10 @@ public class TimeFilterControl extends LinearLayout {
             textViewAll.setTextColor(TaskItemAdapter.CONTEXT_FG_COLOR);
             textViewAll.setBackgroundColor(TaskItemAdapter.CONTEXT_BG_COLOR);
         }
-        updateColors(textViewNotStarted, net.fibulwinter.gtd.domain.Context.NOT_STARTED, TimeConstraintsUtils.NOT_STARTED_FG_COLOR, TimeConstraintsUtils.NOT_STARTED_BG_COLOR);
-        updateColors(textViewStartedToday, net.fibulwinter.gtd.domain.Context.STARTED_TODAY, TimeConstraintsUtils.STARTED_TODAY_FG_COLOR, TimeConstraintsUtils.STARTED_TODAY_BG_COLOR);
-        updateColors(textViewDueTomorrow, net.fibulwinter.gtd.domain.Context.TODAY, TimeConstraintsUtils.TODAY_FG_COLOR, TimeConstraintsUtils.TODAY_BG_COLOR);
-        updateColors(textViewOverDue, net.fibulwinter.gtd.domain.Context.OVERDUE, TimeConstraintsUtils.OVERDUE_FG_COLOR, TimeConstraintsUtils.OVERDUE_BG_COLOR);
+        updateColors(textViewNotStarted, notStartedContext, TimeConstraintsUtils.NOT_STARTED_FG_COLOR, TimeConstraintsUtils.NOT_STARTED_BG_COLOR);
+        updateColors(textViewStartedToday, startedTodayContext, TimeConstraintsUtils.STARTED_TODAY_FG_COLOR, TimeConstraintsUtils.STARTED_TODAY_BG_COLOR);
+        updateColors(textViewDueTomorrow, dueTomorrowContext, TimeConstraintsUtils.TODAY_FG_COLOR, TimeConstraintsUtils.TODAY_BG_COLOR);
+        updateColors(textViewOverDue, overdueContext, TimeConstraintsUtils.OVERDUE_FG_COLOR, TimeConstraintsUtils.OVERDUE_BG_COLOR);
 
     }
 
@@ -177,10 +206,10 @@ public class TimeFilterControl extends LinearLayout {
     }
 
     public void updateOn(List<Task> taskList) {
-        setTodayCounter(count(taskList, TaskListService.TODAY_PREDICATE()));
-        setOverdueCounter(count(taskList, TaskListService.OVERDUE_PREDICATE()));
-        setStartedTodayCounter(count(taskList, TaskListService.STARTED_TODAY_PREDICATE()));
-        setNotStartedCounter(count(taskList, TaskListService.NOT_STARTED_PREDICATE()));
+        setTodayCounter(count(taskList, temporalPredicates.dueTomorrow()));
+        setOverdueCounter(count(taskList, temporalPredicates.overdue()));
+        setStartedTodayCounter(count(taskList, temporalPredicates.startedToday()));
+        setNotStartedCounter(count(taskList, temporalPredicates.notStarted()));
     }
 
     private int count(List<Task> taskList, Predicate<Task> predicate) {
