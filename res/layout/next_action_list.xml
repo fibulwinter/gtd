@@ -9,13 +9,6 @@
             android:layout_height="wrap_content"
             android:orientation="horizontal"
             >
-        <ImageButton android:id="@+id/searchButton"
-                     android:layout_width="wrap_content"
-                     android:layout_height="wrap_content"
-                     android:layout_alignParentLeft="true"
-                     android:onClick="onSearch"
-                     android:src="@drawable/ic_btn_search"
-                />
         <ImageButton android:id="@+id/new_task"
                      android:layout_width="wrap_content"
                      android:layout_height="wrap_content"
@@ -27,7 +20,7 @@
                      android:layout_width="wrap_content"
                      android:layout_height="wrap_content"
                      android:layout_centerVertical="true"
-                     android:layout_toRightOf="@id/searchButton"
+                     android:layout_alignParentLeft="true"
                      android:layout_toLeftOf="@id/new_task"
                 >
             <net.fibulwinter.gtd.presentation.TimeFilterControl
