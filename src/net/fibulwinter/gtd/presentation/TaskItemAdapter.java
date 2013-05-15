@@ -257,8 +257,7 @@ public class TaskItemAdapter extends ArrayAdapter<Task> {
                 this.convertView.setBackgroundColor(getContext().getResources().getColor(android.R.color.background_dark));
             }
             if (canShowLevel()) {
-                this.text.setPadding(task.getMasterTasks().size() * 24, 5, 5, 5);
-                this.extraPanel.setPadding(task.getMasterTasks().size() * 24, 5, 5, 5);
+                doneStatus.setPadding(task.getMasterTasks().size() * 32 + 5, 0, 5, 0);
             }
             configureEditors();
         }
