@@ -72,11 +72,12 @@ public abstract class SimpleListActivity extends Activity {
     protected abstract Iterable<Task> loadActions();
 
     public void onNewTask(View view) {
-        new EditDialogFactory(this).showTitleDialog("", "Enter new task title", new EditDialogFactory.TitleEdited() {
+        new EditDialogFactory(this).showTitleDialog("", Context.DEFAULT, "Enter new task title and context", new EditDialogFactory.TitleEdited() {
             @Override
-            public void onValidText(String title) {
+            public void onValidText(String title, Context context) {
                 Task task = new Task(title);
                 task.setStatus(getNewStatus());
+                task.setContext(context);
                 taskListService.save(task);
                 fillData();
                 taskItemAdapter.setHighlightedTask(Optional.of(task));

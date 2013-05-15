@@ -27,6 +27,7 @@
                 android:layout_gravity="right"
                 android:text="@string/archive_tasks"
                 android:onClick="onArchive"
+                android:visibility="gone"
                 />
     </LinearLayout>
     <ListView

@@ -3,6 +3,7 @@ package net.fibulwinter.gtd.presentation;
 import java.util.ArrayList;
 import java.util.List;
 
+import net.fibulwinter.gtd.domain.Context;
 import net.fibulwinter.gtd.domain.Task;
 import net.fibulwinter.gtd.domain.TaskStatus;
 
@@ -26,11 +27,12 @@ public abstract class StatusTransitionsFactory {
             transitions.add(new StatusTransition("Sub action") {
                 @Override
                 public void doTransition(final Task task) {
-                    editDialogFactory.showTitleDialog("", "Enter sub action", new EditDialogFactory.TitleEdited() {
+                    editDialogFactory.showTitleDialog("", Context.DEFAULT, "Enter sub action", new EditDialogFactory.TitleEdited() {
                         @Override
-                        public void onValidText(String title) {
+                        public void onValidText(String title, Context context) {
                             Task subTask = new Task(title);
                             subTask.setMaster(task);
+                            subTask.setContext(context);
                             addedSubtask(task, subTask);
                         }
 

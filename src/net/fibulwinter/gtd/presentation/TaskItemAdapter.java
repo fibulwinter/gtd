@@ -203,11 +203,11 @@ public class TaskItemAdapter extends ArrayAdapter<Task> {
         }
 
         public void onTitleClick(Context context, View view) {
-            //todo edit context
-            editDialogFactory.showTitleDialog(task.getText(), "Edit task text", new EditDialogFactory.TitleEdited() {
+            editDialogFactory.showTitleDialog(task.getText(), task.getContext(), "Edit task text and context", new EditDialogFactory.TitleEdited() {
                 @Override
-                public void onValidText(String title) {
+                public void onValidText(String title, net.fibulwinter.gtd.domain.Context taskContext) {
                     task.setText(title);
+                    task.setContext(taskContext);
                     updateTask();
                 }
             });
@@ -271,11 +271,11 @@ public class TaskItemAdapter extends ArrayAdapter<Task> {
         }
 
         private void configureText(Task item) {
-            SpannedText text = getTitle(item);
+            SpannedText text = getTitle(item).join("\n");
 
             SpannedText extra = getDetails();
             if (!extra.isEmpty()) {
-                text = text.join("\n").join(extra);
+                text = text.join(extra);
             }
             text.apply(this.textTitle);
         }
@@ -341,7 +341,7 @@ public class TaskItemAdapter extends ArrayAdapter<Task> {
                 if (canShowLevel()) {
                     return new SpannedText(DateMarshaller.dateTimeTo2Strings(task.getCompleteDate().get()));
                 } else {
-                    return new SpannedText(DateMarshaller.timeToString(task.getCompleteDate().get()));
+                    return new SpannedText(DateMarshaller.timeToString(task.getCompleteDate().get()) + "\n");
                 }
             }
             if (new TemporalPredicates().notStarted().apply(task)) {
@@ -356,11 +356,17 @@ public class TaskItemAdapter extends ArrayAdapter<Task> {
             }
             SpannedText dueWarning = timeConstraintsUtils.addDueDateWarning(task);
             if (!dueWarning.isEmpty()) {
+                if (startedToday.isEmpty()) {
+                    startedToday = new SpannedText("\n");
+                }
                 return startedToday.join(dueWarning);
             }
             if (isEditMode()) {
-                return new SpannedText("anytime");
+                return new SpannedText("anytime\n");
             } else {
+                if (startedToday.isEmpty()) {
+                    return new SpannedText("\n");
+                }
                 return startedToday;
             }
         }

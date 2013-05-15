@@ -3,6 +3,7 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
                 android:id="@+id/task_list_item"
                 android:layout_width="fill_parent"
+                android:padding="2dip"
                 android:layout_height="wrap_content">
 
     <TextView
@@ -49,6 +50,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_alignParentRight="true"
+            android:layout_alignParentBottom="true"
             android:layout_below="@id/task_list_item_header_a"
             android:layout_toRightOf="@id/task_list_item_status"
             >
@@ -58,6 +60,7 @@
                 android:id="@+id/task_list_item_time"
                 android:layout_alignParentRight="true"
                 android:layout_alignParentTop="true"
+                android:layout_alignParentBottom="true"
                 android:textColor="@color/white"
                 android:gravity="right"
                 android:text="10:24:11"
@@ -66,6 +69,8 @@
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
                 android:layout_alignParentLeft="true"
+                android:layout_alignParentTop="true"
+                android:layout_alignParentBottom="true"
                 android:layout_toLeftOf="@id/task_list_item_time"
                 android:id="@+id/task_list_item_text"
                 android:textColor="@color/white"
@@ -73,34 +78,4 @@
                 android:text=""
                 />
     </RelativeLayout>
-    <LinearLayout android:id="@+id/extra_row"
-                  android:layout_width="wrap_content"
-                  android:layout_height="wrap_content"
-                  android:orientation="horizontal"
-                  android:layout_below="@id/task_list_item_text_row"
-                  android:visibility="gone"
-                  android:layout_toRightOf="@id/task_list_item_status"
-                  android:layout_alignParentBottom="true">
-        <TextView
-                android:id="@+id/task_context_spinner"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="right"
-                android:paddingLeft="5dip"
-                android:paddingRight="5dip"
-                android:text="Context"
-                android:textSize="15dip"
-                />
-        <TextView
-                android:id="@+id/time_constraints"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="right"
-                android:paddingLeft="5dip"
-                android:paddingRight="5dip"
-                android:text="Start"
-                android:textColor="@color/white"
-                android:textSize="15dip"
-                />
-    </LinearLayout>
 </RelativeLayout>
