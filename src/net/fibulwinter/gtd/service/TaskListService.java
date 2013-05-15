@@ -1,7 +1,6 @@
 package net.fibulwinter.gtd.service;
 
-import static com.google.common.base.Predicates.and;
-import static com.google.common.base.Predicates.not;
+import static com.google.common.base.Predicates.*;
 import static com.google.common.collect.FluentIterable.from;
 
 import com.google.common.base.Optional;
@@ -40,13 +39,14 @@ public class TaskListService {
     };
 
     private TaskRepository taskRepository;
+    private TemporalPredicates temporalPredicates = new TemporalPredicates();
 
     public TaskListService(TaskRepository taskRepository) {
         this.taskRepository = taskRepository;
     }
 
     public Iterable<Task> getNextActions() {
-        return from(taskRepository.getAll()).filter(and(ACTIVE_PREDICATE, not(PROJECT_PREDICATE)));
+        return from(taskRepository.getAll()).filter(and(ACTIVE_PREDICATE, not(temporalPredicates.notStarted()), not(PROJECT_PREDICATE)));
     }
 
     public Iterable<Task> getMaybe() {
@@ -58,7 +58,7 @@ public class TaskListService {
     }
 
     public Iterable<Task> getProjects() {
-        return from(taskRepository.getAll()).filter(and(ACTIVE_PREDICATE, PROJECT_PREDICATE));
+        return from(taskRepository.getAll()).filter(and(ACTIVE_PREDICATE, or(PROJECT_PREDICATE, temporalPredicates.notStarted())));
     }
 
     public Optional<Task> getById(long id) {

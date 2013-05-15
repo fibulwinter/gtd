@@ -3,8 +3,10 @@ package net.fibulwinter.gtd.presentation;
 import java.util.Date;
 
 import android.graphics.Color;
+import android.graphics.Typeface;
 import android.text.style.BackgroundColorSpan;
 import android.text.style.ForegroundColorSpan;
+import android.text.style.StyleSpan;
 import android.text.style.UnderlineSpan;
 import com.google.common.base.Optional;
 import net.fibulwinter.gtd.domain.Task;
@@ -31,8 +33,12 @@ public class TimeConstraintsUtils {
 
     public SpannedText getNonEmptyConstraintsText(Task task) {
         SpannedText spannedText = new SpannedText("");
-        spannedText = spannedText.join(addStartWarning(task, false));
-        spannedText = spannedText.join(addDueDateWarning(task));
+//        spannedText = spannedText.join(addStartWarning(task, false));
+        SpannedText anotherText = addDueDateWarning(task);
+        if (anotherText.isEmpty()) {
+            anotherText = new SpannedText("anytime");
+        }
+        spannedText = spannedText.join(anotherText);
         return spannedText;
     }
 
@@ -50,8 +56,7 @@ public class TimeConstraintsUtils {
         String text = startingDate(task);
         if (inFuture) {
             return new SpannedText().space().join(text,
-                    new ForegroundColorSpan(TimeConstraintsUtils.NOT_STARTED_FG_COLOR),
-                    new BackgroundColorSpan(TimeConstraintsUtils.NOT_STARTED_BG_COLOR));
+                    new StyleSpan(Typeface.ITALIC));
         } else if (startedToday) {
             return new SpannedText().space().join(text,
                     new ForegroundColorSpan(TimeConstraintsUtils.STARTED_TODAY_FG_COLOR),

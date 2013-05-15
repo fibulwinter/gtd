@@ -12,6 +12,7 @@ public class NextActionListActivity extends SimpleListActivity {
 
     @Override
     protected Iterable<Task> loadActions() {
+
         return taskListService.getNextActions();
     }
 

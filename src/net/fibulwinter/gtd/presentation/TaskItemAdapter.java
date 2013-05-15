@@ -23,6 +23,7 @@ import net.fibulwinter.gtd.domain.TaskStatus;
 import net.fibulwinter.gtd.infrastructure.DateMarshaller;
 import net.fibulwinter.gtd.infrastructure.TemporalLogic;
 import net.fibulwinter.gtd.service.TaskListService;
+import net.fibulwinter.gtd.service.TemporalPredicates;
 
 public class TaskItemAdapter extends ArrayAdapter<Task> {
     public static final int CONTEXT_FG_COLOR2 = Color.parseColor("#3333ff");
@@ -101,6 +102,7 @@ public class TaskItemAdapter extends ArrayAdapter<Task> {
         private final View convertView;
         private ImageButton doneStatus;
         private TextView text;
+        private TextView textR;
         private TextView contextSpinner;
         private TextView timeConstraints;
         private LinearLayout extraPanel;
@@ -112,6 +114,7 @@ public class TaskItemAdapter extends ArrayAdapter<Task> {
             doneStatus = (ImageButton) convertView.findViewById(R.id.task_list_item_status);
             extraPanel = (LinearLayout) convertView.findViewById(R.id.extra_row);
             text = (TextView) convertView.findViewById(R.id.task_list_item_text);
+            textR = (TextView) convertView.findViewById(R.id.task_list_item_text_r);
             text.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
@@ -320,7 +323,7 @@ public class TaskItemAdapter extends ArrayAdapter<Task> {
             SpannedText extra = new SpannedText("");
 
             if (canShowCompletedDate()) {
-                extra = extra.space().join("at " + DateMarshaller.dateTimeToString(task.getCompleteDate().get()));
+                textR.setText(DateMarshaller.timeToString(task.getCompleteDate().get()));
             }
             if (canShowMasterProject()) {
                 extra = extra.space().join("to ").join(task.getMasterTask().get().getText(),
@@ -332,15 +335,15 @@ public class TaskItemAdapter extends ArrayAdapter<Task> {
                         new BackgroundColorSpan(CONTEXT_BG_COLOR)
                 );
             }
-            if (canShowFutureStartingDate()) {
-                extra = extra.join(timeConstraintsUtils.addFutureStartWarning(task));
-            }
             if (canShowDueDate()) {
-                extra = extra.join(timeConstraintsUtils.addDueDateWarning(task));
+                timeConstraintsUtils.addDueDateWarning(task).apply(textR);
             }
             if (canShowTimeConstraints()) {
-                extra = extra.space().join(timeConstraintsUtils.addFutureStartWarning(task))
-                        .join(" - " + DateMarshaller.optionalDateToString(task.getDueDate()) + "]");
+                SpannedText dueTime = timeConstraintsUtils.addDueDateWarning(task);
+                if (dueTime.isEmpty()) {
+                    dueTime = new SpannedText("anytime");
+                }
+                extra = extra.space().join(dueTime);
             }
             if (canShowSubActions()) {
                 List<Task> subTasks = from(task.getSubTasks()).filter(TaskListService.ACTIVE_PREDICATE).toImmutableList();
@@ -358,6 +361,15 @@ public class TaskItemAdapter extends ArrayAdapter<Task> {
                             new StyleSpan(Typeface.ITALIC));
                 }
             }
+            if (canShowFutureStartingDate()) {
+                SpannedText startWarning = timeConstraintsUtils.addFutureStartWarning(task);
+                if (!startWarning.isEmpty()) {
+                    if (!extra.isEmpty()) {
+                        extra = extra.join("\n");
+                    }
+                    extra = extra.join(startWarning);
+                }
+            }
             return extra;
         }
 
@@ -365,7 +377,7 @@ public class TaskItemAdapter extends ArrayAdapter<Task> {
             int image = 0;
             switch (task.getStatus()) {
                 case NextAction:
-                    image = task.isProject() ? R.drawable.a_blocked : R.drawable.a_not_done;
+                    image = task.isProject() || new TemporalPredicates().notStarted().apply(task) ? R.drawable.a_blocked : R.drawable.a_not_done;
                     break;
                 case Maybe:
                     image = R.drawable.a_maybe;

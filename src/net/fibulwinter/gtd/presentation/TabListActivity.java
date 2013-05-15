@@ -18,7 +18,7 @@ public class TabListActivity extends TabActivity {
         TabHost tabHost = (TabHost) findViewById(android.R.id.tabhost);
 
         addTab(tabHost, "Next Action", NextActionListActivity.class, R.drawable.a_not_done);
-        addTab(tabHost, "Projects", ProjectListActivity.class, R.drawable.p_not_done);
+        addTab(tabHost, "Blocked", ProjectListActivity.class, R.drawable.a_blocked);
         addTab(tabHost, "May Be", MayBeListActivity.class, R.drawable.a_maybe);
         addTab(tabHost, "Log", DoneListActivity.class, R.drawable.a_done);
         addTab(tabHost, "Search", SearchListActivity.class, R.drawable.ic_btn_search);

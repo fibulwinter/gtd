@@ -52,4 +52,8 @@ public class DateMarshaller {
     public static String dateTimeToString(Date date) {
         return DateFormat.format("yyyy-MM-dd hh:mm:ss", date).toString();
     }
+
+    public static String timeToString(Date date) {
+        return DateFormat.format("hh:mm:ss", date).toString();
+    }
 }

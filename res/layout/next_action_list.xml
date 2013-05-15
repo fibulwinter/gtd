@@ -40,6 +40,7 @@
             android:id="@+id/taskList"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
+            android:dividerHeight="2dip"
             />
 </LinearLayout>
 
