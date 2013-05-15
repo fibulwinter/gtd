@@ -7,7 +7,6 @@ import android.graphics.Typeface;
 import android.text.style.BackgroundColorSpan;
 import android.text.style.ForegroundColorSpan;
 import android.text.style.StyleSpan;
-import android.text.style.UnderlineSpan;
 import com.google.common.base.Optional;
 import net.fibulwinter.gtd.domain.Task;
 import net.fibulwinter.gtd.infrastructure.DateMarshaller;
@@ -43,14 +42,10 @@ public class TimeConstraintsUtils {
     }
 
     public SpannedText addFutureStartWarning(Task task) {
-        return addStartWarning(task, true);
-    }
-
-    private SpannedText addStartWarning(Task task, boolean onlyIfInFuture) {
         Optional<Date> startingDate = task.getStartingDate();
         boolean inFuture = inFuture(startingDate);
         boolean startedToday = startedToday(startingDate);
-        if (!(startedToday || inFuture) && onlyIfInFuture) {
+        if (!(startedToday || inFuture)) {
             return new SpannedText();
         }
         String text = startingDate(task);
@@ -77,13 +72,13 @@ public class TimeConstraintsUtils {
     private String startingDate(Task task) {
         Optional<Date> startingDate = task.getStartingDate();
         if (!startingDate.isPresent()) {
-            return "anytime";
+            return "";
         }
         long days = temporalLogic.relativeDays(startingDate.get());
         if (days > 1) {
-            return "starting in " + days + " days";
+            return "starting\nin " + days + " days";
         } else if (days == 1) {
-            return "starting tomorrow";
+            return "starting\ntomorrow";
         } else if (days == 0) {
             return "started today";
         } else {
@@ -105,7 +100,7 @@ public class TimeConstraintsUtils {
                         new BackgroundColorSpan(TimeConstraintsUtils.OVERDUE_BG_COLOR)
                 );
             } else {
-                return new SpannedText().space().join(dueDate, new UnderlineSpan());
+                return new SpannedText().space().join(dueDate);
             }
         } else {
             return new SpannedText();

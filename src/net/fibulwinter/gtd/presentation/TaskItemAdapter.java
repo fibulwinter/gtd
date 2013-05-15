@@ -13,11 +13,12 @@ import android.text.style.*;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.*;
+import android.widget.ArrayAdapter;
+import android.widget.ImageButton;
+import android.widget.TextView;
 import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 import net.fibulwinter.gtd.R;
-import net.fibulwinter.gtd.domain.ContextRepository;
 import net.fibulwinter.gtd.domain.Task;
 import net.fibulwinter.gtd.domain.TaskStatus;
 import net.fibulwinter.gtd.infrastructure.DateMarshaller;
@@ -35,7 +36,6 @@ public class TaskItemAdapter extends ArrayAdapter<Task> {
     private LayoutInflater inflater;
     private final TaskUpdateListener taskUpdateListener;
     private final TaskItemAdapterConfig config;
-    private TaskItemAdapterConfig selectedConfig;
     private Optional<Task> highlightedTask = Optional.absent();
     private TimeConstraintsUtils timeConstraintsUtils;
     private EditDialogFactory editDialogFactory;
@@ -51,7 +51,6 @@ public class TaskItemAdapter extends ArrayAdapter<Task> {
         super(context, R.layout.task_list_item, Lists.<Task>newArrayList());
         this.taskUpdateListener = taskUpdateListener;
         this.config = config;
-        this.selectedConfig = selectedConfig;
         inflater = LayoutInflater.from(context);
         timeConstraintsUtils = new TimeConstraintsUtils(new TemporalLogic());
         editDialogFactory = new EditDialogFactory(context);
@@ -101,27 +100,37 @@ public class TaskItemAdapter extends ArrayAdapter<Task> {
 
         private final View convertView;
         private ImageButton doneStatus;
-        private TextView text;
-        private TextView textR;
-        private TextView contextSpinner;
-        private TextView timeConstraints;
-        private LinearLayout extraPanel;
+        private TextView textTitle;
+        private TextView textTime;
         private TextView header;
+        private TextView headerUnderline;
 
         ViewHolder(Task aTask, View convertView) {
             this.task = aTask;
             this.convertView = convertView;
             doneStatus = (ImageButton) convertView.findViewById(R.id.task_list_item_status);
-            extraPanel = (LinearLayout) convertView.findViewById(R.id.extra_row);
-            text = (TextView) convertView.findViewById(R.id.task_list_item_text);
-            textR = (TextView) convertView.findViewById(R.id.task_list_item_text_r);
-            text.setOnClickListener(new View.OnClickListener() {
+            textTitle = (TextView) convertView.findViewById(R.id.task_list_item_text);
+            textTime = (TextView) convertView.findViewById(R.id.task_list_item_time);
+            textTitle.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
                     onTitleClick(TaskItemAdapter.this.getContext(), view);
                 }
             });
+            textTime.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    editDialogFactory.showTimeDialog(task, new Runnable() {
+                        @Override
+                        public void run() {
+                            updateTask();
+                        }
+                    });
+                }
+            });
             header = (TextView) convertView.findViewById(R.id.task_list_item_header);
+            headerUnderline = (TextView) convertView.findViewById(R.id.task_list_item_header_a);
+/*
             contextSpinner = (TextView) convertView.findViewById(R.id.task_context_spinner);
             contextSpinner.setOnClickListener(new View.OnClickListener() {
                 private ContextRepository contextRepository = new ContextRepository();
@@ -138,18 +147,7 @@ public class TaskItemAdapter extends ArrayAdapter<Task> {
 
                 }
             });
-            timeConstraints = (TextView) convertView.findViewById(R.id.time_constraints);
-            timeConstraints.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    editDialogFactory.showTimeDialog(task, new Runnable() {
-                        @Override
-                        public void run() {
-                            updateTask();
-                        }
-                    });
-                }
-            });
+*/
             doneStatus.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -205,13 +203,13 @@ public class TaskItemAdapter extends ArrayAdapter<Task> {
         }
 
         public void onTitleClick(Context context, View view) {
+            //todo edit context
             editDialogFactory.showTitleDialog(task.getText(), "Edit task text", new EditDialogFactory.TitleEdited() {
                 @Override
                 public void onValidText(String title) {
                     task.setText(title);
                     updateTask();
                 }
-
             });
         }
 
@@ -245,15 +243,19 @@ public class TaskItemAdapter extends ArrayAdapter<Task> {
                 }
                 if (!haveHeader) {
                     header.setVisibility(View.GONE);
+                    headerUnderline.setVisibility(View.GONE);
                 } else {
                     header.setVisibility(View.VISIBLE);
-                    header.setText(DateMarshaller.optionalDateToString(Optional.of(temporalLogic.getCalendar(item.getCompleteDate().get()).getTime())));
+                    headerUnderline.setVisibility(View.VISIBLE);
+                    header.setText(DateMarshaller.dateToString(temporalLogic.getCalendar(item.getCompleteDate().get()).getTime()));
                 }
             }
 
             configureText(item);
-
+            configureTimeText(item);
             configureStatus();
+            textTitle.setClickable(isEditMode());
+            textTime.setClickable(isEditMode());
             if (isSelected()) {
                 this.convertView.setBackgroundColor(Color.rgb(50, 50, 50));
             } else {
@@ -262,7 +264,6 @@ public class TaskItemAdapter extends ArrayAdapter<Task> {
             if (canShowLevel()) {
                 doneStatus.setPadding(task.getMasterTasks().size() * 32 + 5, 0, 5, 0);
             }
-            configureEditors();
         }
 
         private boolean isSelected() {
@@ -273,10 +274,15 @@ public class TaskItemAdapter extends ArrayAdapter<Task> {
             SpannedText text = getTitle(item);
 
             SpannedText extra = getDetails();
-            if (!extra.isEmpty() && !isEditMode()) {
+            if (!extra.isEmpty()) {
                 text = text.join("\n").join(extra);
             }
-            text.apply(this.text);
+            text.apply(this.textTitle);
+        }
+
+        private void configureTimeText(Task item) {
+            SpannedText text = getTimeDetails();
+            text.apply(this.textTime);
         }
 
         private void configureStatus() {
@@ -288,28 +294,8 @@ public class TaskItemAdapter extends ArrayAdapter<Task> {
             }
         }
 
-        private void configureEditors() {
-            boolean showEditors = isEditMode();
-            int visibility = showEditors ? Button.VISIBLE : Button.GONE;
-            SpannedText nonEmptyConstraintsText = timeConstraintsUtils.getNonEmptyConstraintsText(task);
-            nonEmptyConstraintsText = nonEmptyConstraintsText.style(new UnderlineSpan());
-            nonEmptyConstraintsText.apply(timeConstraints);
-            new SpannedText(task.getContext().getName(),
-                    new ForegroundColorSpan(Color.WHITE),
-                    new BackgroundColorSpan(CONTEXT_FG_COLOR),
-                    new UnderlineSpan()
-            ).apply(contextSpinner);
-            extraPanel.setVisibility(visibility);
-            contextSpinner.setVisibility(visibility);
-            timeConstraints.setVisibility(visibility);
-            timeConstraints.setClickable(showEditors);
-            this.text.setClickable(showEditors);
-        }
-
         private SpannedText getTitle(Task item) {
-            SpannedText text = isSelected() ? new SpannedText(item.getText(), new StyleSpan(Typeface.BOLD),
-                    new RelativeSizeSpan(1.8f)) :
-                    new SpannedText(item.getText(), new StyleSpan(Typeface.BOLD));
+            SpannedText text = new SpannedText(item.getText(), new StyleSpan(Typeface.BOLD));
             if (task.getStatus() == TaskStatus.Cancelled) {
                 text = text.style(new StrikethroughSpan());
             }
@@ -321,10 +307,6 @@ public class TaskItemAdapter extends ArrayAdapter<Task> {
 
         private SpannedText getDetails() {
             SpannedText extra = new SpannedText("");
-
-            if (canShowCompletedDate()) {
-                textR.setText(DateMarshaller.timeToString(task.getCompleteDate().get()));
-            }
             if (canShowMasterProject()) {
                 extra = extra.space().join("to ").join(task.getMasterTask().get().getText(),
                         new StyleSpan(Typeface.ITALIC));
@@ -334,16 +316,6 @@ public class TaskItemAdapter extends ArrayAdapter<Task> {
                         new ForegroundColorSpan(CONTEXT_FG_COLOR),
                         new BackgroundColorSpan(CONTEXT_BG_COLOR)
                 );
-            }
-            if (canShowDueDate()) {
-                timeConstraintsUtils.addDueDateWarning(task).apply(textR);
-            }
-            if (canShowTimeConstraints()) {
-                SpannedText dueTime = timeConstraintsUtils.addDueDateWarning(task);
-                if (dueTime.isEmpty()) {
-                    dueTime = new SpannedText("anytime");
-                }
-                extra = extra.space().join(dueTime);
             }
             if (canShowSubActions()) {
                 List<Task> subTasks = from(task.getSubTasks()).filter(TaskListService.ACTIVE_PREDICATE).toImmutableList();
@@ -361,16 +333,36 @@ public class TaskItemAdapter extends ArrayAdapter<Task> {
                             new StyleSpan(Typeface.ITALIC));
                 }
             }
-            if (canShowFutureStartingDate()) {
-                SpannedText startWarning = timeConstraintsUtils.addFutureStartWarning(task);
-                if (!startWarning.isEmpty()) {
-                    if (!extra.isEmpty()) {
-                        extra = extra.join("\n");
-                    }
-                    extra = extra.join(startWarning);
+            return extra;
+        }
+
+        private SpannedText getTimeDetails() {
+            if (task.getCompleteDate().isPresent()) {
+                if (canShowLevel()) {
+                    return new SpannedText(DateMarshaller.dateTimeTo2Strings(task.getCompleteDate().get()));
+                } else {
+                    return new SpannedText(DateMarshaller.timeToString(task.getCompleteDate().get()));
                 }
             }
-            return extra;
+            if (new TemporalPredicates().notStarted().apply(task)) {
+                return timeConstraintsUtils.addFutureStartWarning(task);
+            }
+            SpannedText startedToday = new SpannedText();
+            if (new TemporalPredicates().startedToday().apply(task)) {
+                startedToday = new SpannedText("started today\n",
+                        new ForegroundColorSpan(TimeConstraintsUtils.STARTED_TODAY_FG_COLOR),
+                        new BackgroundColorSpan(TimeConstraintsUtils.STARTED_TODAY_BG_COLOR)
+                );
+            }
+            SpannedText dueWarning = timeConstraintsUtils.addDueDateWarning(task);
+            if (!dueWarning.isEmpty()) {
+                return startedToday.join(dueWarning);
+            }
+            if (isEditMode()) {
+                return new SpannedText("anytime");
+            } else {
+                return startedToday;
+            }
         }
 
         private int selectStatusImage() {
@@ -393,7 +385,7 @@ public class TaskItemAdapter extends ArrayAdapter<Task> {
         }
 
         private TaskItemAdapterConfig getActualConfig() {
-            return isSelected() ? selectedConfig : config;
+            return config;
         }
 
         private boolean canShowContext() {
