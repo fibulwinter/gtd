@@ -26,7 +26,7 @@
             android:layout_below="@id/task_list_item_header"
             android:layout_alignParentRight="true"
             android:layout_centerVertical="true"
-            android:background="@android:color/background_dark"
+            android:background="@android:color/transparent"
             android:clickable="true"
             android:gravity="center"
             />
@@ -57,8 +57,7 @@
                 android:paddingLeft="5dip"
                 android:paddingRight="5dip"
                 android:text="Context"
-                android:textColor="#6666cc"
-                android:background="#303066"
+                android:textSize="15dip"
                 />
         <TextView
                 android:id="@+id/time_constraints"
@@ -69,6 +68,7 @@
                 android:paddingRight="5dip"
                 android:text="Start"
                 android:textColor="@color/white"
+                android:textSize="15dip"
                 />
     </LinearLayout>
 </RelativeLayout>

@@ -91,13 +91,12 @@ public class TaskItemAdapter extends ArrayAdapter<Task> {
         } else {
             holder = (ViewHolder) convertView.getTag();
         }
-        holder.update(getItem(position), highlightedTask.isPresent() && highlightedTask.get().equals(holder.task));
+        holder.update(getItem(position));
         return convertView;
     }
 
     private class ViewHolder {
         private Task task;
-        private boolean selected;
 
         private final View convertView;
         private ImageButton doneStatus;
@@ -154,12 +153,13 @@ public class TaskItemAdapter extends ArrayAdapter<Task> {
                     StatusTransitionsFactory statusTransitionsFactory = new StatusTransitionsFactory(editDialogFactory) {
                         @Override
                         protected void addedSubtask(Task masterTask, Task subTask) {
-                            highlightedTask = Optional.of(subTask);
                             taskUpdateListener.onTaskUpdated(subTask);
                             if (canShowLevel()) {
+                                highlightedTask = Optional.of(subTask);
                                 addAfter(masterTask, subTask);
                             } else {
-                                update(subTask, true);
+                                highlightedTask = Optional.absent();
+                                update(subTask);
                                 replace(masterTask, subTask);
                             }
                             notifyDataSetChanged();
@@ -168,7 +168,8 @@ public class TaskItemAdapter extends ArrayAdapter<Task> {
                         @Override
                         protected void justUpdate(Task task) {
                             taskUpdateListener.onTaskUpdated(task);
-                            update(task, true);
+                            highlightedTask = Optional.of(task);
+                            update(task);
                             notifyDataSetChanged();
                         }
 
@@ -197,7 +198,7 @@ public class TaskItemAdapter extends ArrayAdapter<Task> {
 
         private void updateTask() {
             taskUpdateListener.onTaskUpdated(task);
-            update(task, true);
+            update(task);
         }
 
         public void onTitleClick(Context context, View view) {
@@ -213,14 +214,19 @@ public class TaskItemAdapter extends ArrayAdapter<Task> {
 
 
         private void onSelected() {
+
+            if (canShowLevel() || !task.isComplex()) {
+                highlightedTask = Optional.of(task);
+            } else {
+                highlightedTask = Optional.absent();
+            }
             taskUpdateListener.onTaskSelected(task);
-            update(task, true);
+            update(task);
+            notifyDataSetChanged();
         }
 
-        void update(Task item, boolean selectedItem) {
+        void update(Task item) {
             task = item;
-            this.selected = selectedItem;
-
             int position = getPosition(item);
 
             TemporalLogic temporalLogic = new TemporalLogic();
@@ -245,16 +251,20 @@ public class TaskItemAdapter extends ArrayAdapter<Task> {
             configureText(item);
 
             configureStatus();
+            if (isSelected()) {
+                this.convertView.setBackgroundColor(Color.rgb(50, 50, 50));
+            } else {
+                this.convertView.setBackgroundColor(getContext().getResources().getColor(android.R.color.background_dark));
+            }
             if (canShowLevel()) {
                 this.text.setPadding(task.getMasterTasks().size() * 24, 5, 5, 5);
                 this.extraPanel.setPadding(task.getMasterTasks().size() * 24, 5, 5, 5);
-                if (highlightedTask.isPresent() && highlightedTask.get().equals(task)) {//todo is selected?
-                    this.convertView.setBackgroundColor(getContext().getResources().getColor(android.R.color.widget_edittext_dark));
-                } else {
-                    this.convertView.setBackgroundColor(getContext().getResources().getColor(android.R.color.background_dark));
-                }
             }
             configureEditors();
+        }
+
+        private boolean isSelected() {
+            return highlightedTask.isPresent() && highlightedTask.get().equals(task);
         }
 
         private void configureText(Task item) {
@@ -270,7 +280,7 @@ public class TaskItemAdapter extends ArrayAdapter<Task> {
         private void configureStatus() {
             doneStatus.setImageDrawable(getContext().getResources().getDrawable(selectStatusImage()));
             if (config.isEditMode()) {
-                doneStatus.setClickable(selected);
+                doneStatus.setClickable(isSelected());
             } else {
                 doneStatus.setClickable(config.isAllowChangeStatus());
             }
@@ -279,8 +289,14 @@ public class TaskItemAdapter extends ArrayAdapter<Task> {
         private void configureEditors() {
             boolean showEditors = isEditMode();
             int visibility = showEditors ? Button.VISIBLE : Button.GONE;
-            timeConstraintsUtils.getNonEmptyConstraintsText(task).apply(timeConstraints);
-            contextSpinner.setText(task.getContext().getName());
+            SpannedText nonEmptyConstraintsText = timeConstraintsUtils.getNonEmptyConstraintsText(task);
+            nonEmptyConstraintsText = nonEmptyConstraintsText.style(new UnderlineSpan());
+            nonEmptyConstraintsText.apply(timeConstraints);
+            new SpannedText(task.getContext().getName(),
+                    new ForegroundColorSpan(Color.WHITE),
+                    new BackgroundColorSpan(CONTEXT_FG_COLOR),
+                    new UnderlineSpan()
+            ).apply(contextSpinner);
             extraPanel.setVisibility(visibility);
             contextSpinner.setVisibility(visibility);
             timeConstraints.setVisibility(visibility);
@@ -289,11 +305,14 @@ public class TaskItemAdapter extends ArrayAdapter<Task> {
         }
 
         private SpannedText getTitle(Task item) {
-            SpannedText text = selected ? new SpannedText(item.getText(), new StyleSpan(Typeface.BOLD),
-                    new RelativeSizeSpan(1.5f)) :
+            SpannedText text = isSelected() ? new SpannedText(item.getText(), new StyleSpan(Typeface.BOLD),
+                    new RelativeSizeSpan(1.8f)) :
                     new SpannedText(item.getText(), new StyleSpan(Typeface.BOLD));
             if (task.getStatus() == TaskStatus.Cancelled) {
                 text = text.style(new StrikethroughSpan());
+            }
+            if (isSelected()) {
+                text = text.style(new UnderlineSpan());
             }
             return text;
         }
@@ -347,7 +366,7 @@ public class TaskItemAdapter extends ArrayAdapter<Task> {
             int image = 0;
             switch (task.getStatus()) {
                 case NextAction:
-                    image = R.drawable.a_not_done;
+                    image = task.isProject() ? R.drawable.a_blocked : R.drawable.a_not_done;
                     break;
                 case Maybe:
                     image = R.drawable.a_maybe;
@@ -363,7 +382,7 @@ public class TaskItemAdapter extends ArrayAdapter<Task> {
         }
 
         private TaskItemAdapterConfig getActualConfig() {
-            return selected ? selectedConfig : config;
+            return isSelected() ? selectedConfig : config;
         }
 
         private boolean canShowContext() {
@@ -399,7 +418,7 @@ public class TaskItemAdapter extends ArrayAdapter<Task> {
         }
 
         private boolean isEditMode() {
-            return getActualConfig().isEditMode() && selected;
+            return /*getActualConfig().isEditMode() && */isSelected();
         }
     }
 }

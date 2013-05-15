@@ -5,6 +5,7 @@ import java.util.Date;
 import android.graphics.Color;
 import android.text.style.BackgroundColorSpan;
 import android.text.style.ForegroundColorSpan;
+import android.text.style.UnderlineSpan;
 import com.google.common.base.Optional;
 import net.fibulwinter.gtd.domain.Task;
 import net.fibulwinter.gtd.infrastructure.DateMarshaller;
@@ -99,7 +100,7 @@ public class TimeConstraintsUtils {
                         new BackgroundColorSpan(TimeConstraintsUtils.OVERDUE_BG_COLOR)
                 );
             } else {
-                return new SpannedText().space().join(dueDate);
+                return new SpannedText().space().join(dueDate, new UnderlineSpan());
             }
         } else {
             return new SpannedText();

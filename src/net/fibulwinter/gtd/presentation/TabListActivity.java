@@ -21,7 +21,7 @@ public class TabListActivity extends TabActivity {
         addTab(tabHost, "Projects", ProjectListActivity.class, R.drawable.p_not_done);
         addTab(tabHost, "May Be", MayBeListActivity.class, R.drawable.a_maybe);
         addTab(tabHost, "Log", DoneListActivity.class, R.drawable.a_done);
-        addTab(tabHost, "Search", SearchListActivity.class, R.drawable.ic_btn_search_a);
+        addTab(tabHost, "Search", SearchListActivity.class, R.drawable.ic_btn_search);
     }
 
     private void addTab(TabHost tabHost, String label, Class<? extends Activity> targetClass, int icon) {

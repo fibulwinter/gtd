@@ -184,4 +184,8 @@ public class Task {
     public int hashCode() {
         return (int) (id ^ (id >>> 32));
     }
+
+    public boolean isComplex() {
+        return getMasterTask().isPresent() || !getSubTasks().isEmpty();
+    }
 }

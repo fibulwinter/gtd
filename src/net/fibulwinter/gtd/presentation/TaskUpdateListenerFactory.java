@@ -14,9 +14,12 @@ public class TaskUpdateListenerFactory {
 
             @Override
             public void onTaskSelected(Task selectedTask) {
-                Uri uri = ContentUris.withAppendedId(TaskTableColumns.CONTENT_URI, selectedTask.getId());
-                Intent intent = new Intent("edit", uri, callingActivity, TaskEditActivity.class);
-                callingActivity.startActivity(intent);
+                if (selectedTask.isComplex()) {
+                    Uri uri = ContentUris.withAppendedId(TaskTableColumns.CONTENT_URI, selectedTask.getId());
+                    Intent intent = new Intent("edit", uri, callingActivity, TaskEditActivity.class);
+                    callingActivity.startActivity(intent);
+                } else {
+                }
             }
 
             @Override
