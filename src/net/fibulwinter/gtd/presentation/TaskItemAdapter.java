@@ -354,7 +354,7 @@ public class TaskItemAdapter extends ArrayAdapter<Task> {
                 if (canShowLevel()) {
                     return new SpannedText(DateMarshaller.dateTimeTo2Strings(task.getCompleteDate().get()));
                 } else {
-                    return new SpannedText(DateMarshaller.timeToString(task.getCompleteDate().get()) + "\n");
+                    return new SpannedText(DateMarshaller.timeToString(task.getCompleteDate().get()));
                 }
             }
             if (new TemporalPredicates().notStarted().apply(task)) {
@@ -369,16 +369,13 @@ public class TaskItemAdapter extends ArrayAdapter<Task> {
             }
             SpannedText dueWarning = timeConstraintsUtils.addDueDateWarning(task);
             if (!dueWarning.isEmpty()) {
-                if (startedToday.isEmpty()) {
-                    startedToday = new SpannedText("\n");
-                }
                 return startedToday.join(dueWarning);
             }
             if (isEditMode()) {
-                return new SpannedText("anytime\n");
+                return new SpannedText("anytime");
             } else {
                 if (startedToday.isEmpty()) {
-                    return new SpannedText("\n");
+                    return new SpannedText();
                 }
                 return startedToday;
             }
