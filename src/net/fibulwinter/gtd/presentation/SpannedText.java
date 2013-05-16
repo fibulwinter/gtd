@@ -78,7 +78,7 @@ public class SpannedText {
     }
 
     public boolean isEmpty() {
-        return string.isEmpty();
+        return string.length() == 0;
     }
 
 }

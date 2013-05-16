@@ -16,11 +16,18 @@
                      android:src="@drawable/ic_menu_add"
                      android:onClick="onNewTask"
                 />
+        <ImageButton android:id="@+id/sortBtn"
+                     android:layout_width="wrap_content"
+                     android:layout_height="wrap_content"
+                     android:layout_alignParentLeft="true"
+                     android:src="@drawable/ic_menu_sort_alphabetically"
+                     android:onClick="onSort"
+                />
         <FrameLayout android:id="@+id/filterPanel"
                      android:layout_width="wrap_content"
                      android:layout_height="wrap_content"
                      android:layout_centerVertical="true"
-                     android:layout_alignParentLeft="true"
+                     android:layout_toRightOf="@id/sortBtn"
                      android:layout_toLeftOf="@id/new_task"
                 >
             <net.fibulwinter.gtd.presentation.TimeFilterControl

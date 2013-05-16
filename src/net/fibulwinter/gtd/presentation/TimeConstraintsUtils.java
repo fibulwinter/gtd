@@ -108,7 +108,7 @@ public class TimeConstraintsUtils {
     }
 
 
-    private String dueDate(Task task) {
+    public String dueDate(Task task) {
         Optional<Date> dueDate = task.getDueDate();
         if (!dueDate.isPresent()) {
             return "anytime";
@@ -120,8 +120,10 @@ public class TimeConstraintsUtils {
             return "tomorrow";
         } else if (days == 1) {
             return "today";
+        } else if (days == 0) {
+            return "yesterday";
         } else {
-            return "due to " + DateMarshaller.optionalDateToString(dueDate);
+            return "overdue " + ((-days) + 1) + " days";
         }
     }
 }

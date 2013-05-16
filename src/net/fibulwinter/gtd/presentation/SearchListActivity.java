@@ -78,7 +78,7 @@ public class SearchListActivity extends Activity {
             @Override
             public boolean apply(Task task) {
                 String s = searchText.getText().toString();
-                return s.isEmpty() || task.getText().toLowerCase().contains(s.toLowerCase());
+                return s.length() == 0 || task.getText().toLowerCase().contains(s.toLowerCase());
             }
         }));
         Collections.sort(taskArrayList, new Comparator<Task>() {

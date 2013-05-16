@@ -3,7 +3,6 @@ package net.fibulwinter.gtd.presentation;
 import static com.google.common.collect.FluentIterable.from;
 import static com.google.common.collect.Iterables.getOnlyElement;
 
-import java.util.Date;
 import java.util.List;
 
 import android.content.Context;
@@ -39,6 +38,22 @@ public class TaskItemAdapter extends ArrayAdapter<Task> {
     private Optional<Task> highlightedTask = Optional.absent();
     private TimeConstraintsUtils timeConstraintsUtils;
     private EditDialogFactory editDialogFactory;
+    private SortAndGroup groupFunction = new SortAndGroup() {
+        @Override
+        public int compare(Task task, Task task1) {
+            return task.getText().trim().toLowerCase().compareTo(task1.getText().trim().toLowerCase());
+        }
+
+        @Override
+        public int getResource() {
+            return 0;
+        }
+
+        @Override
+        public Optional<Object> apply(Task task) {
+            return Optional.absent();
+        }
+    };
 
 
     public TaskItemAdapter(Context context, TaskUpdateListener taskUpdateListener, TaskItemAdapterConfig config) {
@@ -58,6 +73,11 @@ public class TaskItemAdapter extends ArrayAdapter<Task> {
 
     public void setHighlightedTask(Optional<Task> highlightedTask) {
         this.highlightedTask = highlightedTask;
+    }
+
+    public void setGroupFunction(SortAndGroup groupFunction) {
+        this.groupFunction = groupFunction;
+        notifyDataSetChanged();
     }
 
     public void setData(Iterable<Task> tasks) {
@@ -226,29 +246,22 @@ public class TaskItemAdapter extends ArrayAdapter<Task> {
             notifyDataSetChanged();
         }
 
-        void update(Task item) {
+        void update(final Task item) {
             task = item;
             int position = getPosition(item);
-
-            TemporalLogic temporalLogic = new TemporalLogic();
-            Optional<Date> completeDateN = item.getCompleteDate();
-            if (config.isShowCompletedDate()) {
-                boolean haveHeader = completeDateN.isPresent();
-                if (position > 0) {
-                    Optional<Date> completeDateP = getItem(position - 1).getCompleteDate();
-                    haveHeader = completeDateN.isPresent() && completeDateP.isPresent();
-                    if (haveHeader) {
-                        haveHeader = temporalLogic.relativeDays(completeDateN.get()) != temporalLogic.relativeDays(completeDateP.get());
-                    }
-                }
-                if (!haveHeader) {
-                    header.setVisibility(View.GONE);
-                    headerUnderline.setVisibility(View.GONE);
-                } else {
+            Optional<?> thisHeader = groupFunction.apply(task);
+            if (thisHeader.isPresent()) {
+                if (position == 0 || !thisHeader.equals(groupFunction.apply(getItem(position - 1)))) {
                     header.setVisibility(View.VISIBLE);
                     headerUnderline.setVisibility(View.VISIBLE);
-                    header.setText(DateMarshaller.dateToString(temporalLogic.getCalendar(item.getCompleteDate().get()).getTime()));
+                    header.setText(thisHeader.get().toString());
+                } else {
+                    header.setVisibility(View.GONE);
+                    headerUnderline.setVisibility(View.GONE);
                 }
+            } else {
+                header.setVisibility(View.GONE);
+                headerUnderline.setVisibility(View.GONE);
             }
 
             configureText(item);

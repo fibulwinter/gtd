@@ -58,7 +58,7 @@ public class EditDialogFactory {
                 .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int whichButton) {
                         String inputText = input.getText().toString().trim();
-                        if (!inputText.isEmpty()) {
+                        if (inputText.length() > 0) {
                             titleEdited.onValidText(inputText, (net.fibulwinter.gtd.domain.Context) spinner.getSelectedItem());
                         }
                     }

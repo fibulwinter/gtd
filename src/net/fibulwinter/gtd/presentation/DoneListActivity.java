@@ -17,11 +17,14 @@ import android.view.View;
 import android.widget.ListView;
 import android.widget.Toast;
 import com.google.common.base.Joiner;
+import com.google.common.base.Optional;
 import net.fibulwinter.gtd.R;
 import net.fibulwinter.gtd.domain.ContextRepository;
 import net.fibulwinter.gtd.domain.Task;
 import net.fibulwinter.gtd.domain.TaskDAO;
 import net.fibulwinter.gtd.domain.TaskRepository;
+import net.fibulwinter.gtd.infrastructure.DateMarshaller;
+import net.fibulwinter.gtd.infrastructure.TemporalLogic;
 import net.fibulwinter.gtd.service.TaskExportService;
 import net.fibulwinter.gtd.service.TaskImportService;
 import net.fibulwinter.gtd.service.TaskListService;
@@ -41,6 +44,28 @@ public class DoneListActivity extends Activity {
         taskListService = new TaskListService(taskRepository);
         TaskUpdateListener taskUpdateListener = TaskUpdateListenerFactory.simple(this, taskListService);
         taskItemAdapter = new TaskItemAdapter(this, taskUpdateListener, TaskItemAdapterConfig.logList());
+        taskItemAdapter.setGroupFunction(new SortAndGroup() {
+            final TemporalLogic temporalLogic = new TemporalLogic();
+
+            @Override
+            public int compare(Task task, Task task1) {
+                return 0;  //To change body of implemented methods use File | Settings | File Templates.
+            }
+
+            @Override
+            public int getResource() {
+                return 0;
+            }
+
+            @Override
+            public Optional<?> apply(Task input) {
+                if (input.getCompleteDate().isPresent()) {
+                    return Optional.of(DateMarshaller.dateToString(temporalLogic.getCalendar(input.getCompleteDate().get()).getTime()));
+                } else {
+                    return Optional.absent();
+                }
+            }
+        });
         taskList.setAdapter(taskItemAdapter);
     }
 
