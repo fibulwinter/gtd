@@ -34,7 +34,7 @@ public class DateMarshaller {
             return Optional.absent();
         } else {
             try {
-                return Optional.of(new SimpleDateFormat("yyyy-MM-dd hh:mm:ss").parse(string));
+                return Optional.of(new SimpleDateFormat("yyyy-MM-dd kk:mm:ss").parse(string));
             } catch (ParseException e) {
                 return Optional.absent();
             }
@@ -50,15 +50,15 @@ public class DateMarshaller {
     }
 
     public static String dateTimeToString(Date date) {
-        return DateFormat.format("yyyy-MM-dd hh:mm:ss", date).toString();
+        return DateFormat.format("yyyy-MM-dd kk:mm:ss", date).toString();
     }
 
     public static String dateTimeTo2Strings(Date date) {
-        return DateFormat.format("yyyy-MM-dd\nhh:mm:ss", date).toString();
+        return DateFormat.format("yyyy-MM-dd\nkk:mm:ss", date).toString();
     }
 
     public static String timeToString(Date date) {
-        return DateFormat.format("hh:mm:ss", date).toString();
+        return DateFormat.format("kk:mm:ss", date).toString();
     }
 
     public static String dateToString(Date date) {
