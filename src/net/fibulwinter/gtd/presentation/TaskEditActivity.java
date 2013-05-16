@@ -21,8 +21,6 @@ import net.fibulwinter.gtd.service.TaskListService;
 
 public class TaskEditActivity extends Activity {
 
-    public static final String TYPE = "type";
-
     private TaskListService taskListService;
     private Task task;
     private TaskUpdateListener taskUpdateListener = new TaskUpdateListener() {
