@@ -250,7 +250,7 @@ public class TaskItemAdapter extends ArrayAdapter<Task> {
             task = item;
             int position = getPosition(item);
             Optional<?> thisHeader = groupFunction.apply(task);
-            if (thisHeader.isPresent()) {
+            if (position >= 0 && thisHeader.isPresent()) {
                 if (position == 0 || !thisHeader.equals(groupFunction.apply(getItem(position - 1)))) {
                     header.setVisibility(View.VISIBLE);
                     headerUnderline.setVisibility(View.VISIBLE);
