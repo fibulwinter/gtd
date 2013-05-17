@@ -4,7 +4,6 @@ import static com.google.common.collect.Lists.newArrayList;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Date;
 import java.util.List;
 
 import android.app.Activity;
@@ -89,23 +88,24 @@ public abstract class SimpleListActivity extends Activity {
             }
         });
         sortAndGroups.add(new SortAndGroup() {
+            TemporalLogic temporalLogic = new TemporalLogic();
+
             @Override
             public int compare(Task task, Task task1) {
-                Optional<Date> dueDate = task.getDueDate();
-                Optional<Date> dueDate1 = task1.getDueDate();
-                if (!dueDate.isPresent() && !dueDate1.isPresent()) return 0;
-                if (dueDate.isPresent() && !dueDate1.isPresent()) return -1;
-                if (!dueDate.isPresent() && dueDate1.isPresent()) return 1;
-                return dueDate.get().compareTo(dueDate1.get());
+                TemporalLogic.NextTemporal timeDetails = temporalLogic.getTimeDetails(task);
+                TemporalLogic.NextTemporal timeDetails1 = temporalLogic.getTimeDetails(task1);
+                return timeDetails.compareTo(timeDetails1);
             }
 
             @Override
             public Optional<?> apply(Task task) {
-                if (task.getDueDate().isPresent()) {
-                    return Optional.of(new TimeConstraintsUtils(new TemporalLogic()).dueDate(task));
-                } else {
-                    return Optional.of("Anytime");
-                }
+                TemporalLogic.NextTemporal timeDetails = temporalLogic.getTimeDetails(task);
+                return Optional.of(timeDetails.toString());
+//                if (task.getDueDate().isPresent()) {
+//                    return Optional.of(new TimeConstraintsUtils(new TemporalLogic()).dueDate(task));
+//                } else {
+//                    return Optional.of("Anytime");
+//                }
             }
 
             @Override

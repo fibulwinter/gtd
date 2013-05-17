@@ -33,12 +33,12 @@ public class TemporalLogic {
     public class NextTemporal implements Comparable<NextTemporal> {
         private DateType dateType;
         private int relativeDays;
-        private Optional<Date> optionalDate;
+        private Task task;
 
-        public NextTemporal(DateType dateType, int relativeDays, Optional<Date> optionalDate) {
+        public NextTemporal(DateType dateType, int relativeDays, Task task) {
             this.dateType = dateType;
             this.relativeDays = relativeDays;
-            this.optionalDate = optionalDate;
+            this.task = task;
         }
 
         public DateType getDateType() {
@@ -49,8 +49,8 @@ public class TemporalLogic {
             return relativeDays;
         }
 
-        public Optional<Date> getOptionalDate() {
-            return optionalDate;
+        public Task getTask() {
+            return task;
         }
 
         @Override
@@ -58,6 +58,14 @@ public class TemporalLogic {
             int comp = dateType.compareTo(nextTemporal.dateType);
             if (comp == 0) {
                 comp = relativeDays - nextTemporal.relativeDays;
+                if (comp == 0) {
+                    if (task.getCompleteDate().isPresent() && nextTemporal.task.getCompleteDate().isPresent()) {
+                        comp = task.getCompleteDate().get().compareTo(nextTemporal.task.getCompleteDate().get());
+                    }
+                    if (comp == 0) {
+                        comp = task.getText().trim().toLowerCase().compareTo(nextTemporal.task.getText().trim().toLowerCase());
+                    }
+                }
             }
             return comp;
         }
@@ -66,41 +74,100 @@ public class TemporalLogic {
         public String toString() {
             switch (dateType) {
                 case OVERDUE:
-                    return "Overdue";
+                    if (relativeDays == 0) {
+                        return "Yesterday";
+                    } else {
+                        return "Overdue " + (1 - relativeDays) + " days";
+                    }
                 case DUE_TO:
-                    return "in";
+                    if (relativeDays == 1) {
+                        return "Today";
+                    } else if (relativeDays == 2) {
+                        return "Tomorrow";
+                    } else if (relativeDays == 3) {
+                        return "In " + relativeDays + " days";
+                    } else if (relativeDays <= 7) {
+                        return "In a week";
+                    } else if (relativeDays <= 14) {
+                        return "In 2 weeks";
+                    } else if (relativeDays <= 21) {
+                        return "In 3 weeks";
+                    } else if (relativeDays <= 31) {
+                        return "In a month";
+                    } else if (relativeDays <= 365) {
+                        return "In " + (relativeDays / 30) + " months";
+                    } else {
+                        return "In future";
+                    }
                 case ANYTIME:
-                    break;
+                    return "Anytime";
                 case STARTING:
-                    break;
+                    if (relativeDays == 1) {
+                        return "Starting tomorrow";
+                    } else if (relativeDays == 2) {
+                        return "Starting in " + relativeDays + " days";
+                    } else if (relativeDays <= 7) {
+                        return "Starting in a week";
+                    } else if (relativeDays <= 14) {
+                        return "Starting in 2 weeks";
+                    } else if (relativeDays <= 21) {
+                        return "Starting in 3 weeks";
+                    } else if (relativeDays <= 31) {
+                        return "Starting in a month";
+                    } else if (relativeDays <= 365) {
+                        return "Starting in " + (relativeDays / 30) + " months";
+                    } else {
+                        return "Starting in future";
+                    }
                 case DONE:
-                    return "Completed";
+                    return "Done";
             }
             throw new IllegalStateException();
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (!(o instanceof NextTemporal)) return false;
+
+            NextTemporal that = (NextTemporal) o;
+
+            if (relativeDays != that.relativeDays) return false;
+            if (dateType != that.dateType) return false;
+
+            return true;
+        }
+
+        @Override
+        public int hashCode() {
+            int result = dateType.hashCode();
+            result = 31 * result + relativeDays;
+            return result;
         }
     }
 
     public NextTemporal getTimeDetails(Task task) {
+        String title = task.getText();
         if (task.getCompleteDate().isPresent()) {
-            return new NextTemporal(DateType.DONE, 0, task.getCompleteDate());
+            return new NextTemporal(DateType.DONE, 0, task);
         }
         Optional<Date> startingDate = task.getStartingDate();
         if (startingDate.isPresent()) {
             int relativeDays = relativeDays(startingDate.get());
             if (relativeDays > 0) {
-                return new NextTemporal(DateType.STARTING, relativeDays, Optional.<Date>absent());
+                return new NextTemporal(DateType.STARTING, relativeDays, task);
             }
         }
         Optional<Date> dueDate = task.getDueDate();
         if (dueDate.isPresent()) {
             int relativeDays = relativeDays(dueDate.get());
             if (relativeDays > 0) {
-                return new NextTemporal(DateType.DUE_TO, relativeDays, Optional.<Date>absent());
+                return new NextTemporal(DateType.DUE_TO, relativeDays, task);
             } else {
-                return new NextTemporal(DateType.OVERDUE, relativeDays, Optional.<Date>absent());
+                return new NextTemporal(DateType.OVERDUE, relativeDays, task);
             }
         }
-        return new NextTemporal(DateType.ANYTIME, 0, Optional.<Date>absent());
+        return new NextTemporal(DateType.ANYTIME, 0, task);
     }
 
 
