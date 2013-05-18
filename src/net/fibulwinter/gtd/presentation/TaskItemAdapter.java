@@ -150,24 +150,6 @@ public class TaskItemAdapter extends ArrayAdapter<Task> {
             });
             header = (TextView) convertView.findViewById(R.id.task_list_item_header);
             headerUnderline = (TextView) convertView.findViewById(R.id.task_list_item_header_a);
-/*
-            contextSpinner = (TextView) convertView.findViewById(R.id.task_context_spinner);
-            contextSpinner.setOnClickListener(new View.OnClickListener() {
-                private ContextRepository contextRepository = new ContextRepository();
-
-                @Override
-                public void onClick(View view) {
-                    SpinnerDialog.show(TaskItemAdapter.this.getContext(), contextRepository.getAll(), task.getContext(), new SpinnerDialog.OnSelected<net.fibulwinter.gtd.domain.Context>() {
-                        @Override
-                        public void selected(net.fibulwinter.gtd.domain.Context selectedItem) {
-                            task.setContext(selectedItem);
-                            updateTask();
-                        }
-                    });
-
-                }
-            });
-*/
             doneStatus.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -177,7 +159,9 @@ public class TaskItemAdapter extends ArrayAdapter<Task> {
                             taskUpdateListener.onTaskUpdated(subTask);
                             if (canShowLevel()) {
                                 highlightedTask = Optional.of(subTask);
-                                addAfter(masterTask, subTask);
+                                int indexOfChild = masterTask.getSubTasks().indexOf(subTask);
+                                Task target = indexOfChild > 0 ? masterTask.getSubTasks().get(indexOfChild - 1) : masterTask;
+                                addAfter(target, subTask);
                             } else {
                                 highlightedTask = Optional.absent();
                                 update(subTask);

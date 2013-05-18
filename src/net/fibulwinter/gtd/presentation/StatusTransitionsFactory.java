@@ -24,7 +24,26 @@ public abstract class StatusTransitionsFactory {
                     justUpdate(task);
                 }
             });
-            transitions.add(new StatusTransition("Sub action") {
+            if (task.getMasterTask().isPresent()) {
+                transitions.add(new StatusTransition("Done with follow up") {
+                    @Override
+                    public void doTransition(final Task task) {
+                        task.complete();
+                        justUpdate(task);
+                        editDialogFactory.showTitleDialog("", Context.DEFAULT, "Enter follow up action", new EditDialogFactory.TitleEdited() {
+                            @Override
+                            public void onValidText(String title, Context context) {
+                                Task subTask = new Task(title);
+                                subTask.setMaster(task.getMasterTask().get());
+                                subTask.setContext(context);
+                                addedSubtask(task.getMasterTask().get(), subTask);
+                            }
+
+                        });
+                    }
+                });
+            }
+            transitions.add(new StatusTransition("Add child action") {
                 @Override
                 public void doTransition(final Task task) {
                     editDialogFactory.showTitleDialog("", Context.DEFAULT, "Enter sub action", new EditDialogFactory.TitleEdited() {

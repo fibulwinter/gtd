@@ -9,6 +9,7 @@ import java.util.UUID;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
+import com.google.common.collect.Ordering;
 
 public class Task {
     private long id;
@@ -20,6 +21,7 @@ public class Task {
     private Optional<Date> dueDate = Optional.absent();
     private Context context = Context.DEFAULT;
     private Optional<Date> completeDate = Optional.absent();
+    private Date createdDate = new Date();
     public static final Predicate<? super Task> IS_PROJECT_ROOT = new Predicate<Task>() {
         @Override
         public boolean apply(Task task) {
@@ -34,12 +36,14 @@ public class Task {
         if (masterTask.isPresent()) {
             masterTask.get().addSubAction(this);
         }
+        this.createdDate = new Date();
     }
 
-    public Task(long id, String text, TaskStatus status) {
+    public Task(long id, String text, TaskStatus status, Date createdDate) {
         this.id = id;
         this.text = text;
         this.status = status;
+        this.createdDate = createdDate;
     }
 
     public long getId() {
@@ -70,6 +74,12 @@ public class Task {
 
     private void addSubAction(Task subTask) {
         subTasks.add(subTask);
+        Collections.sort(subTasks, new Ordering<Task>() {
+            @Override
+            public int compare(Task task, Task task1) {
+                return task.getCreatedDate().compareTo(task1.getCreatedDate());
+            }
+        });
     }
 
     public List<Task> getSubTasks() {
@@ -105,12 +115,16 @@ public class Task {
         this.text = text;
     }
 
+    public Date getCreatedDate() {
+        return createdDate;
+    }
+
     public void setMaster(Task masterTask) {
         if (this.masterTask.isPresent()) {
             this.masterTask.get().subTasks.remove(this);
         }
         this.masterTask = Optional.of(masterTask);
-        masterTask.subTasks.add(this);
+        masterTask.addSubAction(this);
     }
 
     public List<Task> getMasterTasks() {
@@ -166,6 +180,10 @@ public class Task {
 
     public void setCompleteDate(Optional<Date> completeDate) {
         this.completeDate = completeDate;
+    }
+
+    public void setCreatedDate(Date createdDate) {
+        this.createdDate = createdDate;
     }
 
     @Override

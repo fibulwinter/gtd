@@ -1,5 +1,8 @@
 package net.fibulwinter.gtd.infrastructure;
 
+import java.util.Date;
+import java.util.HashMap;
+
 import android.content.*;
 import android.content.res.Resources;
 import android.database.Cursor;
@@ -11,13 +14,10 @@ import android.net.Uri;
 import android.util.Log;
 import net.fibulwinter.gtd.domain.TaskStatus;
 
-import java.util.Date;
-import java.util.HashMap;
-
 public class TaskContentProvider extends ContentProvider {
     private static final String TAG = "TasksContentProvider";
 
-    private static final int DATABASE_VERSION = 4;
+    private static final int DATABASE_VERSION = 5;
     private static final String DATABASE_NAME = "gtd_db";
     private static final String TASKS_TABLE_NAME = "tasks";
 
@@ -42,6 +42,7 @@ public class TaskContentProvider extends ContentProvider {
         tasksProjectionMap.put(TaskTableColumns.DUE_DATE, TaskTableColumns.DUE_DATE);
         tasksProjectionMap.put(TaskTableColumns.CONTEXT, TaskTableColumns.CONTEXT);
         tasksProjectionMap.put(TaskTableColumns.COMPLETED_DATE, TaskTableColumns.COMPLETED_DATE);
+        tasksProjectionMap.put(TaskTableColumns.CREATED_DATE, TaskTableColumns.CREATED_DATE);
 
     }
 
@@ -64,7 +65,8 @@ public class TaskContentProvider extends ContentProvider {
                     + TaskTableColumns.START_DATE + " INTEGER, "
                     + TaskTableColumns.DUE_DATE + " INTEGER, "
                     + TaskTableColumns.CONTEXT + " TEXT, "
-                    + TaskTableColumns.COMPLETED_DATE + " INTEGER "
+                    + TaskTableColumns.COMPLETED_DATE + " INTEGER, "
+                    + TaskTableColumns.CREATED_DATE + " INTEGER "
                     + ");");
         }
 
@@ -87,6 +89,11 @@ public class TaskContentProvider extends ContentProvider {
                         "' OR " + TaskTableColumns.STATUS + "='"
                         + TaskStatus.Cancelled.name() +
                         "'");
+            }
+            if (oldVersion < 5) {
+                db.execSQL("ALTER TABLE " + TASKS_TABLE_NAME + " ADD COLUMN " + TaskTableColumns.CREATED_DATE + " INTEGER");
+                long time = new Date().getTime();
+                db.execSQL("UPDATE " + TASKS_TABLE_NAME + " SET " + TaskTableColumns.CREATED_DATE + "=" + time);
             }
         }
     }

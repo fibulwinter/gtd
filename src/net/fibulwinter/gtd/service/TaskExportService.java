@@ -49,6 +49,7 @@ public class TaskExportService {
                 Strings.repeat("    ", task.getMasterTasks().size())
                         + status(task.getStatus()) + " "
                         + task.getContext().getName() + " "
+                        + DateMarshaller.dateTimeToString(task.getCreatedDate()) + " "
                         + DateMarshaller.optionalDateToString(task.getStartingDate()) + " "
                         + DateMarshaller.optionalDateToString(task.getDueDate()) + " "
                         + DateMarshaller.optionalDateTimeToString(task.getCompleteDate()) + " "

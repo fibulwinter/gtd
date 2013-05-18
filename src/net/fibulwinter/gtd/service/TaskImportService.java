@@ -53,7 +53,7 @@ public class TaskImportService {
     }
 
     private Task importTask(String line, Task[] lastByLevel) {
-        Pattern pattern = Pattern.compile("(\\s*)\\[(.)\\] (@\\S+) (\\S+) (\\S+) (<>|\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2}) (.+)");
+        Pattern pattern = Pattern.compile("(\\s*)\\[(.)\\] (@\\S+) (?:(\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2}) )?(\\S+) (\\S+) (<>|\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2}) (.+)");
         Matcher matcher = pattern.matcher(line);
         if (matcher.matches()) {
             int level = matcher.group(1).length() / 4;
@@ -65,12 +65,15 @@ public class TaskImportService {
                                             statusString.equals("?") ? TaskStatus.Maybe :
                                                     statusString.equals("P") ? TaskStatus.NextAction : null;
             Context context = contextRepository.getByName(matcher.group(3)).get();
-            Optional<Date> start = DateMarshaller.stringToOptionalDate(matcher.group(4));
-            Optional<Date> due = DateMarshaller.stringToOptionalDate(matcher.group(5));
-            Optional<Date> completed = DateMarshaller.stringToOptionalDateTime(matcher.group(6));
-            String text = matcher.group(7);
+            String createdGroup = matcher.group(4);
+            Date created = createdGroup == null ? new Date() : DateMarshaller.stringToOptionalDateTime(createdGroup).get();
+            Optional<Date> start = DateMarshaller.stringToOptionalDate(matcher.group(5));
+            Optional<Date> due = DateMarshaller.stringToOptionalDate(matcher.group(6));
+            Optional<Date> completed = DateMarshaller.stringToOptionalDateTime(matcher.group(7));
+            String text = matcher.group(8);
 
             Task task = new Task(text);
+            task.setCreatedDate(created);
             task.setStatus(status);
             task.setCompleteDate(completed);
             task.setContext(context);
