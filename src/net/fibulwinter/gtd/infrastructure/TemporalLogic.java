@@ -71,61 +71,6 @@ public class TemporalLogic {
         }
 
         @Override
-        public String toString() {
-            switch (dateType) {
-                case OVERDUE:
-                    if (relativeDays == 0) {
-                        return "Yesterday";
-                    } else {
-                        return "Overdue " + (1 - relativeDays) + " days";
-                    }
-                case DUE_TO:
-                    if (relativeDays == 1) {
-                        return "Today";
-                    } else if (relativeDays == 2) {
-                        return "Tomorrow";
-                    } else if (relativeDays == 3) {
-                        return "In " + relativeDays + " days";
-                    } else if (relativeDays <= 7) {
-                        return "In a week";
-                    } else if (relativeDays <= 14) {
-                        return "In 2 weeks";
-                    } else if (relativeDays <= 21) {
-                        return "In 3 weeks";
-                    } else if (relativeDays <= 31) {
-                        return "In a month";
-                    } else if (relativeDays <= 365) {
-                        return "In " + (relativeDays / 30) + " months";
-                    } else {
-                        return "In future";
-                    }
-                case ANYTIME:
-                    return "Anytime";
-                case STARTING:
-                    if (relativeDays == 1) {
-                        return "Starting tomorrow";
-                    } else if (relativeDays == 2) {
-                        return "Starting in " + relativeDays + " days";
-                    } else if (relativeDays <= 7) {
-                        return "Starting in a week";
-                    } else if (relativeDays <= 14) {
-                        return "Starting in 2 weeks";
-                    } else if (relativeDays <= 21) {
-                        return "Starting in 3 weeks";
-                    } else if (relativeDays <= 31) {
-                        return "Starting in a month";
-                    } else if (relativeDays <= 365) {
-                        return "Starting in " + (relativeDays / 30) + " months";
-                    } else {
-                        return "Starting in future";
-                    }
-                case DONE:
-                    return "Done";
-            }
-            throw new IllegalStateException();
-        }
-
-        @Override
         public boolean equals(Object o) {
             if (this == o) return true;
             if (!(o instanceof NextTemporal)) return false;

@@ -3,21 +3,25 @@ package net.fibulwinter.gtd.presentation;
 import java.util.ArrayList;
 import java.util.List;
 
+import android.content.res.Resources;
+import net.fibulwinter.gtd.R;
 import net.fibulwinter.gtd.domain.Context;
 import net.fibulwinter.gtd.domain.Task;
 import net.fibulwinter.gtd.domain.TaskStatus;
 
 public abstract class StatusTransitionsFactory {
     private EditDialogFactory editDialogFactory;
+    private Resources resources;
 
-    protected StatusTransitionsFactory(EditDialogFactory editDialogFactory) {
+    protected StatusTransitionsFactory(EditDialogFactory editDialogFactory, Resources resources) {
         this.editDialogFactory = editDialogFactory;
+        this.resources = resources;
     }
 
     public List<StatusTransition> getTransitions(Task task) {
         List<StatusTransition> transitions = new ArrayList<StatusTransition>();
         if (task.getStatus() == TaskStatus.NextAction) {
-            transitions.add(new StatusTransition("Done!") {
+            transitions.add(new StatusTransition(resources.getString(R.string.transition_to_done)) {
                 @Override
                 public void doTransition(Task task) {
                     task.complete();
@@ -25,28 +29,29 @@ public abstract class StatusTransitionsFactory {
                 }
             });
             if (task.getMasterTask().isPresent()) {
-                transitions.add(new StatusTransition("Done with follow up") {
+                transitions.add(new StatusTransition(resources.getString(R.string.transition_to_done_with_follow_up)) {
                     @Override
                     public void doTransition(final Task task) {
                         task.complete();
                         justUpdate(task);
-                        editDialogFactory.showTitleDialog("", Context.DEFAULT, "Enter follow up action", new EditDialogFactory.TitleEdited() {
-                            @Override
-                            public void onValidText(String title, Context context) {
-                                Task subTask = new Task(title);
-                                subTask.setMaster(task.getMasterTask().get());
-                                subTask.setContext(context);
-                                addedSubtask(task.getMasterTask().get(), subTask);
-                            }
+                        editDialogFactory.showTitleDialog("", Context.DEFAULT, resources.getString(R.string.enter_follow_up_action),
+                                new EditDialogFactory.TitleEdited() {
+                                    @Override
+                                    public void onValidText(String title, Context context) {
+                                        Task subTask = new Task(title);
+                                        subTask.setMaster(task.getMasterTask().get());
+                                        subTask.setContext(context);
+                                        addedSubtask(task.getMasterTask().get(), subTask);
+                                    }
 
-                        });
+                                });
                     }
                 });
             }
-            transitions.add(new StatusTransition("Add child action") {
+            transitions.add(new StatusTransition(resources.getString(R.string.add_child_action)) {
                 @Override
                 public void doTransition(final Task task) {
-                    editDialogFactory.showTitleDialog("", Context.DEFAULT, "Enter sub action", new EditDialogFactory.TitleEdited() {
+                    editDialogFactory.showTitleDialog("", Context.DEFAULT, resources.getString(R.string.enter_sub_action), new EditDialogFactory.TitleEdited() {
                         @Override
                         public void onValidText(String title, Context context) {
                             Task subTask = new Task(title);
@@ -58,7 +63,7 @@ public abstract class StatusTransitionsFactory {
                     });
                 }
             });
-            transitions.add(new StatusTransition("Do it later") {
+            transitions.add(new StatusTransition(resources.getString(R.string.transition_to_do_it_later)) {
                 @Override
                 public void doTransition(final Task task) {
                     editDialogFactory.showTimeDialog(task, new Runnable() {
@@ -70,7 +75,7 @@ public abstract class StatusTransitionsFactory {
                 }
             });
         } else if (!task.isInherentlyCancelled()) {
-            transitions.add(new StatusTransition("Let's do it!") {
+            transitions.add(new StatusTransition(resources.getString(R.string.transition_to_do_it)) {
                 @Override
                 public void doTransition(Task task) {
                     task.setStatus(TaskStatus.NextAction);
@@ -79,7 +84,7 @@ public abstract class StatusTransitionsFactory {
             });
         }
         if (!task.isInherentlyCancelled() && task.getStatus() != TaskStatus.Maybe) {
-            transitions.add(new StatusTransition("May be later...") {
+            transitions.add(new StatusTransition(resources.getString(R.string.transition_to_may_be)) {
                 @Override
                 public void doTransition(Task task) {
                     task.setStatus(TaskStatus.Maybe);
@@ -88,7 +93,7 @@ public abstract class StatusTransitionsFactory {
             });
         }
         if (task.getStatus() != TaskStatus.Cancelled) {
-            transitions.add(new StatusTransition("Never. Cancel it!") {
+            transitions.add(new StatusTransition(resources.getString(R.string.transition_to_cancel)) {
                 @Override
                 public void doTransition(Task task) {
                     task.cancel();
@@ -96,7 +101,7 @@ public abstract class StatusTransitionsFactory {
                 }
             });
         } else {
-            transitions.add(new StatusTransition("Delete it forever") {
+            transitions.add(new StatusTransition(resources.getString(R.string.transition_to_delete)) {
                 @Override
                 public void doTransition(Task task) {
                     justDelete(task);

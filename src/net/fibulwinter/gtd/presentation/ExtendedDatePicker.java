@@ -5,11 +5,13 @@ import java.util.Date;
 import java.util.GregorianCalendar;
 
 import android.content.Context;
+import android.content.res.Resources;
 import android.text.format.DateFormat;
 import android.view.Gravity;
 import android.view.View;
 import android.widget.*;
 import com.google.common.base.Optional;
+import net.fibulwinter.gtd.R;
 import net.fibulwinter.gtd.infrastructure.TemporalLogic;
 
 public class ExtendedDatePicker {
@@ -19,6 +21,7 @@ public class ExtendedDatePicker {
     private final CheckBox checkBox;
     private final TextView textView;
     private final TemporalLogic temporalLogic;
+    private final Resources resources;
 
     public ExtendedDatePicker(Context context, Optional<Date> optionalDate, String text) {
         temporalLogic = new TemporalLogic();
@@ -39,6 +42,7 @@ public class ExtendedDatePicker {
         datePicker.setEnabled(optionalDate.isPresent());
         textView = new TextView(context);
         textView.setGravity(Gravity.CENTER_VERTICAL | Gravity.CENTER_HORIZONTAL);
+        resources = context.getResources();
         updateStatus(calendar);
         datePicker.init(calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), calendar.get(Calendar.DAY_OF_MONTH), new DatePicker.OnDateChangedListener() {
             @Override
@@ -60,15 +64,15 @@ public class ExtendedDatePicker {
     private String diffMessage(Calendar calendar) {
         int d = temporalLogic.relativeDays(calendar.getTime());
         if (d == 0) {
-            return "today";
+            return resources.getString(R.string.today);
         } else if (d == 1) {
-            return "tomorrow";
+            return resources.getString(R.string.tomorrow);
         } else if (d == -1) {
-            return "yesterday";
+            return resources.getString(R.string.yesterday);
         } else if (d > 1) {
-            return d + " days after today";
+            return resources.getQuantityString(R.plurals.n_days_after_today, d, d);
         } else {
-            return (-d) + " days before today";
+            return resources.getQuantityString(R.plurals.n_days_before_today, -d, -d);
         }
 
     }

@@ -6,6 +6,7 @@ import static com.google.common.collect.Iterables.getOnlyElement;
 import java.util.List;
 
 import android.content.Context;
+import android.content.res.Resources;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.text.style.*;
@@ -54,6 +55,7 @@ public class TaskItemAdapter extends ArrayAdapter<Task> {
             return Optional.absent();
         }
     };
+    private Resources resources;
 
 
     public TaskItemAdapter(Context context, TaskUpdateListener taskUpdateListener, TaskItemAdapterConfig config) {
@@ -67,8 +69,9 @@ public class TaskItemAdapter extends ArrayAdapter<Task> {
         this.taskUpdateListener = taskUpdateListener;
         this.config = config;
         inflater = LayoutInflater.from(context);
-        timeConstraintsUtils = new TimeConstraintsUtils(new TemporalLogic());
+        timeConstraintsUtils = new TimeConstraintsUtils(context.getResources(), new TemporalLogic());
         editDialogFactory = new EditDialogFactory(context);
+        resources = context.getResources();
     }
 
     public void setHighlightedTask(Optional<Task> highlightedTask) {
@@ -153,7 +156,7 @@ public class TaskItemAdapter extends ArrayAdapter<Task> {
             doneStatus.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    StatusTransitionsFactory statusTransitionsFactory = new StatusTransitionsFactory(editDialogFactory) {
+                    StatusTransitionsFactory statusTransitionsFactory = new StatusTransitionsFactory(editDialogFactory, resources) {
                         @Override
                         protected void addedSubtask(Task masterTask, Task subTask) {
                             taskUpdateListener.onTaskUpdated(subTask);
@@ -163,7 +166,10 @@ public class TaskItemAdapter extends ArrayAdapter<Task> {
                                 Task target = indexOfChild > 0 ? masterTask.getSubTasks().get(indexOfChild - 1) : masterTask;
                                 addAfter(target, subTask);
                             } else {
-                                highlightedTask = Optional.absent();
+                                highlightedTask = Optional.of(subTask);
+                                if (getPosition(masterTask) == -1) {
+                                    masterTask = task;
+                                }
                                 update(subTask);
                                 replace(masterTask, subTask);
                             }
@@ -207,7 +213,8 @@ public class TaskItemAdapter extends ArrayAdapter<Task> {
         }
 
         public void onTitleClick(Context context, View view) {
-            editDialogFactory.showTitleDialog(task.getText(), task.getContext(), "Edit task text and context", new EditDialogFactory.TitleEdited() {
+            editDialogFactory.showTitleDialog(task.getText(), task.getContext(),
+                    resources.getString(R.string.edit_task_text_and_context), new EditDialogFactory.TitleEdited() {
                 @Override
                 public void onValidText(String title, net.fibulwinter.gtd.domain.Context taskContext) {
                     task.setText(title);
@@ -305,7 +312,7 @@ public class TaskItemAdapter extends ArrayAdapter<Task> {
         private SpannedText getDetails() {
             SpannedText extra = new SpannedText("");
             if (canShowMasterProject()) {
-                extra = extra.space().join("to ").join(task.getMasterTask().get().getText(),
+                extra = extra.space().join(resources.getString(R.string.to) + " " + task.getMasterTask().get().getText(),
                         new StyleSpan(Typeface.ITALIC));
             }
             if (canShowContext()) {
@@ -320,13 +327,13 @@ public class TaskItemAdapter extends ArrayAdapter<Task> {
                     if (!extra.isEmpty()) {
                         extra = extra.join("\n");
                     }
-                    extra = extra.space().join("blocked by " + getOnlyElement(subTasks).getText(),
+                    extra = extra.space().join(resources.getString(R.string.blocked_by) + " " + getOnlyElement(subTasks).getText(),
                             new StyleSpan(Typeface.ITALIC));
                 } else if (subTasks.size() > 1) {
                     if (!extra.isEmpty()) {
                         extra = extra.join("\n");
                     }
-                    extra = extra.space().join("blocked by " + subTasks.size() + " subtasks",
+                    extra = extra.space().join(resources.getQuantityString(R.plurals.blocked_by_n_tasks, subTasks.size(), subTasks.size()),
                             new StyleSpan(Typeface.ITALIC));
                 }
             }
@@ -346,7 +353,7 @@ public class TaskItemAdapter extends ArrayAdapter<Task> {
             }
             SpannedText startedToday = new SpannedText();
             if (new TemporalPredicates().startedToday().apply(task)) {
-                startedToday = new SpannedText("started today\n",
+                startedToday = new SpannedText(resources.getString(R.string.started_today) + "\n",
                         new ForegroundColorSpan(TimeConstraintsUtils.STARTED_TODAY_FG_COLOR),
                         new BackgroundColorSpan(TimeConstraintsUtils.STARTED_TODAY_BG_COLOR)
                 );
@@ -356,7 +363,7 @@ public class TaskItemAdapter extends ArrayAdapter<Task> {
                 return startedToday.join(dueWarning);
             }
             if (isEditMode()) {
-                return new SpannedText("anytime");
+                return new SpannedText(resources.getString(R.string.anytime));
             } else {
                 if (startedToday.isEmpty()) {
                     return new SpannedText();

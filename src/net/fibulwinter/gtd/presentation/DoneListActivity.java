@@ -117,12 +117,12 @@ public class DoneListActivity extends Activity {
     public void onArchive(View view) {
         Intent i = new Intent(Intent.ACTION_SEND);
         i.setType("message/rfc822");
-        i.putExtra(Intent.EXTRA_SUBJECT, "Archive log");
+        i.putExtra(Intent.EXTRA_SUBJECT, getResources().getString(R.string.archive_log));
         i.putExtra(Intent.EXTRA_TEXT, Joiner.on("\n").join(taskListService.getCompleted()));
         try {
-            startActivity(Intent.createChooser(i, "Send mail..."));
+            startActivity(Intent.createChooser(i, getResources().getString(R.string.send_mail)));
         } catch (android.content.ActivityNotFoundException ex) {
-            Toast.makeText(this, "There are no email clients installed.", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, getResources().getString(R.string.there_are_no_email_clients_installed), Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -132,7 +132,9 @@ public class DoneListActivity extends Activity {
 
             @Override
             protected void onPreExecute() {
-                progressDialog = ProgressDialog.show(DoneListActivity.this, "Please wait", "Importing...", true);
+                progressDialog = ProgressDialog.show(DoneListActivity.this,
+                        getResources().getString(R.string.please_wait), getResources().getString(R.string.importing),
+                        true);
             }
 
             @Override
@@ -147,7 +149,7 @@ public class DoneListActivity extends Activity {
                     new AlertDialog.Builder(DoneListActivity.this)
                             .setIcon(android.R.drawable.ic_dialog_info)
                             .setTitle(R.string.import_complete)
-                            .setMessage("Imported " + count + " tasks.")
+                            .setMessage(getResources().getQuantityString(R.plurals.in_n_days, count, count))
 //                    .setPositiveButton(R.string.import_complete, null)
                             .show();
                     fillData();

@@ -9,6 +9,7 @@ import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.Spinner;
 import com.google.common.base.Optional;
+import net.fibulwinter.gtd.R;
 import net.fibulwinter.gtd.domain.ContextRepository;
 import net.fibulwinter.gtd.domain.Task;
 
@@ -23,7 +24,7 @@ public class EditDialogFactory {
     }
 
     public void showTimeDialog(final Task task, final Runnable runnable) {
-        clearDatePicker.pickDate("Time constraints", task.getStartingDate(), task.getDueDate(), new ClearDatePicker.DatePickListener() {
+        clearDatePicker.pickDate(context.getResources().getString(R.string.time_constraints), task.getStartingDate(), task.getDueDate(), new ClearDatePicker.DatePickListener() {
             @Override
             public void setOptionalDate(Optional<Date> dateStart, Optional<Date> dateDue) {
                 task.setStartingDate(dateStart);
@@ -55,7 +56,7 @@ public class EditDialogFactory {
                 .setTitle(title)
                 .setView(linearLayout)
                 .setCancelable(false)
-                .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+                .setPositiveButton(context.getResources().getString(R.string.ok), new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int whichButton) {
                         String inputText = input.getText().toString().trim();
                         if (inputText.length() > 0) {
@@ -64,7 +65,7 @@ public class EditDialogFactory {
                     }
 
                 })
-                .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                .setNegativeButton(context.getResources().getString(R.string.cancel), new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int whichButton) {
                     }
                 }).show();

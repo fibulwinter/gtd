@@ -17,11 +17,11 @@ public class TabListActivity extends TabActivity {
         setContentView(R.layout.tab);
         TabHost tabHost = (TabHost) findViewById(android.R.id.tabhost);
 
-        addTab(tabHost, "Next Action", NextActionListActivity.class, R.drawable.a_not_done);
-        addTab(tabHost, "Blocked", ProjectListActivity.class, R.drawable.a_blocked);
-        addTab(tabHost, "May Be", MayBeListActivity.class, R.drawable.a_maybe);
-        addTab(tabHost, "Log", DoneListActivity.class, R.drawable.a_done);
-        addTab(tabHost, "Search", SearchListActivity.class, R.drawable.ic_btn_search);
+        addTab(tabHost, getResources().getString(R.string.tab_next_action), NextActionListActivity.class, R.drawable.a_not_done);
+        addTab(tabHost, getResources().getString(R.string.tab_blocked), ProjectListActivity.class, R.drawable.a_blocked);
+        addTab(tabHost, getResources().getString(R.string.tab_may_be), MayBeListActivity.class, R.drawable.a_maybe);
+        addTab(tabHost, getResources().getString(R.string.tab_log), DoneListActivity.class, R.drawable.a_done);
+        addTab(tabHost, getResources().getString(R.string.tab_search), SearchListActivity.class, R.drawable.ic_btn_search);
     }
 
     private void addTab(TabHost tabHost, String label, Class<? extends Activity> targetClass, int icon) {

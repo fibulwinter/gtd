@@ -2,12 +2,14 @@ package net.fibulwinter.gtd.presentation;
 
 import java.util.Date;
 
+import android.content.res.Resources;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.text.style.BackgroundColorSpan;
 import android.text.style.ForegroundColorSpan;
 import android.text.style.StyleSpan;
 import com.google.common.base.Optional;
+import net.fibulwinter.gtd.R;
 import net.fibulwinter.gtd.domain.Task;
 import net.fibulwinter.gtd.infrastructure.DateMarshaller;
 import net.fibulwinter.gtd.infrastructure.TemporalLogic;
@@ -22,23 +24,14 @@ public class TimeConstraintsUtils {
     public static final int NOT_STARTED_BG_COLOR = Color.parseColor("#444444");
     public static final int STARTED_TODAY_FG_COLOR = Color.parseColor("#00cc00");
     public static final int STARTED_TODAY_BG_COLOR = Color.parseColor("#006600");
+    private Resources resources;
     private TemporalLogic temporalLogic;
     private TemporalPredicates temporalPredicates;
 
-    public TimeConstraintsUtils(TemporalLogic temporalLogic) {
+    public TimeConstraintsUtils(Resources resources, TemporalLogic temporalLogic) {
+        this.resources = resources;
         this.temporalLogic = temporalLogic;
         this.temporalPredicates = new TemporalPredicates(temporalLogic);
-    }
-
-    public SpannedText getNonEmptyConstraintsText(Task task) {
-        SpannedText spannedText = new SpannedText("");
-//        spannedText = spannedText.join(addStartWarning(task, false));
-        SpannedText anotherText = addDueDateWarning(task);
-        if (anotherText.isEmpty()) {
-            anotherText = new SpannedText("anytime");
-        }
-        spannedText = spannedText.join(anotherText);
-        return spannedText;
     }
 
     public SpannedText addFutureStartWarning(Task task) {
@@ -74,15 +67,15 @@ public class TimeConstraintsUtils {
         if (!startingDate.isPresent()) {
             return "";
         }
-        long days = temporalLogic.relativeDays(startingDate.get());
+        int days = temporalLogic.relativeDays(startingDate.get());
         if (days > 1) {
-            return "starting\nin " + days + " days";
+            return resources.getString(R.string.starting) + "\n" + resources.getQuantityString(R.plurals.in_n_days, days, days);
         } else if (days == 1) {
-            return "starting\ntomorrow";
+            return resources.getString(R.string.starting) + "\n" + resources.getString(R.string.tomorrow);
         } else if (days == 0) {
-            return "started today";
+            return resources.getString(R.string.started_today);
         } else {
-            return "started " + DateMarshaller.optionalDateToString(startingDate);
+            return resources.getString(R.string.started_s, DateMarshaller.optionalDateToString(startingDate));
         }
     }
 
@@ -111,19 +104,20 @@ public class TimeConstraintsUtils {
     public String dueDate(Task task) {
         Optional<Date> dueDate = task.getDueDate();
         if (!dueDate.isPresent()) {
-            return "anytime";
+            return resources.getString(R.string.anytime);
         }
-        long days = temporalLogic.relativeDays(dueDate.get());
+        int days = temporalLogic.relativeDays(dueDate.get());
         if (days > 2) {
-            return "in " + days + " days";
+            return resources.getQuantityString(R.plurals.in_n_days, days, days);
         } else if (days == 2) {
-            return "tomorrow";
+            return resources.getString(R.string.tomorrow);
         } else if (days == 1) {
-            return "today";
+            return resources.getString(R.string.today);
         } else if (days == 0) {
-            return "yesterday";
+            return resources.getString(R.string.yesterday);
         } else {
-            return "overdue " + ((-days) + 1) + " days";
+            int quantity = (int) ((-days) + 1);
+            return resources.getQuantityString(R.plurals.overdue_n_days, quantity, quantity);
         }
     }
 }

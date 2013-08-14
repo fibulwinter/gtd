@@ -63,7 +63,7 @@ public abstract class SimpleListActivity extends Activity {
 
             @Override
             public String toString() {
-                return "A-Z";
+                return getResources().getString(R.string.a_z);
             }
         });
         sortAndGroups.add(new SortAndGroup() {
@@ -87,6 +87,7 @@ public abstract class SimpleListActivity extends Activity {
                 return "@";
             }
         });
+        final NextTemporalMarshaller nextTemporalMarshaller = new NextTemporalMarshaller(getResources());
         sortAndGroups.add(new SortAndGroup() {
             TemporalLogic temporalLogic = new TemporalLogic();
 
@@ -100,7 +101,7 @@ public abstract class SimpleListActivity extends Activity {
             @Override
             public Optional<?> apply(Task task) {
                 TemporalLogic.NextTemporal timeDetails = temporalLogic.getTimeDetails(task);
-                return Optional.of(timeDetails.toString());
+                return Optional.of(nextTemporalMarshaller.marshall(timeDetails));
 //                if (task.getDueDate().isPresent()) {
 //                    return Optional.of(new TimeConstraintsUtils(new TemporalLogic()).dueDate(task));
 //                } else {
@@ -155,7 +156,7 @@ public abstract class SimpleListActivity extends Activity {
     }
 
     public void onNewTask(View view) {
-        new EditDialogFactory(this).showTitleDialog("", Context.DEFAULT, "Enter new task title and context", new EditDialogFactory.TitleEdited() {
+        new EditDialogFactory(this).showTitleDialog("", Context.DEFAULT, getResources().getString(R.string.enter_new_task_title_and_context), new EditDialogFactory.TitleEdited() {
             @Override
             public void onValidText(String title, Context context) {
                 Task task = new Task(title);
